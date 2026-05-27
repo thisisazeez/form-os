@@ -8,6 +8,25 @@ segments, teams, and roles — all from a single, fully-owned, open-source codeb
 It’s a self-hosted alternative to proprietary survey SaaS: features that are usually paywalled
 (Teams & RBAC, Contacts/Segments, webhooks, API keys, white-label) are first-class here.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/builder.png" alt="OpenSurvey survey builder — question palette, settings, and a live preview" width="900">
+</p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard"><br><sub><b>Dashboard</b> — active surveys, responses, completion rate & NPS at a glance.</sub></td>
+    <td width="50%"><img src="docs/screenshots/results.png" alt="Results & analytics"><br><sub><b>Results & analytics</b> — completion funnel, drop-off, and response trends.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/runtime.png" alt="Public survey runtime"><br><sub><b>Public survey</b> — what respondents see (shareable link or embed).</sub></td>
+    <td width="50%"><img src="docs/screenshots/contacts.png" alt="Contacts & segments"><br><sub><b>Contacts & segments</b> — typed attributes, dynamic segments, PII masking.</sub></td>
+  </tr>
+</table>
+
+> Screenshots can be regenerated against any running instance with `scripts/capture_screenshots.mjs`.
+
 ## Features
 
 - **Survey builder** — visual editor with 15+ question types (text, single/multi-select, rating,
