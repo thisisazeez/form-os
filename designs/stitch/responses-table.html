@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Survey Responses</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            main: '#222b27',
+                            muted: '#444444',
+                            light: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)'
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "display": ["Public Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 24px rgba(34,43,39,0.05)',
+                        'card': '0 2px 8px rgba(34,43,39,0.04), 0 8px 24px rgba(34,43,39,0.02)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #faf8f7; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom scrollbar for table */
+        .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll::-webkit-scrollbar-thumb { background: rgba(34,43,39,0.2); border-radius: 4px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(34,43,39,0.3); }
+    </style>
+</head>
+<body class="font-body text-ink-main bg-surface-page antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-white shadow-soft flex flex-col p-6 z-20 border-r border-border hidden md:flex">
+<!-- Brand -->
+<div class="mb-10 flex items-center gap-3">
+<img alt="OpenSurvey Logo" class="h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uiA0oDC3L4_nhZlJrE4TYtyfxrzvLIAOxPKLKRVaxD_WjYWzmHlSZi1BRW--NBd1W3xnBQlBl17k0YrDgWCVy7ZGEW4cxPTycxO0lTsLUhWDQ60bwI3l3u8OFD45npGV7YEo1tVqD-q6IqIXqsd_3fDl9ghffiSuNIM4jQBtv2Z6eS77oQhtO1W36cPwal3vyNVNnE0601fbZ2uy3lETgRRG5G4_g5Grb8N8Ovd8vPuVNORVJ9h8iJ1PH5i"/>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-ink-muted font-medium hover:text-primary hover:bg-surface-page transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-semibold border-r-4 border-primary bg-surface-page scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">poll</span>
+                My Surveys
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-ink-muted font-medium hover:text-primary hover:bg-surface-page transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-ink-muted font-medium hover:text-primary hover:bg-surface-page transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+                Templates
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-ink-muted font-medium hover:text-primary hover:bg-surface-page transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+</nav>
+<!-- Bottom CTA & Profile -->
+<div class="mt-auto flex flex-col gap-4">
+<button class="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition-all duration-150 active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Create Survey
+            </button>
+<div class="flex items-center gap-3 p-3 mt-2 border-t border-border">
+<div class="h-8 w-8 rounded-full bg-surface-panel flex items-center justify-center text-primary font-bold text-sm bg-center bg-cover" data-alt="A close-up portrait of a professional woman with a warm smile, wearing a subtle orange blazer that aligns with the OpenSurvey brand palette. The background is a blurred, bright office environment indicating a modern, light-mode corporate setting. Lighting is soft and flattering." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA6DB8AlYN7uJ3Xyh7wcNnWGByI6bO5boXp-JedVfUgEx2u7twsKF0o2SMR-9jOT17BBmQoaJ4pYbOHyu1W2r2DznN84sipLztxrLy8Uz-XdPN1wCXn5aUk_xMvEQJAdsaNhkzC7mLQs-UJrpoxdAAGpzEzRWniNhRpMIi1IUl7_SJUV5G-caARofMxjRECXfuLL-ZFNsi3OkJuHZBpIwnFgy9s8UcaO9b1z2piA8qzAuH4zXxMLruBwdQ77Y_5dK1hQC6bz4ufbXn1');"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold text-ink-main truncate">Sarah Jenkins</p>
+<p class="text-xs text-ink-light truncate">Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 md:ml-64 flex flex-col h-screen relative">
+<!-- Top Bar -->
+<header class="h-20 px-8 flex items-center justify-between bg-surface-page/90 backdrop-blur-sm sticky top-0 z-10">
+<div>
+<p class="text-xs font-medium text-ink-light mb-1 uppercase tracking-wider">My Surveys</p>
+<h1 class="text-2xl font-headline font-bold text-ink-main">Customer Satisfaction Q4</h1>
+</div>
+<div class="flex items-center gap-4">
+<!-- Date Picker Dropdown Mock -->
+<button class="flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-lg text-sm font-medium text-ink-muted hover:bg-surface-panel transition-colors">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                    Last 30 days
+                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 text-primary font-medium text-sm hover:bg-primary/5 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Export CSV
+                </button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 px-8 pb-8 overflow-hidden flex flex-col">
+<!-- Main Card -->
+<div class="bg-white rounded-xl shadow-card border border-border flex-1 flex flex-col overflow-hidden">
+<!-- Card Header / Toolbar -->
+<div class="p-5 border-b border-border flex flex-wrap items-center justify-between gap-4 bg-white">
+<div class="flex items-center gap-2 min-w-max">
+<span class="text-lg font-headline font-semibold text-ink-main">2,450 Responses</span>
+<span class="text-xs font-medium px-2 py-1 bg-surface-panel text-ink-muted rounded-full">+12% this week</span>
+</div>
+<div class="flex-1 flex items-center justify-end gap-3 min-w-[300px]">
+<!-- Search -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-light text-[18px]">search</span>
+<input class="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-shadow bg-surface-page placeholder:text-ink-light" placeholder="Search responses..." type="text"/>
+</div>
+<!-- Filters -->
+<div class="flex items-center gap-2 border-l border-border pl-3">
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 text-success rounded-lg text-sm font-medium border border-success/20">
+<span>completed = true</span>
+<button class="hover:text-success/70"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-medium border border-primary/20">
+<span>NPS ≤ 6</span>
+<button class="hover:text-primary/70"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 border border-dashed border-border rounded-lg text-sm font-medium text-ink-muted hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[14px]">add</span>
+                                Add filter
+                            </button>
+</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="flex-1 overflow-auto table-scroll bg-white">
+<table class="w-full text-left border-collapse min-w-[1000px]">
+<thead class="sticky top-0 bg-surface-panel z-10 shadow-[0_1px_0_rgba(34,43,39,0.1)]">
+<tr>
+<th class="py-3 px-4 w-12 border-b border-border">
+<input class="rounded border-ink-light text-primary focus:ring-primary/20 bg-white" type="checkbox"/>
+</th>
+<th class="py-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-border">Respondent</th>
+<th class="py-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-border">Submitted</th>
+<th class="py-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-border text-center">Status</th>
+<th class="py-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-border">Q1: CSAT</th>
+<th class="py-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-border">Q2: NPS</th>
+<th class="py-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-border w-64">Q3: Feedback</th>
+<th class="py-3 px-4 w-12 border-b border-border"></th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<!-- Row 1 -->
+<tr class="border-b border-border hover:bg-surface-page transition-colors group cursor-pointer">
+<td class="py-3 px-4"><input class="rounded border-ink-light text-primary focus:ring-primary/20 bg-white" type="checkbox"/></td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 text-secondary flex items-center justify-center font-bold text-xs">AJ</div>
+<div>
+<p class="font-medium text-ink-main">alice.jones@example.com</p>
+<p class="text-xs text-ink-light">Premium Tier</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-ink-muted whitespace-nowrap">Oct 24, 10:42 AM</td>
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-success text-[20px] fill" title="Completed">check_circle</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex text-primary">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">9 - Promoter</span>
+</td>
+<td class="py-3 px-4 text-ink-muted truncate max-w-[250px]">The new dashboard is incredibly intuitive. Great work!</td>
+<td class="py-3 px-4 text-right">
+<button class="text-ink-light hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-border hover:bg-surface-page transition-colors group cursor-pointer bg-red-50/30">
+<td class="py-3 px-4"><input class="rounded border-ink-light text-primary focus:ring-primary/20 bg-white" type="checkbox"/></td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-panel text-ink-muted flex items-center justify-center border border-border">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+<div>
+<p class="font-medium text-ink-main italic">Anonymous</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-ink-muted whitespace-nowrap">Oct 24, 09:15 AM</td>
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-success text-[20px] fill" title="Completed">check_circle</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex text-primary">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] text-ink-light/30">star</span>
+<span class="material-symbols-outlined text-[16px] text-ink-light/30">star</span>
+<span class="material-symbols-outlined text-[16px] text-ink-light/30">star</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">4 - Detractor</span>
+</td>
+<td class="py-3 px-4 text-ink-muted truncate max-w-[250px]">Export functionality is consistently crashing for me.</td>
+<td class="py-3 px-4 text-right">
+<button class="text-ink-light hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-border hover:bg-surface-page transition-colors group cursor-pointer">
+<td class="py-3 px-4"><input class="rounded border-ink-light text-primary focus:ring-primary/20 bg-white" type="checkbox"/></td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-orange-100 text-primary flex items-center justify-center font-bold text-xs">MW</div>
+<div>
+<p class="font-medium text-ink-main">m.walker@techcorp.io</p>
+<p class="text-xs text-ink-light">Enterprise</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-ink-muted whitespace-nowrap">Oct 23, 16:30 PM</td>
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-secondary text-[20px]" title="In Progress">timelapse</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex text-primary">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] text-ink-light/30">star</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">7 - Passive</span>
+</td>
+<td class="py-3 px-4 text-ink-muted truncate max-w-[250px] italic text-ink-light">Skipped</td>
+<td class="py-3 px-4 text-right">
+<button class="text-ink-light hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-border hover:bg-surface-page transition-colors group cursor-pointer">
+<td class="py-3 px-4"><input class="rounded border-ink-light text-primary focus:ring-primary/20 bg-white" type="checkbox"/></td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-green-100 text-success flex items-center justify-center font-bold text-xs">SL</div>
+<div>
+<p class="font-medium text-ink-main">s.lee@startup.co</p>
+<p class="text-xs text-ink-light">Basic Tier</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-ink-muted whitespace-nowrap">Oct 23, 11:20 AM</td>
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-success text-[20px] fill" title="Completed">check_circle</span>
+</td>
+<td class="py-3 px-4">
+<div class="flex text-primary">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">10 - Promoter</span>
+</td>
+<td class="py-3 px-4 text-ink-muted truncate max-w-[250px]">Love the clean interface! Very easy to use.</td>
+<td class="py-3 px-4 text-right">
+<button class="text-ink-light hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="p-4 border-t border-border bg-white flex items-center justify-between text-sm text-ink-muted">
+<div>
+                        Showing <span class="font-medium text-ink-main">1-50</span> of <span class="font-medium text-ink-main">2,450</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span>Rows per page:</span>
+<select class="border-transparent bg-surface-page rounded-md py-1 pl-2 pr-6 text-sm font-medium focus:ring-0 focus:border-transparent cursor-pointer">
+<option>50</option>
+<option>100</option>
+<option>250</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-surface-panel text-ink-light hover:text-ink-main disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-panel text-ink-main">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

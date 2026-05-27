@@ -1,0 +1,103 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Settings → Audit log. `/<org_slug>/settings/audit-log` — apps.audit.views_settings.audit_log_page.
+  Owner/admin gated. A paginated, filterable list of audit entries (actor, action, target, time).
+  Filters are querystring params (action substring, target type, actor substring), AND-combined.
+
+  Context: org, section ("audit-log"), entries (with .actor_user_obj hydrated), page, paginator,
+  target_types, filters.
+{% endcomment %}
+
+{% block title %}Audit log — {{ org.name }}{% endblock %}
+{% block nav_settings %}is-active{% endblock %}
+{% block topbar_title %}Audit log{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Audit log" subtitle="A record of key changes across this organization." %}
+
+  <div class="mt-6 max-w-5xl">
+    {% include "settings/_org_subnav.html" with org=org section=section %}
+
+    {# ---- filters ---- #}
+    <form method="get" action="/{{ org.slug }}/settings/audit-log" class="mb-5 flex flex-wrap items-end gap-3">
+      <div class="min-w-[160px] flex-1">
+        <label class="mb-1.5 block text-xs font-medium text-ink" for="f_action">Action</label>
+        <input type="text" name="action" id="f_action" value="{{ filters.action }}" placeholder="e.g. survey"
+          class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+      </div>
+      <div class="min-w-[140px]">
+        <label class="mb-1.5 block text-xs font-medium text-ink" for="f_target">Target type</label>
+        <select name="target" id="f_target"
+          class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+          <option value="">All</option>
+          {% for t in target_types %}
+            <option value="{{ t }}" {% if filters.target == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="min-w-[160px] flex-1">
+        <label class="mb-1.5 block text-xs font-medium text-ink" for="f_actor">Actor</label>
+        <input type="text" name="actor" id="f_actor" value="{{ filters.actor }}" placeholder="name or email"
+          class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+      </div>
+      <button type="submit"
+        class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
+        <span class="material-symbols-outlined text-[18px]">filter_list</span>Filter
+      </button>
+      {% if filters.action or filters.target or filters.actor %}
+        <a href="/{{ org.slug }}/settings/audit-log" class="text-sm font-medium text-secondary hover:underline">Clear</a>
+      {% endif %}
+    </form>
+
+    {# ---- entries ---- #}
+    <section class="rounded-xl border border-hairline bg-white shadow-sm">
+      {% if entries %}
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-hairline text-left text-xs uppercase tracking-wide text-muted">
+              <th class="px-6 py-3 font-medium">Action</th>
+              <th class="px-6 py-3 font-medium">Target</th>
+              <th class="px-6 py-3 font-medium">Actor</th>
+              <th class="px-6 py-3 font-medium">When</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline">
+            {% for entry in entries %}
+              <tr>
+                <td class="px-6 py-4"><code class="font-mono text-xs text-ink">{{ entry.action }}</code></td>
+                <td class="px-6 py-4 text-muted">{{ entry.target_type }}{% if entry.target_id %} <span class="font-mono text-xs">#{{ entry.target_id|truncatechars:12 }}</span>{% endif %}</td>
+                <td class="px-6 py-4 text-ink">
+                  {% if entry.actor_user_obj %}
+                    {% firstof entry.actor_user_obj.name entry.actor_user_obj.email %}
+                  {% else %}
+                    <span class="text-muted">System</span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 text-muted">{{ entry.created_at|date:"M j, Y H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="px-6 py-10 text-center text-sm text-muted">No audit entries match your filters.</div>
+      {% endif %}
+    </section>
+
+    {# ---- pagination ---- #}
+    {% if page.paginator.num_pages > 1 %}
+      <div class="mt-4 flex items-center justify-between text-sm">
+        <span class="text-muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        <div class="flex gap-2">
+          {% if page.has_previous %}
+            <a href="?page={{ page.previous_page_number }}{% if filters.action %}&action={{ filters.action }}{% endif %}{% if filters.target %}&target={{ filters.target }}{% endif %}{% if filters.actor %}&actor={{ filters.actor }}{% endif %}"
+               class="rounded-lg border border-hairline px-3 py-1.5 font-medium text-ink transition-colors hover:bg-panel">Previous</a>
+          {% endif %}
+          {% if page.has_next %}
+            <a href="?page={{ page.next_page_number }}{% if filters.action %}&action={{ filters.action }}{% endif %}{% if filters.target %}&target={{ filters.target }}{% endif %}{% if filters.actor %}&actor={{ filters.actor }}{% endif %}"
+               class="rounded-lg border border-hairline px-3 py-1.5 font-medium text-ink transition-colors hover:bg-panel">Next</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

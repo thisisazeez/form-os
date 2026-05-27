@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="h-full antialiased bg-[#faf8f7] text-[#444] font-body" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Jane Doe Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "brand-primary": "#0d9488",
+                "brand-primary-hover": "#0f766e",
+                "brand-secondary": "#3d63dc",
+                "brand-success": "#8ac449",
+                "brand-ink": "#222b27",
+                "brand-muted": "#666666",
+                "brand-canvas": "#faf8f7",
+                "brand-card": "#ffffff",
+                "brand-panel": "#f2f4ef",
+                "brand-border": "rgba(34, 43, 39, 0.10)"
+            },
+            "borderRadius": {
+                    "DEFAULT": "8px",
+                    "lg": "12px",
+                    "xl": "16px",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Outfit", "sans-serif"],
+                    "body": ["Inter", "sans-serif"]
+            },
+            "boxShadow": {
+                "soft": "0 4px 24px -4px rgba(34, 43, 39, 0.05), 0 2px 8px -2px rgba(34, 43, 39, 0.02)"
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="flex h-full overflow-hidden">
+<!-- SideNavBar -->
+<nav class="flex flex-col h-full p-4 gap-2 bg-[#faf8f7] dark:bg-neutral-950 border-r border-[#222b271a] dark:border-white/10 w-64 flex-shrink-0 z-20 shadow-none">
+<div class="px-2 pb-6 pt-2">
+<h1 class="text-2xl font-black font-headline text-[#0d9488] tracking-tight">OpenSurvey</h1>
+<p class="text-xs font-body font-medium text-brand-muted mt-1">Enterprise Survey Platform</p>
+</div>
+<div class="flex-1 overflow-y-auto space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-lg">home</span>
+<span class="font-body font-medium text-sm">Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-lg">poll</span>
+<span class="font-body font-medium text-sm">Surveys</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT bg-white dark:bg-neutral-800 text-[#0d9488] shadow-sm font-semibold translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-lg fill">contacts</span>
+<span class="font-body font-medium text-sm">Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-lg">group_work</span>
+<span class="font-body font-medium text-sm">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-lg">bar_chart</span>
+<span class="font-body font-medium text-sm">Results</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-lg">group</span>
+<span class="font-body font-medium text-sm">Team</span>
+</a>
+</div>
+<div class="pt-4 border-t border-brand-border">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span class="font-body font-medium text-sm">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-brand-canvas relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 py-3 bg-[#ffffff] dark:bg-neutral-900 border-b border-[#222b271a] dark:border-white/10 shadow-sm z-10 flex-shrink-0">
+<div class="flex items-center w-full max-w-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted text-lg pointer-events-none">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-brand-panel border-transparent focus:bg-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-DEFAULT text-sm font-body transition-colors text-brand-ink placeholder:text-brand-muted" placeholder="Search contacts, surveys..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-[#666] hover:text-[#222b27] hover:bg-[#faf8f7] dark:hover:bg-neutral-800 transition-colors duration-200 rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-primary rounded-full border border-white"></span>
+</button>
+<button class="p-2 text-[#666] hover:text-[#222b27] hover:bg-[#faf8f7] dark:hover:bg-neutral-800 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-px bg-brand-border mx-1"></div>
+<button class="flex items-center gap-2 pl-2 rounded-full hover:opacity-80 transition-opacity">
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-brand-border object-cover" data-alt="A small circular avatar of a professional user. The aesthetic is clean, bright, and modern, fitting an enterprise software application. The lighting is soft and neutral." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVwqI6xhwe3PT4IEAviTjEhJHNb-0btBY5Gf8ZbniamxIxmFOEsqi9uFtmpbXmUBR3OpZ6Htc3Dnpjo84jQcpGJnzxOd-QWvoGrgxvq59RaNcwTzF_umQ2py7gI-lDiuZsHOi78dgpm3xaPLdJmDQZ0gK5dubuBHZIXOy4gprC9Uz6n6KZRsWnFVyLkn-CdxpfwWGirmIJiFNIsutsVJKsh92PpcBxVO1ECwFwmVvlfQTNYnrG6pVJ-6pNmHjsTpx-WjHY0CsEoTpi"/>
+</button>
+</div>
+</header>
+<!-- Page Scrollable Content -->
+<main class="flex-1 overflow-y-auto p-6 md:p-8 lg:px-12 xl:px-16">
+<div class="max-w-6xl mx-auto space-y-6">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4">
+<div>
+<nav aria-label="Breadcrumb" class="flex text-sm text-brand-muted font-body mb-2">
+<ol class="inline-flex items-center space-x-1 md:space-x-2">
+<li class="inline-flex items-center">
+<a class="hover:text-brand-primary transition-colors" href="#">Contacts</a>
+</li>
+<li>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-sm mx-1 opacity-50">chevron_right</span>
+<span class="text-brand-ink font-medium">Jane Doe</span>
+</div>
+</li>
+</ol>
+</nav>
+<h2 class="text-3xl md:text-4xl font-headline font-semibold text-brand-ink tracking-tight">Jane Doe</h2>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 bg-white border border-brand-border text-brand-ink text-sm font-medium rounded-DEFAULT hover:bg-brand-canvas transition-all duration-200 shadow-sm active:scale-95">
+                            Add to segment
+                        </button>
+<button class="px-4 py-2 bg-brand-primary text-white text-sm font-medium rounded-DEFAULT hover:bg-brand-primary-hover transition-all duration-200 shadow-sm flex items-center gap-2 active:scale-95">
+<span class="material-symbols-outlined text-sm">send</span>
+                            Send survey
+                        </button>
+<button class="p-2 bg-white border border-brand-border text-brand-muted rounded-DEFAULT hover:bg-brand-canvas transition-colors duration-200 shadow-sm">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Two-column Layout -->
+<div class="flex flex-col lg:flex-row gap-6 items-start">
+<!-- Left Column (Profile Card) -->
+<div class="w-full lg:w-80 flex-shrink-0 space-y-6">
+<div class="bg-brand-card rounded-lg shadow-soft border border-brand-border/50 p-6">
+<!-- Avatar & Identity -->
+<div class="flex flex-col items-center text-center pb-6 border-b border-brand-border">
+<div class="w-24 h-24 rounded-full bg-brand-panel flex items-center justify-center text-3xl font-headline font-bold text-brand-primary mb-4 shadow-sm border border-brand-border relative">
+                                    JD
+                                    <span class="absolute bottom-0 right-0 w-5 h-5 bg-brand-success border-2 border-white rounded-full" title="Active"></span>
+</div>
+<h3 class="text-xl font-headline font-semibold text-brand-ink">Jane Doe</h3>
+<p class="text-sm text-brand-muted font-body mt-1">jane@acme.inc</p>
+<div class="flex items-center justify-center gap-1 mt-2 text-sm text-brand-secondary font-medium">
+<span class="material-symbols-outlined text-sm">domain</span>
+                                    Acme Inc
+                                </div>
+</div>
+<!-- Attributes -->
+<div class="py-6">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-xs font-headline font-bold text-brand-ink uppercase tracking-wider">Attributes</h4>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-brand-muted">Plan</span>
+<span class="font-medium text-brand-ink">Enterprise</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-brand-muted">Country</span>
+<span class="font-medium text-brand-ink">United States</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-brand-muted">Joined</span>
+<span class="font-medium text-brand-ink">Oct 12, 2023</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-brand-muted">Lead Score</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-panel text-brand-ink border border-brand-border">
+                                            85
+                                        </span>
+</div>
+</div>
+<button class="mt-4 text-sm font-medium text-brand-primary hover:text-brand-primary-hover flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+                                    Add attribute
+                                </button>
+</div>
+<!-- Segments -->
+<div class="pt-6 border-t border-brand-border">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-xs font-headline font-bold text-brand-ink uppercase tracking-wider">Segments</h4>
+<button class="text-brand-muted hover:text-brand-primary transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-brand-primary border border-orange-100">
+                                        High Value
+                                    </span>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-brand-secondary border border-blue-100">
+                                        Beta User
+                                    </span>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-brand-panel text-brand-ink border border-brand-border">
+                                        Q4 Cohort
+                                    </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (Activity & Tabs) -->
+<div class="flex-1 w-full flex flex-col">
+<!-- Tabs -->
+<div class="border-b border-brand-border mb-6">
+<nav aria-label="Tabs" class="-mb-px flex space-x-8">
+<a class="border-brand-primary text-brand-primary whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" href="#">
+                                    Activity Feed
+                                </a>
+<a class="border-transparent text-brand-muted hover:text-brand-ink hover:border-brand-border whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" href="#">
+                                    Survey Responses
+                                </a>
+</nav>
+</div>
+<!-- Activity Feed Content -->
+<div class="bg-brand-card rounded-lg shadow-soft border border-brand-border/50 p-6 md:p-8">
+<div class="flow-root">
+<ul class="-mb-8" role="list">
+<!-- Item 1 -->
+<li>
+<div class="relative pb-8">
+<span aria-hidden="true" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-brand-panel"></span>
+<div class="relative flex space-x-3">
+<div>
+<span class="h-8 w-8 rounded-full bg-brand-success/10 flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-sm text-brand-success">task_alt</span>
+</span>
+</div>
+<div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+<div>
+<p class="text-sm text-brand-ink font-medium">Submitted <a class="text-brand-secondary hover:underline" href="#">NPS Survey</a></p>
+<div class="mt-2 text-sm text-brand-muted bg-brand-panel rounded p-3 border border-brand-border/50 inline-block">
+                                                            Score: <strong class="text-brand-success font-headline">9</strong> (Promoter)
+                                                        </div>
+</div>
+<div class="whitespace-nowrap text-right text-xs text-brand-muted">
+<time datetime="2023-10-24T14:30">2h ago</time>
+</div>
+</div>
+</div>
+</div>
+</li>
+<!-- Item 2 -->
+<li>
+<div class="relative pb-8">
+<span aria-hidden="true" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-brand-panel"></span>
+<div class="relative flex space-x-3">
+<div>
+<span class="h-8 w-8 rounded-full bg-orange-50 flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-sm text-brand-primary">group_add</span>
+</span>
+</div>
+<div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+<div>
+<p class="text-sm text-brand-ink">Joined <span class="font-medium">High Value</span> segment</p>
+</div>
+<div class="whitespace-nowrap text-right text-xs text-brand-muted">
+<time datetime="2023-10-23T09:00">1d ago</time>
+</div>
+</div>
+</div>
+</div>
+</li>
+<!-- Item 3 -->
+<li>
+<div class="relative pb-8">
+<span aria-hidden="true" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-brand-panel"></span>
+<div class="relative flex space-x-3">
+<div>
+<span class="h-8 w-8 rounded-full bg-brand-panel flex items-center justify-center ring-4 ring-white border border-brand-border">
+<span class="material-symbols-outlined text-sm text-brand-muted">update</span>
+</span>
+</div>
+<div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+<div>
+<p class="text-sm text-brand-ink">Attribute <span class="font-medium">Lead Score</span> updated to <span class="font-medium">85</span></p>
+</div>
+<div class="whitespace-nowrap text-right text-xs text-brand-muted">
+<time datetime="2023-10-22T16:15">2d ago</time>
+</div>
+</div>
+</div>
+</div>
+</li>
+<!-- Item 4 (Last) -->
+<li>
+<div class="relative">
+<div class="relative flex space-x-3">
+<div>
+<span class="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-sm text-brand-secondary">forward_to_inbox</span>
+</span>
+</div>
+<div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+<div>
+<p class="text-sm text-brand-ink">Received <a class="text-brand-secondary hover:underline" href="#">Product Feedback</a> survey</p>
+</div>
+<div class="whitespace-nowrap text-right text-xs text-brand-muted">
+<time datetime="2023-10-21T10:00">3d ago</time>
+</div>
+</div>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="mt-8 flex justify-center">
+<button class="text-sm font-medium text-brand-muted hover:text-brand-primary transition-colors border border-brand-border rounded-DEFAULT px-4 py-2 hover:bg-brand-canvas">
+                                    Load older activity
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,173 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Response detail (/<org_slug>/surveys/<id>/responses/<rid>) — a single response's Q&A: every
+  question with its rendered answer (NPS scale, rating stars, choice labels, text). Mirrors
+  designs/stitch/response-detail.png (rendered as a page; the design's drawer holds identical
+  data). Brand tokens only.
+{% endcomment %}
+
+{% block title %}Response · {{ survey.name }} — OpenSurvey{% endblock %}
+{% block nav_results %}is-active{% endblock %}
+{% block topbar_title %}Response{% endblock %}
+
+{% block content %}
+  <div class="mb-6 flex items-center gap-3">
+    <a href="/{{ org_slug }}/surveys/{{ survey.id }}/responses" class="text-muted hover:text-ink" aria-label="Back to responses">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted">{{ survey.name }}</p>
+      <h1 class="font-display text-2xl font-bold tracking-tight text-ink">Response</h1>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-3xl">
+    {# Respondent / meta header #}
+    <div class="mb-6 rounded-xl border border-hairline bg-white p-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-panel text-muted">
+            <span class="material-symbols-outlined">{% if response.contact_id %}person{% else %}person_outline{% endif %}</span>
+          </span>
+          <div>
+            <p class="font-medium text-ink">{% if response.contact_id %}Contact{% else %}Anonymous{% endif %}</p>
+            <p class="text-sm text-muted">Respondent</p>
+          </div>
+        </div>
+        <div class="text-right">
+          {% if response.finished %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+              <span class="mr-0.5 h-1.5 w-1.5 rounded-full bg-success"></span>Completed
+            </span>
+          {% else %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-panel px-2.5 py-1 text-xs font-medium text-muted">Partial</span>
+          {% endif %}
+          <p class="mt-1 text-sm text-muted">{{ response.created_at|date:"M j, Y · g:i A" }}</p>
+        </div>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-4 border-t border-hairline pt-4 text-sm text-muted">
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">language</span>{{ response.language }}</span>
+        {% if response.finished_at %}
+          <span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">schedule</span>Finished {{ response.finished_at|date:"M j, g:i A" }}</span>
+        {% endif %}
+      </div>
+
+      {% comment %} ---- Tags (chips + add picker; add/remove only when ``can_tag``) ---- {% endcomment %}
+      <div class="mt-4 border-t border-hairline pt-4">
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Tags</p>
+        <div class="flex flex-wrap items-center gap-1.5">
+          {% for t in tags %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-panel px-2.5 py-1 text-xs font-medium text-ink">
+              <span class="material-symbols-outlined text-[12px] text-muted">label</span>{{ t.name }}
+              {% if can_tag %}
+                <form method="post" action="/{{ org_slug }}/surveys/{{ survey.id }}/responses/{{ response.id }}/tags/{{ t.id }}/remove" class="inline">
+                  {% csrf_token %}
+                  <button type="submit" class="text-muted hover:text-ink" aria-label="Remove tag">
+                    <span class="material-symbols-outlined text-[12px]">close</span>
+                  </button>
+                </form>
+              {% endif %}
+            </span>
+          {% empty %}
+            <span class="text-xs text-muted">No tags yet.</span>
+          {% endfor %}
+          {% if can_tag %}
+            <div x-data="{ open: false }" class="relative inline-block">
+              <button type="button" @click="open = !open"
+                      class="inline-flex items-center gap-0.5 rounded-full border border-dashed border-hairline px-2.5 py-1 text-xs font-medium text-muted transition-colors hover:border-brand hover:text-brand">
+                <span class="material-symbols-outlined text-[12px]">add</span> Add tag
+              </button>
+              <div x-show="open" @click.outside="open = false" x-cloak
+                   class="absolute left-0 z-20 mt-1 w-56 rounded-lg border border-hairline bg-white p-3 text-left shadow-lg">
+                <form method="post" action="/{{ org_slug }}/surveys/{{ survey.id }}/responses/{{ response.id }}/tags">
+                  {% csrf_token %}
+                  {% if all_tags %}
+                    <select name="tag_id"
+                            class="mb-2 block w-full rounded-lg border border-hairline px-2 py-1.5 text-xs text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                      <option value="">Existing tag…</option>
+                      {% for t in all_tags %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+                    </select>
+                  {% endif %}
+                  <input type="text" name="tag_name" placeholder="Or new tag…"
+                         class="mb-2 block w-full rounded-lg border border-hairline px-2 py-1.5 text-xs text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                  <button type="submit"
+                          class="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-brand px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
+                    <span class="material-symbols-outlined text-[14px]">label</span> Add tag
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# Q&A #}
+    {% if answers %}
+      <div class="space-y-5">
+        {% for a in answers %}
+          <div class="rounded-xl border border-hairline bg-white p-6">
+            <div class="flex items-baseline gap-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-muted">Q{{ a.index }}</span>
+              <h3 class="font-display text-base font-semibold text-ink">{{ a.headline }}</h3>
+            </div>
+
+            <div class="mt-4">
+              {% if a.kind == "skipped" %}
+                <p class="text-sm italic text-muted">Skipped</p>
+
+              {% elif a.kind == "nps" %}
+                <div class="flex flex-wrap gap-1.5">
+                  {% for n in a.scale %}
+                    {% if n == a.value %}
+                      <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-sm font-semibold text-white">{{ n }}</span>
+                    {% else %}
+                      <span class="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline text-sm text-muted">{{ n }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+
+              {% elif a.kind == "rating" %}
+                <span class="inline-flex items-center gap-1 text-brand">
+                  {% for filled in a.stars %}
+                    {% if filled %}
+                      <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                    {% else %}
+                      <span class="material-symbols-outlined text-[22px] text-muted">star</span>
+                    {% endif %}
+                  {% endfor %}
+                  <span class="ml-2 text-sm text-muted">{{ a.value }} / {{ a.range }}</span>
+                </span>
+
+              {% elif a.kind == "choice" %}
+                <div class="flex flex-wrap gap-2">
+                  {% for c in a.all_choices %}
+                    {% if c.selected %}
+                      <span class="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white">
+                        <span class="material-symbols-outlined text-[16px]">check</span>{{ c.label }}
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center rounded-lg border border-hairline px-3 py-1.5 text-sm text-muted">{{ c.label }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+
+              {% else %}
+                <p class="border-l-2 border-brand bg-brand/5 px-3 py-2 text-sm italic text-ink">"{{ a.text }}"</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      {% include "_components/empty_state.html" with icon="quiz" title="No questions" message="This survey has no questions to display answers for." %}
+    {% endif %}
+
+    <div class="mt-6">
+      <a href="/{{ org_slug }}/surveys/{{ survey.id }}/responses"
+         class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to responses
+      </a>
+    </div>
+  </div>
+{% endblock %}

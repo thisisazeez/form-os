@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% block title %}{{ org_name|default:"Org" }} — OpenSurvey{% endblock %}
+
+{% block nav %}<span class="rounded bg-slate-100 px-2 py-1 font-mono text-xs">schema: {{ schema }}</span>{% endblock %}
+
+{% block head_extra %}
+  {# django-vite HMR client + React Fast Refresh (only emit in dev mode). #}
+  {% if vite_built %}
+    {% vite_hmr_client %}
+    {% vite_react_refresh %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <section>
+    <h1 class="text-2xl font-bold tracking-tight">
+      Workspace home — <span class="text-indigo-600">{{ org_name|default:org_slug }}</span>
+    </h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Tenant routing resolved this org from the URL path <code>/{{ org_slug }}/</code>
+      (ADR-001) and activated its Postgres schema <code>{{ schema }}</code>.
+      The two React islands below are mounted via django-vite — proving the Vite pipeline.
+    </p>
+
+    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div>
+        <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Builder island</h2>
+        {# Mount point read by frontend/src/islands/builder/main.tsx (the real builder host is /<org_slug>/surveys/<id>/edit) #}
+        <div id="opensurvey-builder"></div>
+      </div>
+
+      <div>
+        <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Runtime island</h2>
+        {# Mount point read by frontend/src/islands/runtime/main.tsx (no survey id here — this is the workspace home demo; the real runtime host is /<org_slug>/s/<id>) #}
+        <div id="opensurvey-runtime"></div>
+      </div>
+    </div>
+
+    {% if not vite_built %}
+      <p class="mt-6 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        React island bundle not built yet. Run <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code>
+        (or set <code>DJANGO_VITE_DEV_MODE=True</code> and <code>npm run dev</code>) to load the islands.
+      </p>
+    {% endif %}
+  </section>
+{% endblock %}
+
+{% block body_extra %}
+  {% if vite_built %}
+    {# Load each island entrypoint. django-vite injects the hashed bundle from the manifest. #}
+    {% vite_asset "src/islands/builder/main.tsx" %}
+    {% vite_asset "src/islands/runtime/main.tsx" %}
+  {% endif %}
+{% endblock %}

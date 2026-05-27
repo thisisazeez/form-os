@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Response Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "brand-primary": "#0d9488",
+                "brand-primary-hover": "#0f766e",
+                "brand-secondary": "#3d63dc",
+                "brand-success": "#8ac449",
+                "brand-ink-dark": "#222b27",
+                "brand-ink-secondary": "#444444",
+                "brand-ink-muted": "#666666",
+                "brand-surface-page": "#faf8f7",
+                "brand-surface-card": "#ffffff",
+                "brand-surface-panel": "#f2f4ef",
+                "brand-border": "rgba(34,43,39,0.10)"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Outfit", "sans-serif"],
+                    "display": ["Outfit", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "label": ["Inter", "sans-serif"]
+            },
+            "boxShadow": {
+                "soft": "0 4px 20px -2px rgba(34,43,39,0.08)",
+                "drawer": "-10px 0 40px -10px rgba(34,43,39,0.15)"
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="h-full bg-brand-surface-page font-body text-brand-ink-secondary overflow-hidden relative selection:bg-brand-primary/20 selection:text-brand-ink-dark">
+<!-- Dimmed Background Shell (Simulating Dashboard) -->
+<div class="absolute inset-0 bg-[#f2f4ef] dark:bg-neutral-900 filter blur-[2px] opacity-80 z-0 flex flex-col pointer-events-none">
+<!-- Mock TopAppBar -->
+<header class="w-full h-16 bg-[#faf8f7] dark:bg-neutral-900 border-b border-[rgba(34,43,39,0.10)] shadow-sm flex justify-between items-center px-6">
+<div class="text-2xl font-headline font-bold text-[#222b27] dark:text-white">OpenSurvey</div>
+<div class="flex gap-4 opacity-40">
+<div class="w-20 h-4 bg-brand-ink-muted/20 rounded"></div>
+<div class="w-20 h-4 bg-brand-ink-muted/20 rounded"></div>
+<div class="w-20 h-4 bg-brand-primary rounded"></div>
+<div class="w-20 h-4 bg-brand-ink-muted/20 rounded"></div>
+</div>
+<div class="w-8 h-8 rounded-full bg-brand-ink-muted/20"></div>
+</header>
+<!-- Mock Content Area -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Mock SideNav -->
+<div class="w-64 h-full border-r border-[rgba(34,43,39,0.10)] p-6 flex flex-col gap-4 opacity-40">
+<div class="w-3/4 h-6 bg-brand-ink-muted/20 rounded"></div>
+<div class="w-1/2 h-4 bg-brand-ink-muted/20 rounded mt-8"></div>
+<div class="w-full h-10 bg-brand-ink-muted/20 rounded"></div>
+<div class="w-full h-10 bg-brand-ink-muted/20 rounded"></div>
+</div>
+<!-- Mock Table -->
+<div class="flex-1 p-8 opacity-40">
+<div class="w-full h-full bg-white rounded-xl shadow-soft p-6">
+<div class="w-1/4 h-8 bg-brand-ink-muted/20 rounded mb-8"></div>
+<div class="space-y-4">
+<div class="w-full h-12 bg-brand-ink-muted/10 rounded"></div>
+<div class="w-full h-12 bg-brand-ink-muted/10 rounded"></div>
+<div class="w-full h-12 bg-brand-ink-muted/10 rounded"></div>
+<div class="w-full h-12 bg-brand-ink-muted/10 rounded"></div>
+<div class="w-full h-12 bg-brand-ink-muted/10 rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Dark Overlay to emphasize drawer -->
+<div class="absolute inset-0 bg-brand-ink-dark/20 z-10 transition-opacity"></div>
+<!-- Right-side Drawer -->
+<aside aria-label="Response Details" class="absolute right-0 top-0 bottom-0 w-[480px] bg-brand-surface-card shadow-drawer z-20 flex flex-col transform transition-transform duration-300 ease-out translate-x-0">
+<!-- Drawer Header -->
+<header class="px-8 py-6 border-b border-brand-border flex-shrink-0 bg-brand-surface-card z-10">
+<!-- Top Row: Identity -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-brand-surface-panel flex items-center justify-center text-brand-ink-dark font-headline font-bold text-lg border border-brand-border/50">
+                        JD
+                    </div>
+<div>
+<h2 class="font-headline font-semibold text-brand-ink-dark text-lg leading-tight">jane@acme.com</h2>
+<p class="text-sm text-brand-ink-muted">Respondent</p>
+</div>
+</div>
+<button aria-label="More options" class="w-10 h-10 rounded-full flex items-center justify-center text-brand-ink-muted hover:bg-brand-surface-panel hover:text-brand-ink-dark transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Second Row: Status & Navigation -->
+<div class="flex items-center justify-between mb-5">
+<div class="flex items-center gap-3">
+<span class="px-2.5 py-1 rounded-full bg-brand-success/10 text-brand-success text-xs font-medium border border-brand-success/20">
+                        Completed
+                    </span>
+<span class="text-sm text-brand-ink-muted">Submitted 2 hours ago</span>
+</div>
+<div class="flex gap-1">
+<button aria-label="Previous response" class="w-8 h-8 rounded flex items-center justify-center text-brand-ink-muted hover:bg-brand-surface-panel hover:text-brand-ink-dark transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button aria-label="Next response" class="w-8 h-8 rounded flex items-center justify-center text-brand-ink-muted hover:bg-brand-surface-panel hover:text-brand-ink-dark transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Third Row: Metadata -->
+<div class="flex items-center gap-6 p-3 bg-brand-surface-panel rounded-lg border border-brand-border/50">
+<div class="flex items-center gap-2 text-sm text-brand-ink-secondary" title="Device">
+<span class="material-symbols-outlined text-brand-ink-muted text-[18px]">desktop_windows</span>
+<span>Desktop</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-brand-ink-secondary" title="Duration">
+<span class="material-symbols-outlined text-brand-ink-muted text-[18px]">timer</span>
+<span>3m 45s</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-brand-ink-secondary" title="Source">
+<span class="material-symbols-outlined text-brand-ink-muted text-[18px]">link</span>
+<span>Direct Link</span>
+</div>
+</div>
+</header>
+<!-- Drawer Body (Scrollable Q&A List) -->
+<main class="flex-1 overflow-y-auto px-8 py-6 space-y-10 custom-scrollbar">
+<!-- Question 1: NPS -->
+<section class="group">
+<h3 class="text-brand-ink-muted font-medium mb-3 group-hover:text-brand-ink-secondary transition-colors">
+<span class="mr-2 text-xs opacity-70">Q1</span> 
+                    How likely are you to recommend us?
+                </h3>
+<div class="flex gap-1 mt-2">
+<!-- Numbers 0-10 -->
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">0</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">1</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">2</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">3</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">4</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">5</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">6</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">7</div>
+<!-- Selected -->
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-bold border-2 border-brand-primary text-white bg-brand-primary shadow-sm scale-110 z-10 relative">8</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">9</div>
+<div class="flex-1 aspect-square rounded flex items-center justify-center text-sm font-medium border border-brand-border text-brand-ink-muted bg-brand-surface-card">10</div>
+</div>
+</section>
+<!-- Question 2: Rating -->
+<section class="group">
+<h3 class="text-brand-ink-muted font-medium mb-3 group-hover:text-brand-ink-secondary transition-colors">
+<span class="mr-2 text-xs opacity-70">Q2</span> 
+                    Overall experience?
+                </h3>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-brand-primary text-3xl" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-brand-primary text-3xl" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-brand-primary text-3xl" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-brand-primary text-3xl" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-brand-border text-3xl" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</section>
+<!-- Question 3: Multi-Select -->
+<section class="group">
+<h3 class="text-brand-ink-muted font-medium mb-3 group-hover:text-brand-ink-secondary transition-colors">
+<span class="mr-2 text-xs opacity-70">Q3</span> 
+                    Which features do you use?
+                </h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-4 py-2 rounded bg-brand-primary text-white text-sm font-medium shadow-sm">
+                        Analytics
+                    </span>
+<span class="px-4 py-2 rounded bg-brand-primary text-white text-sm font-medium shadow-sm">
+                        Form Builder
+                    </span>
+<!-- Unselected options context -->
+<span class="px-4 py-2 rounded bg-brand-surface-panel border border-brand-border text-brand-ink-muted text-sm line-through opacity-50">
+                        Integrations
+                    </span>
+</div>
+</section>
+<!-- Question 4: Open Text -->
+<section class="group pb-8">
+<h3 class="text-brand-ink-muted font-medium mb-3 group-hover:text-brand-ink-secondary transition-colors">
+<span class="mr-2 text-xs opacity-70">Q4</span> 
+                    Any additional feedback?
+                </h3>
+<blockquote class="p-4 bg-brand-primary/5 border-l-4 border-brand-primary rounded-r-lg text-brand-ink-dark leading-relaxed italic">
+                    "The platform is incredibly intuitive, but we'd love more advanced branching logic."
+                </blockquote>
+</section>
+</main>
+<!-- Drawer Footer -->
+<footer class="p-4 border-t border-brand-border bg-brand-surface-page flex items-center justify-between">
+<button class="px-4 py-2 text-sm font-medium text-brand-ink-secondary hover:text-brand-ink-dark transition-colors border border-brand-border rounded-lg bg-white hover:bg-brand-surface-panel shadow-sm">
+                Close
+            </button>
+<span class="text-xs text-brand-ink-muted tracking-wider uppercase font-semibold">Response 4 of 238</span>
+<div class="w-[74px]"></div> <!-- Spacer for centering -->
+</footer>
+</aside>
+<style>
+        /* Custom scrollbar for webkit */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(34,43,39,0.15);
+            border-radius: 20px;
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(34,43,39,0.25);
+        }
+    </style>
+</body></html>

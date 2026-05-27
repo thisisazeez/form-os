@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+*.sqlite3
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Node / Vite
+node_modules/
+dist-vite/
+.vite/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Django
+/staticfiles/
+/media/
+local_settings.py
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Claude Code agent worktrees / local state
+.claude/
+
+# Internal build scratch / planning docs — not part of the product (excluded from the public repo)
+/FEATURE_PARITY.md
+/e2e_*.py
+/FOLLOWUPS.md
+/PLAN.md
+/PROMPTS.md
+/STYLE_GUIDE.md
+/TEST_PLAN.md
+/contracts/REVIEW.md
+/contracts/decisions.md
+/contracts/models.md
+/contracts/rbac.md

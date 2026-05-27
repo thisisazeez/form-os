@@ -1,0 +1,122 @@
+{% comment %}
+  Team members card — the selected team's members table + (for managers) an "Add member"
+  control and per-row "Remove". Swapped wholesale (hx-target="#team-members-card",
+  hx-swap="outerHTML") on add/remove so the table reflects the change without a full reload.
+
+  RBAC: rendered interactive only when `can_manage_membership` (org owner/admin OR team-admin
+  of THIS team — resolved by the view via can(). Read-only callers see the table alone.
+
+  Context: org, selected_team, members (hydrated → .user_obj), candidates ([{id,label}] org
+  members not yet on the team), can_manage_membership, member_error.
+{% endcomment %}
+<div id="team-members-card" class="overflow-hidden rounded-xl border border-hairline bg-white shadow-sm"
+     {% if can_manage_membership %}x-data="{ addOpen: false }"{% endif %}>
+  <div class="flex items-center justify-between border-b border-hairline px-6 py-4">
+    <div>
+      <h2 class="font-display font-semibold text-ink">{{ selected_team.name }} members</h2>
+      <p class="mt-0.5 text-xs text-muted">Users assigned to this team.</p>
+    </div>
+    {% if can_manage_membership %}
+      <button type="button" @click="addOpen = true"
+              {% if not candidates %}disabled{% endif %}
+              class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50">
+        <span class="material-symbols-outlined text-[18px]">person_add</span>Add member
+      </button>
+    {% endif %}
+  </div>
+
+  {% if member_error %}
+    <div class="mx-6 mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ member_error }}</div>
+  {% endif %}
+
+  {% if members %}
+    <table class="min-w-full divide-y divide-hairline text-sm">
+      <thead class="bg-panel/50 text-left">
+        <tr>
+          <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted">User</th>
+          <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Team role</th>
+          {% if can_manage_membership %}<th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-hairline">
+        {% for tm in members %}
+          <tr class="transition-colors hover:bg-panel/30">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 font-display text-sm font-semibold text-brand">
+                  {% if tm.user_obj %}{% firstof tm.user_obj.name tm.user_obj.email "?" as un %}{{ un|first|upper }}{% else %}?{% endif %}
+                </span>
+                <div class="min-w-0">
+                  <div class="font-medium text-ink">{% if tm.user_obj %}{{ tm.user_obj.name|default:tm.user_obj.email }}{% else %}Unknown user{% endif %}</div>
+                  {% if tm.user_obj and tm.user_obj.name %}<div class="truncate text-xs text-muted">{{ tm.user_obj.email }}</div>{% endif %}
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-md border border-hairline bg-white px-2.5 py-1 text-xs font-medium text-ink">{{ tm.get_team_role_display }}</span>
+            </td>
+            {% if can_manage_membership %}
+              <td class="px-6 py-4 text-right">
+                <button type="button"
+                        hx-post="/{{ org.slug }}/teams/{{ selected_team.id }}/members/{{ tm.user_id }}/remove"
+                        hx-target="#team-members-card" hx-swap="outerHTML"
+                        hx-confirm="Remove this member from the team?"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-white px-2.5 py-1.5 text-xs font-medium text-muted transition-colors hover:border-brand hover:text-brand">
+                  <span class="material-symbols-outlined text-[16px]">person_remove</span>Remove
+                </button>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="px-6 py-8 text-center text-sm text-muted">No members on this team yet.</p>
+  {% endif %}
+
+  {% if can_manage_membership %}
+    {% comment %}Add-member modal (Alpine) — a <select> of org members not yet on the team.
+       hx-posts {user_id} to the add endpoint and swaps this whole card.{% endcomment %}
+    <div x-show="addOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div @click="addOpen = false" class="absolute inset-0 bg-ink/40"></div>
+      <div class="relative w-full max-w-md rounded-xl border border-hairline bg-white p-6 shadow-lg">
+        <div class="mb-4 flex items-start justify-between">
+          <div>
+            <h2 class="font-display text-xl font-bold text-ink">Add member</h2>
+            <p class="mt-1 text-sm text-muted">Add an existing organization member to <span class="font-medium text-ink">{{ selected_team.name }}</span>.</p>
+          </div>
+          <button type="button" @click="addOpen = false" class="text-muted hover:text-ink" aria-label="Close">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        {% if candidates %}
+          <form hx-post="/{{ org.slug }}/teams/{{ selected_team.id }}/members"
+                hx-target="#team-members-card" hx-swap="outerHTML"
+                @htmx:after-request="addOpen = false">
+            <label for="add-member-select" class="mb-1 block text-sm font-medium text-ink">Organization member</label>
+            <select id="add-member-select" name="user_id" required
+                    class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+              {% for c in candidates %}
+                <option value="{{ c.id }}">{{ c.label }}</option>
+              {% endfor %}
+            </select>
+            <div class="mt-6 flex justify-end gap-3">
+              <button type="button" @click="addOpen = false"
+                      class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</button>
+              <button type="submit"
+                      class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>Add to team
+              </button>
+            </div>
+          </form>
+        {% else %}
+          <p class="text-sm text-muted">Every active organization member is already on this team. Invite more people from the <a href="/{{ org.slug }}/members" class="font-medium text-brand hover:underline">Members</a> page.</p>
+          <div class="mt-6 flex justify-end">
+            <button type="button" @click="addOpen = false"
+                    class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Close</button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>

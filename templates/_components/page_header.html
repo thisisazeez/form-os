@@ -1,0 +1,22 @@
+{% comment %}
+  page_header.html — section heading for an admin content region.
+
+  USAGE:
+    {% include "_components/page_header.html" with title="Surveys" %}
+    {% include "_components/page_header.html" with title="Contacts" subtitle="People who can receive your surveys." %}
+
+  PARAMS:
+    title    (required) — the H1 text (rendered font-display).
+    subtitle (optional) — a muted one-line description under the title.
+
+  NOTE: Django {% include %} cannot accept block content, so this partial does NOT host an
+  `actions` slot. Put page action buttons in the page template right beside the include, e.g.:
+    <div class="mb-6 flex items-end justify-between">
+      {% include "_components/page_header.html" with title="Surveys" subtitle="…" %}
+      <a class="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover">New</a>
+    </div>
+{% endcomment %}
+<div>
+  <h1 class="font-display text-2xl font-bold tracking-tight text-ink">{{ title }}</h1>
+  {% if subtitle %}<p class="mt-1 text-sm text-muted">{{ subtitle }}</p>{% endif %}
+</div>

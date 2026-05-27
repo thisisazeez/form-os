@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Team Settings - OpenSurvey</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        tertiary: '#8ac449',
+                        ink: {
+                            dark: '#222b27',
+                            DEFAULT: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            bg: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)'
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", // 8px
+                        "lg": "0.75rem",     // 12px
+                        "xl": "1rem",        // 16px
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Outfit", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(34,43,39,0.05)',
+                        'modal': '0 10px 40px -5px rgba(34,43,39,0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.surface.bg');
+            color: theme('colors.ink.DEFAULT');
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Smooth transitions */
+        .btn-press {
+            transition: transform 0.15s ease-out, background-color 0.2s ease-out;
+        }
+        .btn-press:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="font-body antialiased flex">
+<!-- JSON Component: SideNavBar -->
+<nav class="bg-white dark:bg-zinc-900 h-screen w-64 fixed left-0 top-0 border-r border-zinc-200/50 dark:border-zinc-800 shadow-sm flex flex-col h-full py-6 px-4 z-20">
+<div class="mb-8 px-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary flex items-center justify-center text-white font-headline font-bold">C</div>
+<div>
+<h1 class="font-headline text-xl font-bold text-[#222b27] dark:text-white leading-tight">OpenSurvey</h1>
+<p class="text-xs text-ink-muted">Enterprise Survey Platform</p>
+</div>
+</div>
+<ul class="flex flex-col gap-1 flex-1 font-body text-sm font-medium">
+<!-- Home -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT text-[#444] dark:text-zinc-400 hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+                    Home
+                </a>
+</li>
+<!-- Surveys -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT text-[#444] dark:text-zinc-400 hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">poll</span>
+                    Surveys
+                </a>
+</li>
+<!-- Contacts -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT text-[#444] dark:text-zinc-400 hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span>
+                    Contacts
+                </a>
+</li>
+<!-- Segments -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT text-[#444] dark:text-zinc-400 hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">segment</span>
+                    Segments
+                </a>
+</li>
+<!-- Results -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT text-[#444] dark:text-zinc-400 hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                    Results
+                </a>
+</li>
+<!-- Team (Active Semantic Match for Team settings) -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT bg-[#f2f4ef] dark:bg-zinc-800 text-[#0d9488] font-semibold hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">groups</span>
+                    Team
+                </a>
+</li>
+<!-- Settings -->
+<li>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-DEFAULT text-[#444] dark:text-zinc-400 hover:bg-[#f2f4ef] dark:hover:bg-zinc-800 transition-colors duration-200 scale-98 active:scale-95 transition-transform mt-auto" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="ml-64 w-full min-h-screen flex flex-col relative">
+<!-- JSON Component: TopAppBar -->
+<header class="bg-white dark:bg-zinc-900 fixed top-0 right-0 w-[calc(100%-16rem)] h-16 border-b border-zinc-200/50 dark:border-zinc-800 flat flex items-center justify-between px-8 z-10 font-body text-sm">
+<div class="flex-1 max-w-md focus-within:ring-2 focus-within:ring-[#0d9488]/20 rounded-DEFAULT transition-shadow">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-ink-muted">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-bg border-none rounded-DEFAULT text-ink focus:outline-none focus:ring-0 placeholder-ink-muted text-sm" placeholder="Search across workspace..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-ink-muted hover:text-[#0d9488] transition-colors p-2 rounded-full hover:bg-surface-panel flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-panel overflow-hidden border border-border cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A small circular avatar showing a professional headshot of a person looking slightly smiling, suitable for a light-mode corporate dashboard profile icon." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx-HWpDNF0RHXNReDdqfIAfQUv94YjKuagnfLb5nLo_wylIjJauvNGYHWXXk8Q5wi-mIR59slEqjhnrumTjK6izieY8bKUxXa9e8G05t-qo9XB_67ow1dZoOJ60dWAUIlhy9sjfC5YSODMukAGzX4GtjJ__ZW1ExZsn4Xl4PdcTYOU7TNUbM0TrkrLHTxqoIJ12mC6SRRhMlHn22Pfju4ElJi4g5tS6Gvgu6JUnuEmjAJvRzKFgjETHkUyMLg3xCrkpU7Rkd2_XiQ9"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<main class="flex-1 mt-16 p-8 max-w-6xl w-full mx-auto pb-24">
+<!-- Page Header -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<h2 class="font-headline text-3xl font-bold text-ink-dark mb-1">Members</h2>
+<p class="text-ink-muted text-sm flex items-center gap-2">
+<span>7 of 10 seats used</span>
+<span class="w-1 h-1 rounded-full bg-border"></span>
+<a class="text-secondary hover:underline" href="#">Manage billing</a>
+</p>
+</div>
+<button class="btn-press bg-primary hover:bg-primary-hover text-white font-medium py-2 px-5 rounded-DEFAULT shadow-soft flex items-center gap-2 text-sm" onclick="document.getElementById('inviteModal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-lg">add</span>
+                    Invite member
+                </button>
+</div>
+<!-- Main Members Table Card -->
+<div class="bg-surface-card rounded-lg shadow-soft border border-border overflow-hidden mb-8">
+<div class="px-6 py-4 border-b border-border flex justify-between items-center bg-white">
+<h3 class="font-headline font-semibold text-ink-dark">Active Members</h3>
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-ink-muted text-sm">search</span>
+<input class="pl-8 pr-3 py-1.5 border border-border rounded-DEFAULT text-sm focus:border-primary focus:ring-1 focus:ring-primary w-48" placeholder="Filter members..." type="text"/>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-surface-bg border-b border-border text-ink-muted font-medium text-xs uppercase tracking-wider">
+<tr>
+<th class="px-6 py-3">Respondent</th>
+<th class="px-6 py-3">Role</th>
+<th class="px-6 py-3">Workspaces</th>
+<th class="px-6 py-3">Status</th>
+<th class="px-6 py-3">Last Active</th>
+<th class="px-6 py-3 text-right"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<!-- Row 1: Owner -->
+<tr class="hover:bg-surface-bg/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#fce8e3] text-primary flex items-center justify-center font-bold text-sm">
+                                            SR
+                                        </div>
+<div>
+<div class="font-medium text-ink-dark">Sarah Richards</div>
+<div class="text-ink-muted text-xs">sarah.r@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-zinc-100 text-ink-dark border border-zinc-200">
+                                        Owner
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-panel text-xs text-ink">All Workspaces</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-ink">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+                                        Active
+                                    </div>
+</td>
+<td class="px-6 py-4 text-ink-muted text-xs">
+                                    Today, 10:42 AM
+                                </td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink p-1 rounded hover:bg-surface-panel transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Admin -->
+<tr class="hover:bg-surface-bg/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Mark Thorne" class="w-9 h-9 rounded-full object-cover" data-alt="Small circular profile picture of a casually dressed male professional against a plain background, light modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4nH5aJUoiBu1wH6ZmG08p-7t8BLljLW0EHorgg35T76U5Q0s5a1wy3VGVnYPFVK3flNH450xbTXeVYbXijQKQznIRlucdexdPuqLZA_Py-fB3lmMtJcdBEYIl1ZdZwy4dA2bPcsdUIzo4qBnWDolqoD8tKOhW61DrM47TH5_450qJgfJLQGEGeHz4FaUKbq0GZznIaJ0rnBmNi68fCiU8omJWVzBXb7cp6KA9umBaEJs_m8Cbw2zvSpq4iiv_jSNAepOCNZA1Yrw_"/>
+<div>
+<div class="font-medium text-ink-dark">Mark Thorne</div>
+<div class="text-ink-muted text-xs">mark.thorne@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<select class="text-sm border-border rounded-DEFAULT py-1 pl-2 pr-8 focus:ring-primary focus:border-primary bg-white cursor-pointer hover:bg-surface-bg">
+<option selected="" value="admin">Admin</option>
+<option value="member">Member</option>
+</select>
+</td>
+<td class="px-6 py-4">
+<div class="flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-panel text-xs text-ink">Global Marketing</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-panel text-xs text-ink">+2</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-ink">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+                                        Active
+                                    </div>
+</td>
+<td class="px-6 py-4 text-ink-muted text-xs">
+                                    Yesterday, 4:15 PM
+                                </td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink p-1 rounded hover:bg-surface-panel transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Member -->
+<tr class="hover:bg-surface-bg/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Elena Rodriguez" class="w-9 h-9 rounded-full object-cover" data-alt="Small circular profile picture of a casually dressed female professional against a plain background, light modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeAPU5YEmUgtnFiXiTFdd8UVtBzbAr6jNpG826Wj_GQUI5_gbXm4pFUYHdbzppZqtt6TDa0_91aNtEmFU9YLCWeJnTsl2a6lf1m9naIKXPBNkBAUydnijxc8d74ETR_ocWKzWR40JxtMlwaldeEbF3J8UUsYdQTOuLZvH09npJ02GhxJOJd4AKYdOQe0AOcRzELQEe1uBvbH-hktSNNpcj9vy-VBJZHzwJEneGwgVG24-gITnkNRF-y9bJ3jeo87Zos0ff04MckdLy"/>
+<div>
+<div class="font-medium text-ink-dark">Elena Rodriguez</div>
+<div class="text-ink-muted text-xs">elena.r@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<select class="text-sm border-border rounded-DEFAULT py-1 pl-2 pr-8 focus:ring-primary focus:border-primary bg-white cursor-pointer hover:bg-surface-bg">
+<option value="admin">Admin</option>
+<option selected="" value="member">Member</option>
+</select>
+</td>
+<td class="px-6 py-4">
+<div class="flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-panel text-xs text-ink">Product Feedback</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-ink">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+                                        Active
+                                    </div>
+</td>
+<td class="px-6 py-4 text-ink-muted text-xs">
+                                    Nov 12, 2023
+                                </td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink p-1 rounded hover:bg-surface-panel transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Secondary Section: Pending Invitations -->
+<div class="mt-12">
+<h3 class="font-headline font-semibold text-ink-dark mb-4 text-lg">Pending invitations</h3>
+<div class="bg-surface-card rounded-lg shadow-soft border border-border overflow-hidden">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-surface-bg border-b border-border text-ink-muted font-medium text-xs uppercase tracking-wider">
+<tr>
+<th class="px-6 py-3">Email</th>
+<th class="px-6 py-3">Assigned Role</th>
+<th class="px-6 py-3">Sent Date</th>
+<th class="px-6 py-3 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<tr class="hover:bg-surface-bg/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border border-dashed border-ink-muted flex items-center justify-center text-ink-muted bg-surface-bg">
+<span class="material-symbols-outlined text-sm">mail</span>
+</div>
+<span class="font-medium text-ink-dark">j.doe@partner-agency.com</span>
+</div>
+</td>
+<td class="px-6 py-4 text-ink">Member</td>
+<td class="px-6 py-4 text-ink-muted">2 days ago</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="text-secondary hover:text-secondary-hover text-xs font-medium px-2 py-1 rounded hover:bg-secondary/10 transition-colors">Resend</button>
+<button class="text-red-600 hover:text-red-700 text-xs font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors">Revoke</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+<!-- Overlay: Invite Member Modal -->
+<div class="fixed inset-0 bg-ink-dark/40 backdrop-blur-[2px] z-50 hidden flex items-center justify-center p-4 transition-opacity" id="inviteModal">
+<div class="bg-surface-card rounded-lg shadow-modal w-full max-w-md overflow-hidden relative">
+<!-- Close button -->
+<button class="absolute top-4 right-4 text-ink-muted hover:text-ink-dark p-1 rounded-full hover:bg-surface-bg transition-colors" onclick="document.getElementById('inviteModal').classList.add('hidden')">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+<div class="p-6">
+<h2 class="font-headline text-2xl font-bold text-ink-dark mb-1">Invite to OpenSurvey</h2>
+<p class="text-ink-muted text-sm mb-6">Send an invitation link via email to add a new seat.</p>
+<form class="space-y-5">
+<!-- Email Input -->
+<div>
+<label class="block text-sm font-medium text-ink-dark mb-1.5">Email address</label>
+<input class="w-full border border-border rounded-DEFAULT px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-ink-muted transition-shadow" placeholder="colleague@company.com" type="email"/>
+</div>
+<!-- Role Selection -->
+<div>
+<label class="block text-sm font-medium text-ink-dark mb-1.5">Role</label>
+<div class="space-y-2">
+<!-- Admin Option -->
+<label class="flex items-start p-3 border border-border rounded-DEFAULT cursor-pointer hover:bg-surface-bg transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<div class="flex h-5 items-center">
+<input class="text-primary focus:ring-primary border-ink-muted h-4 w-4" name="role" type="radio" value="admin"/>
+</div>
+<div class="ml-3">
+<span class="block text-sm font-medium text-ink-dark">Admin</span>
+<span class="block text-xs text-ink-muted mt-0.5">Can manage billing, settings, and all workspace data.</span>
+</div>
+</label>
+<!-- Member Option -->
+<label class="flex items-start p-3 border border-border rounded-DEFAULT cursor-pointer hover:bg-surface-bg transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<div class="flex h-5 items-center">
+<input checked="" class="text-primary focus:ring-primary border-ink-muted h-4 w-4" name="role" type="radio" value="member"/>
+</div>
+<div class="ml-3">
+<span class="block text-sm font-medium text-ink-dark">Member</span>
+<span class="block text-xs text-ink-muted mt-0.5">Can create and view surveys in assigned workspaces.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Workspace Assignment -->
+<div>
+<label class="block text-sm font-medium text-ink-dark mb-1.5">Workspaces</label>
+<select class="w-full border border-border rounded-DEFAULT px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary text-ink-dark">
+<option value="all">All Workspaces</option>
+<option value="marketing">Global Marketing</option>
+<option value="product">Product Feedback</option>
+<option value="hr">Internal HR</option>
+</select>
+</div>
+<div class="pt-4 border-t border-border flex justify-end gap-3 mt-6">
+<button class="px-4 py-2 text-sm font-medium text-ink hover:bg-surface-panel rounded-DEFAULT transition-colors btn-press" onclick="document.getElementById('inviteModal').classList.add('hidden')" type="button">
+                            Cancel
+                        </button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-DEFAULT shadow-sm transition-colors btn-press" type="button">
+                            Send invitation
+                        </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,93 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  CSV import results — rendered by contacts_import POST. Shows a per-row outcome table
+  (created / updated / error) plus a summary. Brand tokens only. A file-level error (bad
+  encoding, no header, too large) shows a single message instead of the table.
+{% endcomment %}
+
+{% block title %}Import results — OpenSurvey{% endblock %}
+{% block nav_contacts %}is-active{% endblock %}
+{% block topbar_title %}Contacts{% endblock %}
+
+{% block content %}
+<div>
+  <nav class="mb-1 flex items-center gap-1.5 text-sm text-muted">
+    <a href="../contacts" class="transition-colors hover:text-brand">Contacts</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <span class="text-ink">Import results</span>
+  </nav>
+  {% include "_components/page_header.html" with title="Import results" subtitle="Each row is reported individually — a bad row never blocks the rest." %}
+
+  {% if error %}
+    <div class="mt-6 max-w-lg rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-red-600">error</span>{{ error }}
+    </div>
+    <a href="../contacts/import"
+       class="mt-5 inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+      <span class="material-symbols-outlined text-[18px]">refresh</span> Try again
+    </a>
+  {% else %}
+    {% comment %}Summary chips.{% endcomment %}
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-panel px-3 py-1 text-sm font-medium text-ink">
+        <span class="material-symbols-outlined text-[18px] text-muted">summarize</span> {{ total_n }} row{{ total_n|pluralize }}
+      </span>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-sm font-medium text-brand">
+        <span class="material-symbols-outlined text-[18px]">person_add</span> {{ created_n }} created
+      </span>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-panel px-3 py-1 text-sm font-medium text-ink">
+        <span class="material-symbols-outlined text-[18px] text-muted">sync</span> {{ updated_n }} updated
+      </span>
+      {% if error_n %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-700">
+          <span class="material-symbols-outlined text-[18px]">error</span> {{ error_n }} error{{ error_n|pluralize }}
+        </span>
+      {% endif %}
+    </div>
+
+    {% if truncated %}
+      <p class="mt-3 text-sm text-muted">Only the first {{ max_rows }} rows were processed. Split larger files and import again.</p>
+    {% endif %}
+
+    <div class="mt-6 overflow-hidden rounded-xl border border-hairline bg-white">
+      <table class="min-w-full divide-y divide-hairline text-sm">
+        <thead class="bg-panel/50 text-left">
+          <tr>
+            <th class="w-20 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Row</th>
+            <th class="w-32 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Status</th>
+            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Detail</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {% for r in results %}
+            <tr class="transition-colors hover:bg-panel/30">
+              <td class="px-5 py-3 text-muted">{{ r.row }}</td>
+              <td class="px-5 py-3">
+                {% if r.status == "created" %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand">Created</span>
+                {% elif r.status == "updated" %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-panel px-2.5 py-0.5 text-xs font-medium text-ink">Updated</span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">Error</span>
+                {% endif %}
+              </td>
+              <td class="px-5 py-3 text-muted">{{ r.error|default:"—" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-6 flex items-center gap-3">
+      <a href="../contacts"
+         class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+        <span class="material-symbols-outlined text-[18px]">group</span> Back to contacts
+      </a>
+      <a href="../contacts/import"
+         class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">upload_file</span> Import another file
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

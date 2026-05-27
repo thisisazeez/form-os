@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% load orgs %}
+{% comment %}
+  OpenSurvey AUTHENTICATED admin shell — the app chrome behind every signed-in admin page.
+  Layout mirrors designs/stitch/dashboard-home.png: a fixed left sidebar (logo + workspace
+  switcher + primary nav + storage meter + user card) and a top bar (page-title slot + global
+  search + notifications + "New survey"), with the page body rendered into {% block content %}.
+
+  HOW TO USE (admin producers):
+    {% extends "_layouts/app_shell.html" %}
+    {% block nav_surveys %}is-active{% endblock %}   ← mark the ACTIVE sidebar item (see keys below)
+    {% block topbar_title %}Surveys{% endblock %}    ← left slot in the top bar
+    {% block content %} …page body… {% endblock %}
+
+  Active-state mechanism (deviation from the brief's literal "{% block nav_active %} … compared
+  per-item" wording): Django templates CANNOT capture one block's rendered text into a variable
+  for sibling {% if nav_active == 'surveys' %} comparison (verified empirically). The idiomatic,
+  zero-Python equivalent is a PER-ITEM block: the page overrides EXACTLY ONE of the seven nav
+  blocks with the sentinel `is-active`, and this layout branches on it to apply the active
+  styling (brand left-accent bar + text-brand + filled brand icon). Keys:
+    nav_home  nav_surveys  nav_contacts  nav_segments  nav_results  nav_team  nav_settings
+  Set at most one. Omitting all = nothing highlighted (e.g. a detail page with no sidebar match).
+
+  Resilience: renders even when request.tenant / request.user context is thin — slug/name fall
+  back to safe defaults and links degrade to "#" rather than producing a broken "/None/..." URL.
+  Alpine drives the workspace-switcher dropdown, the user menu, and the mobile sidebar toggle.
+{% endcomment %}
+
+{% block head_extra %}
+  {% comment %}
+    Active-nav + x-cloak styling. We use Tailwind Play CDN's `<style type="text/tailwindcss">`
+    so @apply resolves against the brand TOKENS from the config in base.html — keeping this file
+    free of any raw hex (per the hard rules). The page marks one nav item with the `is-active`
+    sentinel (see the header docs); these rules then paint the brand accent bar + text + filled
+    icon. font-variation-settings is a CSS property (not a color), required to fill a Material
+    Symbol — not a token/hex violation.
+  {% endcomment %}
+  <style type="text/tailwindcss">
+    @layer components {
+      .nav-item.is-active {
+        @apply bg-brand/5 text-brand font-semibold border-r-4 border-brand;
+      }
+      .nav-item.is-active .nav-icon {
+        @apply text-brand;
+        font-variation-settings: 'FILL' 1, 'wght' 400;
+      }
+    }
+  </style>
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+{% endblock %}
+
+{% block body %}
+  {% comment %}
+    Tenant/user shortcuts with safe fallbacks so the shell never renders /None/ links or trips on
+    a thin context. The user's email is read only when authenticated (AnonymousUser has no
+    `email` attr); `uname` falls back name → email → "Account". The shell is always login-gated
+    in practice, but these guards keep it render-safe per the brief's resilience requirement.
+  {% endcomment %}
+  {% with tslug=request.tenant.slug tname=request.tenant.name|default:"Workspace" %}
+  {% firstof request.user.name request.user.email "Account" as uname %}
+  <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
+
+    {# ---------------------------------------------------------------- #}
+    {#  Mobile backdrop (only when the drawer is open on small screens) #}
+    {# ---------------------------------------------------------------- #}
+    <div
+      x-show="sidebarOpen"
+      x-cloak
+      @click="sidebarOpen = false"
+      class="fixed inset-0 z-30 bg-ink/30 lg:hidden"
+    ></div>
+
+    {# ================================================================ #}
+    {#  LEFT SIDEBAR (~248px, bg-panel, full height)                    #}
+    {# ================================================================ #}
+    <aside
+      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col border-r border-hairline bg-panel px-4 py-6 transition-transform lg:translate-x-0"
+    >
+      {# Logo #}
+      <div class="mb-8 flex items-center justify-between px-3">
+        <a href="{% if tslug %}/{{ tslug }}/{% else %}/{% endif %}" class="font-display text-xl font-bold tracking-tight text-ink">
+          Open<span class="text-brand">Survey</span>
+        </a>
+        <button @click="sidebarOpen = false" class="text-muted hover:text-ink lg:hidden" aria-label="Close menu">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      {% comment %}Unified org + workspace switcher (drill-in). Default view = the routed org's
+        workspaces (pick one → POST /switch-workspace → the app scopes to it); "Switch" drills
+        into the org list (pick one → navigate to /<slug>/). A user can belong to many orgs, each
+        with many workspaces. Tags: org_workspaces + user_organizations + current_workspace_name
+        (apps/common/templatetags/orgs.py); the current workspace is session-backed
+        (apps/common/active_workspace.py).{% endcomment %}
+      {% user_organizations as my_orgs %}
+      {% org_workspaces as my_workspaces %}
+      {% current_workspace_name as cur_ws_name %}
+      <div class="relative mx-2 mb-6" x-data="{ open: false, view: 'workspaces' }">
+        <button
+          @click="open = !open; view = 'workspaces'"
+          class="group flex w-full items-center justify-between rounded-lg border border-hairline bg-white px-3 py-2 text-left transition-colors hover:bg-panel"
+        >
+          <span class="flex min-w-0 items-center gap-2">
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-brand font-display text-xs font-bold text-white">
+              {{ tname|first|upper }}
+            </span>
+            <span class="flex min-w-0 flex-col">
+              <span class="truncate text-[11px] leading-tight text-muted">{{ tname }}</span>
+              <span class="truncate text-sm font-semibold leading-tight text-ink">{{ cur_ws_name|default:"Workspace" }}</span>
+            </span>
+          </span>
+          <span class="material-symbols-outlined text-sm text-muted transition-colors group-hover:text-ink">unfold_more</span>
+        </button>
+        <div
+          x-show="open"
+          x-cloak
+          x-transition.opacity
+          @click.outside="open = false"
+          @keydown.escape.window="open = false"
+          class="absolute left-0 right-0 z-20 mt-1 rounded-lg border border-hairline bg-white p-1 shadow-lg"
+        >
+          {# ---- WORKSPACES view (default) ---- #}
+          <div x-show="view === 'workspaces'">
+            <div class="flex items-center justify-between gap-2 px-3 pb-1 pt-2">
+              <span class="flex min-w-0 items-center gap-1.5">
+                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-brand font-display text-[10px] font-bold text-white">{{ tname|first|upper }}</span>
+                <span class="truncate text-xs font-semibold text-ink">{{ tname }}</span>
+              </span>
+              <button type="button" @click="view = 'orgs'" class="flex shrink-0 items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-hover">
+                Switch<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
+            <p class="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-muted">Workspaces</p>
+            <div class="max-h-64 overflow-y-auto">
+              {% for w in my_workspaces %}
+                <form method="post" action="/{{ tslug }}/switch-workspace/{{ w.id }}">
+                  {% csrf_token %}
+                  <button type="submit"
+                    class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors {% if w.is_current %}bg-brand/5{% else %}hover:bg-panel{% endif %}">
+                    <span class="material-symbols-outlined shrink-0 text-[18px] {% if w.is_current %}text-brand{% else %}text-muted{% endif %}">stacks</span>
+                    <span class="min-w-0 flex-1 truncate font-medium {% if w.is_current %}text-brand{% else %}text-ink{% endif %}">{{ w.name }}</span>
+                    <span class="shrink-0 rounded-full bg-panel px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">{{ w.access }}</span>
+                    {% if w.is_current %}<span class="material-symbols-outlined shrink-0 text-[18px] text-brand">check</span>{% endif %}
+                  </button>
+                </form>
+              {% empty %}
+                <p class="px-3 py-2 text-xs text-muted">No workspaces yet.</p>
+              {% endfor %}
+            </div>
+            <div class="my-1 border-t border-hairline"></div>
+            <a href="{% if tslug %}/{{ tslug }}/workspaces/new{% else %}#{% endif %}" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-panel hover:text-ink">
+              <span class="material-symbols-outlined text-[18px]">add</span>New workspace
+            </a>
+            <a href="{% if tslug %}/{{ tslug }}/settings/workspace{% else %}#{% endif %}" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-panel hover:text-ink">
+              <span class="material-symbols-outlined text-[18px]">settings</span>Workspace settings
+            </a>
+          </div>
+          {# ---- ORGANIZATIONS view (after "Switch") ---- #}
+          <div x-show="view === 'orgs'" x-cloak>
+            <button type="button" @click="view = 'workspaces'" class="flex items-center gap-1 px-3 pb-1 pt-2 text-xs font-medium text-muted hover:text-ink">
+              <span class="material-symbols-outlined text-[16px]">chevron_left</span>Back
+            </button>
+            <p class="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-muted">Your organizations</p>
+            <div class="max-h-64 overflow-y-auto">
+              {% for o in my_orgs %}
+                <a href="/{{ o.slug }}/"
+                   class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {% if o.is_current %}bg-brand/5{% else %}hover:bg-panel{% endif %}">
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded font-display text-xs font-bold {% if o.is_current %}bg-brand text-white{% else %}bg-panel text-ink{% endif %}">{{ o.name|first|upper }}</span>
+                  <span class="min-w-0 flex-1 truncate font-medium {% if o.is_current %}text-brand{% else %}text-ink{% endif %}">{{ o.name }}</span>
+                  <span class="shrink-0 rounded-full bg-panel px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">{{ o.role }}</span>
+                  {% if o.is_current %}<span class="material-symbols-outlined shrink-0 text-[18px] text-brand">check</span>{% endif %}
+                </a>
+              {% endfor %}
+            </div>
+            <div class="my-1 border-t border-hairline"></div>
+            <a href="/auth/organizations/new" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-panel hover:text-ink">
+              <span class="material-symbols-outlined text-[18px]">add</span>Create organization
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {% comment %}
+        Primary nav. A page marks the ACTIVE item by overriding its block with `is-active`
+        (e.g. {% block nav_surveys %}is-active{% endblock %}). That sentinel becomes a CSS class
+        on the <a>; the brand left-accent bar, text-brand, and bg-brand/5 are applied via the
+        `is-active:` modifier-free rule defined in head_extra below, which also flips the icon to
+        FILL 1. Idle items show muted text + hover affordances. Each item is one <a>; the only
+        per-page override is the single sentinel block — no Python, no per-item duplication.
+      {% endcomment %}
+      <nav class="flex-1 space-y-1 overflow-y-auto">
+        <a href="{% if tslug %}/{{ tslug }}/{% else %}#{% endif %}"
+           class="nav-item {% block nav_home %}{% endblock %} group flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">home</span>
+          <span class="text-sm">Home</span>
+        </a>
+        <a href="{% if tslug %}/{{ tslug }}/surveys{% else %}#{% endif %}"
+           class="nav-item {% block nav_surveys %}{% endblock %} group flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">analytics</span>
+          <span class="text-sm">Surveys</span>
+        </a>
+        <a href="{% if tslug %}/{{ tslug }}/contacts{% else %}#{% endif %}"
+           class="nav-item {% block nav_contacts %}{% endblock %} group flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">group</span>
+          <span class="text-sm">Contacts</span>
+        </a>
+        <a href="{% if tslug %}/{{ tslug }}/segments{% else %}#{% endif %}"
+           class="nav-item {% block nav_segments %}{% endblock %} group flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">segment</span>
+          <span class="text-sm">Segments</span>
+        </a>
+        <a href="{% if tslug %}/{{ tslug }}/results{% else %}#{% endif %}"
+           class="nav-item {% block nav_results %}{% endblock %} group flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">leaderboard</span>
+          <span class="text-sm">Results</span>
+        </a>
+        <a href="{% if tslug %}/{{ tslug }}/members{% else %}#{% endif %}"
+           class="nav-item {% block nav_team %}{% endblock %} group mt-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">group_add</span>
+          <span class="text-sm">Team</span>
+        </a>
+        <a href="{% if tslug %}/{{ tslug }}/settings{% else %}#{% endif %}"
+           class="nav-item {% block nav_settings %}{% endblock %} group flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted transition-colors hover:bg-surface">
+          <span class="material-symbols-outlined nav-icon group-hover:text-brand">settings</span>
+          <span class="text-sm">Settings</span>
+        </a>
+      </nav>
+
+      {# Footer: user card + logout #}
+      <div class="mt-auto space-y-4 border-t border-hairline pt-6">
+        {# User card + logout (Alpine menu) #}
+        <div class="relative px-2" x-data="{ open: false }">
+          <button @click="open = !open" class="group flex w-full items-center gap-3 text-left">
+            {% if request.user.avatar %}
+              <img src="{{ request.user.avatar.url }}" alt="" class="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-hairline" />
+            {% else %}
+            <span class="flex h-8 w-8 items-center justify-center rounded-full border border-hairline bg-brand font-display text-xs font-semibold text-white transition-colors group-hover:border-brand">
+              {{ uname|first|upper }}
+            </span>
+            {% endif %}
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium text-ink">{{ uname }}</span>
+              {% if request.user.email %}<span class="block truncate text-[11px] text-muted">{{ request.user.email }}</span>{% endif %}
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-muted transition-colors group-hover:text-ink">more_vert</span>
+          </button>
+          <div
+            x-show="open"
+            x-cloak
+            @click.outside="open = false"
+            class="absolute bottom-full left-2 right-2 z-10 mb-1 rounded-lg border border-hairline bg-white p-1 shadow-lg"
+          >
+            <a href="{% if tslug %}/{{ tslug }}/account{% else %}#{% endif %}" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-panel hover:text-ink">
+              <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+              Account settings
+            </a>
+            <form method="post" action="/auth/logout">
+              {% csrf_token %}
+              <button type="submit" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted hover:bg-panel hover:text-ink">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                Log out
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    {# ================================================================ #}
+    {#  MAIN COLUMN (offset by the sidebar on lg+)                      #}
+    {# ================================================================ #}
+    <div class="flex min-h-screen flex-1 flex-col lg:ml-[248px]">
+
+      {# Top bar #}
+      <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-hairline bg-white px-4 sm:px-8">
+        <div class="flex items-center gap-3">
+          <button @click="sidebarOpen = true" class="text-muted hover:text-ink lg:hidden" aria-label="Open menu">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <div class="font-display text-xl font-semibold text-ink">{% block topbar_title %}{% endblock %}</div>
+        </div>
+
+        <div class="flex items-center gap-4 sm:gap-6">
+          {# Global search → /<slug>/search?q= (surveys + contacts) #}
+          <form method="get" action="{% if tslug %}/{{ tslug }}/search{% else %}#{% endif %}" class="relative hidden w-64 md:block">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted">search</span>
+            <input
+              type="text"
+              name="q"
+              placeholder="Search surveys, contacts…"
+              class="w-full rounded-full border border-transparent bg-panel py-1.5 pl-9 pr-4 text-sm placeholder-muted transition-all focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            />
+          </form>
+
+          <div class="flex items-center gap-3">
+            {# Primary action #}
+            <a
+              href="{% if tslug %}/{{ tslug }}/surveys?new=1{% else %}#{% endif %}"
+              class="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 font-display text-sm font-medium tracking-wide text-white shadow-sm transition-colors hover:bg-brand-hover"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              New survey
+            </a>
+          </div>
+        </div>
+      </header>
+
+      {# Content region #}
+      <main class="mx-auto w-full max-w-7xl flex-1 bg-surface px-4 py-8 sm:px-8">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% endwith %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% comment %}
+  empty_state.html — centered "nothing here yet" placeholder for empty lists/tables.
+
+  USAGE:
+    {% include "_components/empty_state.html" with icon="ballot" title="No surveys yet" message="Create your first survey to start collecting responses." %}
+    {% include "_components/empty_state.html" with icon="group" title="No contacts" message="Import or add contacts to build segments." action_label="Add contact" action_href="?new=1" %}
+
+  PARAMS:
+    icon         (required) — a Material Symbols Outlined glyph name (e.g. "ballot", "group").
+    title        (required) — the headline.
+    message      (required) — a muted supporting sentence.
+    action_label (optional) — CTA button text. Renders the button only when BOTH this and
+    action_href (optional)    action_href are provided (brand button).
+{% endcomment %}
+<div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-hairline bg-white px-6 py-16 text-center">
+  <span class="material-symbols-outlined mb-3 text-4xl text-muted">{{ icon|default:"inbox" }}</span>
+  <h3 class="font-display text-lg font-semibold text-ink">{{ title }}</h3>
+  <p class="mt-1 max-w-sm text-sm text-muted">{{ message }}</p>
+  {% if action_label and action_href %}
+    <a href="{{ action_href }}"
+       class="mt-5 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+      <span class="material-symbols-outlined text-[18px]">add</span>{{ action_label }}
+    </a>
+  {% endif %}
+</div>

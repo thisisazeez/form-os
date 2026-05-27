@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% comment %}
+  Public survey runtime host page (PLAN §8; ADR-001).
+
+  Served at /{org_slug}/s/{survey_id} (the slug is stripped by TenantSlugMiddleware before
+  the tenant urlconf matches s/<uuid:survey_id>). It is a MINIMAL host: it renders the mount
+  point for the React runtime island (frontend/src/islands/runtime/main.jsx) and injects the
+  survey id + link token + API base + the workspace white-label flag via:
+    - data-* attributes on #opensurvey-runtime (the existing stub reads el.dataset.surveyId;
+      we ADD data-link-token + data-remove-branding + data-config-id), AND
+    - a json_script filter (#opensurvey-runtime-config) carrying the full config object,
+      which the island can JSON.parse for richer wiring.
+
+  No data side effects here: the island POSTs /public/surveys/{id}/displays on mount, so a
+  preview/bot fetching this HTML does not inflate the view->start->finish funnel.
+{% endcomment %}
+
+{% block title %}{{ survey_name|default:"Survey" }}{% endblock %}
+
+{% block head_extra %}
+  {# django-vite HMR client + React Fast Refresh (only in dev mode). #}
+  {% if vite_built %}
+    {% vite_hmr_client %}
+    {% vite_react_refresh %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {# Full config object for the island (parsed from the json_script tag by id). #}
+  {{ runtime_config|json_script:"opensurvey-runtime-config" }}
+
+  <section>
+    {% comment %}Mount point read by frontend/src/islands/runtime/main.tsx. The island reads these
+       dataset attrs (data-survey-id, data-org-slug, data-link-token, optional data-api-base);
+       the json_script config (#opensurvey-runtime-config) is additive for richer wiring.{% endcomment %}
+    <div
+      id="opensurvey-runtime"
+      data-survey-id="{{ survey_id }}"
+      data-org-slug="{{ runtime_config.orgSlug }}"
+      data-link-token="{{ link_token }}"
+      data-api-base="{{ runtime_config.apiBase }}"
+      data-remove-branding="{{ remove_branding|yesno:"true,false" }}"
+      data-config-id="opensurvey-runtime-config"
+    ></div>
+
+    {% if not vite_built %}
+      <p class="mt-6 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        Survey runtime bundle not built yet. Run
+        <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code>
+        (or set <code>DJANGO_VITE_DEV_MODE=True</code> and <code>npm run dev</code>) to load
+        the runtime island.
+      </p>
+    {% endif %}
+  </section>
+{% endblock %}
+
+{% block body_extra %}
+  {% if vite_built %}
+    {# django-vite injects the hashed runtime bundle from the manifest. #}
+    {% vite_asset "src/islands/runtime/main.tsx" %}
+  {% endif %}
+{% endblock %}

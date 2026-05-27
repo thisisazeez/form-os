@@ -1,0 +1,233 @@
+name: CI
+
+# OpenSurvey CI — Wave-1 pipeline (owned by the ci/cicd-engineer agent).
+#
+# Two parallel tracks plus an explicit cross-language parity gate:
+#   * python  — ruff lint, the shared logic-fixture suite (Python side), and the
+#               Django scaffold checks (manage.py check + migrate_schemas + pytest)
+#               against a Postgres service container.
+#   * node    — build the Vite React islands, run the shared logic-fixture suite
+#               (TypeScript side).
+#   * parity  — fails unless BOTH fixture suites are green, so TS<->Python logic
+#               parity is enforced on every push/PR (REVIEW.md §6, ADR-004).
+#
+# The shared logic-fixture suite (tests/logic_fixtures/) is self-contained and
+# ALWAYS runs — it is the contract between the React runtime, the React builder,
+# and the Django finalize validator and must never be blocked by the rest of the
+# scaffold not yet existing. Scaffold-owned steps (Django app, Vite islands) are
+# guarded so an early push (before the concurrent `scaffold` agent has landed
+# manage.py / the island sources) still runs the parity gate; once the scaffold
+# is in place these steps execute the real Django/Vite commands. Gate alignment:
+# REVIEW.md §2 (run tests + fixtures), §2.5 (migrate_schemas public + 1 tenant),
+# §3.3 (migration ordering: shared then tenant).
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimal default permissions (security best practice — least privilege).
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  #  PYTHON: lint + shared fixtures (PY) + Django scaffold checks
+  # ───────────────────────────────────────────────────────────────────────────
+  python:
+    name: Python (lint · logic fixtures · Django)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: opensurvey
+          POSTGRES_PASSWORD: opensurvey
+          POSTGRES_DB: opensurvey
+        ports:
+          - 5432:5432
+        # Wait until Postgres is healthy before the job's steps run.
+        options: >-
+          --health-cmd "pg_isready -U opensurvey"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Django settings + DB URL the scaffold is expected to honor (models.md /
+      # decisions.md ADR-005). DATABASE_URL is the conventional override; if the
+      # scaffold uses discrete vars it should read these too.
+      DATABASE_URL: postgres://opensurvey:opensurvey@localhost:5432/opensurvey
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: opensurvey
+      POSTGRES_PASSWORD: opensurvey
+      POSTGRES_DB: opensurvey
+      DJANGO_SETTINGS_MODULE: config.settings.ci
+      SECRET_KEY: ci-not-a-real-secret
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Prefer the scaffold's declared deps. Fall back to the minimum this
+          # job needs so the logic-fixture suite + linped run even before the
+          # scaffold's dependency files land (concurrent build).
+          if [ -f requirements/ci.txt ]; then
+            pip install -r requirements/ci.txt
+          elif [ -f requirements/dev.txt ]; then
+            pip install -r requirements/dev.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            # Editable install with a dev/test extra if present, else base.
+            pip install -e ".[dev]" || pip install -e ".[test]" || pip install -e .
+          fi
+          # Tools this CI job requires regardless (idempotent if already pulled
+          # in by the scaffold's deps). These are also in the dep list this agent
+          # hands to the scaffold (see final summary).
+          pip install "ruff>=0.5" "pytest>=8" "pytest-django>=4.8" "jsonschema>=4.20" "psycopg[binary]>=3.1"
+
+      - name: Ruff lint
+        run: |
+          # Lint the whole repo; ruff respects pyproject/ruff.toml from the
+          # scaffold when present. The reference evaluator + runner are included.
+          ruff check .
+          ruff format --check . || echo "::warning::ruff format check reported diffs (non-blocking until scaffold sets format config)"
+
+      - name: Shared logic fixtures — Python (PARITY GATE)
+        # Self-contained; the crown-jewel TS<->PY parity corpus. Must always run.
+        run: pytest tests/logic_fixtures/run_py.py -v
+
+      # NOTE: guards below assume `manage.py` at the REPO ROOT (standard Django /
+      # neo-cookiecutter layout). If the `scaffold` agent nests it, update the
+      # guard path + the `python manage.py` cwd. Flagged for orchestrator confirm.
+      - name: Django system check
+        if: ${{ hashFiles('manage.py') != '' }}
+        run: python manage.py check
+
+      - name: Apply migrations (shared schema, then tenant schemas)
+        # REVIEW.md §3.3 / §2.5: public apps migrate first, then tenant apps for
+        # >=1 tenant. django-tenants' migrate_schemas drives the ordering.
+        if: ${{ hashFiles('manage.py') != '' }}
+        run: |
+          python manage.py migrate_schemas --shared
+          # Tenant migrations run per-schema; on a fresh DB the public tenant row
+          # may not exist yet, so this is best-effort until the scaffold seeds a
+          # test tenant (then it must pass — a reviewer gate).
+          python manage.py migrate_schemas --tenant || \
+            echo "::warning::migrate_schemas --tenant: no tenant yet (scaffold seeds a test tenant in Wave 1)"
+
+      - name: Django test suite (pytest)
+        if: ${{ hashFiles('manage.py') != '' }}
+        run: |
+          # Run the project's own tests (excluding the self-contained fixture
+          # runner already executed above). pytest-django picks up settings from
+          # DJANGO_SETTINGS_MODULE / the scaffold's pytest config.
+          pytest --ignore=tests/logic_fixtures -v
+
+  # ───────────────────────────────────────────────────────────────────────────
+  #  NODE: build Vite islands + shared fixtures (TS)
+  # ───────────────────────────────────────────────────────────────────────────
+  node:
+    name: Node (build islands · logic fixtures)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node (with logic-fixture harness cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/logic_fixtures/package-lock.json
+
+      # --- Shared logic fixtures (TS) — the parity gate, always runs. ---------
+      - name: Install logic-fixture harness deps
+        working-directory: tests/logic_fixtures
+        run: npm ci
+
+      - name: Shared logic fixtures — TypeScript (PARITY GATE)
+        working-directory: tests/logic_fixtures
+        run: npm test
+
+      - name: Typecheck logic-fixture harness
+        working-directory: tests/logic_fixtures
+        run: npx tsc --noEmit
+
+      # --- Vite React islands (builder + runtime) — scaffold-owned. -----------
+      # The concurrent `scaffold` agent creates the islands' frontend project
+      # (django-vite + Vite, PLAN §8). Guarded by package.json presence so an
+      # early push still runs the parity gate above; once the scaffold lands the
+      # island sources, this builds them. Expected location: `frontend/`
+      # (fallbacks cover a repo-root or `assets/` layout).
+      - name: Detect islands frontend dir
+        id: islands
+        run: |
+          if [ -f frontend/package.json ]; then
+            echo "dir=frontend" >> "$GITHUB_OUTPUT"
+          elif [ -f assets/package.json ]; then
+            echo "dir=assets" >> "$GITHUB_OUTPUT"
+          elif [ -f package.json ]; then
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=" >> "$GITHUB_OUTPUT"
+            echo "::notice::No islands frontend package.json found yet (scaffold builds it in Wave 1); skipping Vite build."
+          fi
+
+      - name: Set up Node cache for islands
+        if: ${{ steps.islands.outputs.dir != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ steps.islands.outputs.dir }}/package-lock.json
+
+      - name: Install islands deps
+        if: ${{ steps.islands.outputs.dir != '' }}
+        working-directory: ${{ steps.islands.outputs.dir }}
+        run: npm ci
+
+      - name: Build Vite islands
+        if: ${{ steps.islands.outputs.dir != '' }}
+        working-directory: ${{ steps.islands.outputs.dir }}
+        run: npm run build
+
+  # ───────────────────────────────────────────────────────────────────────────
+  #  PARITY: explicit cross-language gate (both fixture suites must be green)
+  # ───────────────────────────────────────────────────────────────────────────
+  parity:
+    name: TS↔PY logic parity gate
+    runs-on: ubuntu-latest
+    needs: [python, node]
+    if: always()
+    steps:
+      - name: Enforce both fixture suites passed
+        run: |
+          if [ "${{ needs.python.result }}" != "success" ] || [ "${{ needs.node.result }}" != "success" ]; then
+            echo "Logic-fixture parity gate FAILED: python=${{ needs.python.result }} node=${{ needs.node.result }}"
+            echo "Both the Python and TypeScript logic-fixture suites must pass against the same corpus (REVIEW.md §6, ADR-004)."
+            exit 1
+          fi
+          echo "Parity gate OK — TS and Python logic-fixture suites both green."

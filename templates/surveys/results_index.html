@@ -1,0 +1,52 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Results index. `/<org_slug>/results` — apps.surveys.views_htmx.survey_results_index. The sidebar
+  "Results" landing: lists the org's surveys (scoped to readable workspaces) with response count +
+  completion, each row linking to that survey's detailed results page (surveys/<id>/results).
+  Context: org, org_slug, surveys (list of dicts: id, name, display_status, status, response_count,
+  completion).
+{% endcomment %}
+
+{% block title %}Results — {{ org.name }}{% endblock %}
+{% block nav_results %}is-active{% endblock %}
+{% block topbar_title %}Results{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Results" subtitle="Response analytics across your surveys. Open a survey to see its detailed results." %}
+
+  {% if surveys %}
+    <div class="mt-6 overflow-hidden rounded-xl border border-hairline bg-white shadow-sm">
+      <table class="min-w-full divide-y divide-hairline text-sm">
+        <thead class="bg-panel/50 text-left">
+          <tr>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Survey</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Status</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Responses</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Completion</th>
+            <th class="px-6 py-4"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {% for s in surveys %}
+            <tr class="transition-colors hover:bg-panel/30">
+              <td class="px-6 py-4 font-medium text-ink">{{ s.name }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center rounded-md border border-hairline bg-panel px-2.5 py-1 text-xs font-medium text-ink">{{ s.display_status }}</span>
+              </td>
+              <td class="px-6 py-4 text-ink">{{ s.response_count }}</td>
+              <td class="px-6 py-4 text-muted">{% if s.completion is not None %}{{ s.completion }}%{% else %}—{% endif %}</td>
+              <td class="px-6 py-4 text-right">
+                <a href="/{{ org_slug }}/surveys/{{ s.id }}/results"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+                  <span class="material-symbols-outlined text-[16px]">bar_chart</span>View results
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "_components/empty_state.html" with icon="bar_chart" title="No results yet" message="Create and publish a survey to start collecting responses." action_label="New survey" action_href="/"|add:org_slug|add:"/surveys?new=1" %}
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="antialiased text-base" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Organization Settings</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fef5f2',
+                            100: '#fce8e1',
+                            500: '#0d9488',
+                            600: '#0f766e',
+                        },
+                        accent: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            dark: '#222b27',
+                            mid: '#444444',
+                            light: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        divider: 'rgba(34, 43, 39, 0.10)'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 24px -2px rgba(34, 43, 39, 0.04), 0 0 2px rgba(34, 43, 39, 0.08)',
+                        'float': '0 12px 32px -4px rgba(34, 43, 39, 0.08), 0 4px 12px -2px rgba(34, 43, 39, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface-page text-ink-mid font-body min-h-screen overflow-x-hidden selection:bg-brand-100 selection:text-brand-500">
+<!-- JSON Component: SideNavBar -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-white dark:bg-zinc-900 shadow-sm border-r border-[#222b27]/10 z-20">
+<div class="flex flex-col h-full p-4">
+<!-- Brand Header -->
+<div class="flex items-center gap-3 px-2 py-4 mb-6">
+<div class="w-8 h-8 rounded-lg bg-brand-500 text-white flex items-center justify-center font-headline font-bold text-xl shadow-inner">
+                    C
+                </div>
+<div>
+<h1 class="text-2xl font-headline font-bold text-[#0d9488] tracking-tight leading-none">OpenSurvey</h1>
+<span class="text-xs font-label text-ink-light">Workspace Admin</span>
+</div>
+</div>
+<!-- CTA -->
+<button class="mb-8 w-full bg-brand-500 hover:bg-brand-600 text-white font-headline font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-200 active:scale-95 flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-lg">add</span>
+                Create Survey
+            </button>
+<!-- Navigation Links -->
+<ul class="flex-1 space-y-1">
+<!-- Home -->
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">home</span>
+<span class="font-label text-sm font-medium">Home</span>
+</a></li>
+<!-- Surveys -->
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">poll</span>
+<span class="font-label text-sm font-medium">Surveys</span>
+</a></li>
+<!-- Contacts -->
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">contacts</span>
+<span class="font-label text-sm font-medium">Contacts</span>
+</a></li>
+<!-- Segments -->
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">groups</span>
+<span class="font-label text-sm font-medium">Segments</span>
+</a></li>
+<!-- Results -->
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">leaderboard</span>
+<span class="font-label text-sm font-medium">Results</span>
+</a></li>
+<!-- Team -->
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">group_add</span>
+<span class="font-label text-sm font-medium">Team</span>
+</a></li>
+<!-- Settings (ACTIVE) -->
+<li><a class="flex items-center gap-3 px-4 py-2 bg-[#faf8f7] dark:bg-zinc-800 text-[#0d9488] font-semibold rounded-lg scale-98 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px] icon-fill">settings</span>
+<span class="font-label text-sm font-medium">Settings</span>
+</a></li>
+</ul>
+<!-- Footer Links -->
+<div class="pt-4 border-t border-divider mt-auto">
+<ul class="space-y-1">
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-label text-sm font-medium">Help</span>
+</a></li>
+<li><a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-zinc-400 hover:text-[#0d9488] transition-colors hover:bg-[#faf8f7] dark:hover:bg-zinc-800 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-label text-sm font-medium">Sign Out</span>
+</a></li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- JSON Component: TopNavBar -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-[#222b27]/10 z-10">
+<div class="flex justify-between items-center px-8 h-full w-full">
+<!-- Contextual Navigation (Using TopNav links as settings tabs) -->
+<nav class="flex items-end h-full pt-4 gap-8">
+<a class="text-[#666] dark:text-zinc-400 hover:text-[#0d9488] pb-4 transition-colors font-headline text-sm font-medium" href="#">General</a>
+<a class="text-[#666] dark:text-zinc-400 hover:text-[#0d9488] pb-4 transition-colors font-headline text-sm font-medium" href="#">Members</a>
+<!-- Billing (ACTIVE) -->
+<a class="text-[#0d9488] font-semibold border-b-2 border-[#0d9488] pb-4 font-headline text-sm" href="#">Billing</a>
+<a class="text-[#666] dark:text-zinc-400 hover:text-[#0d9488] pb-4 transition-colors font-headline text-sm font-medium" href="#">Usage</a>
+<a class="text-[#666] dark:text-zinc-400 hover:text-[#0d9488] pb-4 transition-colors font-headline text-sm font-medium" href="#">Audit log</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button class="text-ink-light hover:text-brand-500 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-ink-light hover:text-brand-500 transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-panel overflow-hidden border border-divider cursor-pointer hover:ring-2 ring-brand-500 ring-offset-2 transition-all">
+<!-- Placeholder avatar -->
+<div class="w-full h-full bg-brand-100 flex items-center justify-center text-brand-500 font-bold text-xs">U</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="max-w-5xl mx-auto p-8 space-y-8">
+<!-- Breadcrumbs / Page Title -->
+<div class="flex items-center gap-2 text-sm font-body text-ink-light">
+<span>Settings</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="font-medium text-ink-dark">Billing</span>
+</div>
+<!-- Reassurance Banner -->
+<div class="bg-[#fef5f2] border border-[#fce8e1] rounded-xl p-4 flex items-start sm:items-center justify-between gap-4 shadow-sm relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-brand-500/5 to-transparent pointer-events-none"></div>
+<div class="flex items-center gap-3 relative z-10">
+<div class="bg-brand-500 text-white p-1.5 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px] icon-fill">verified_user</span>
+</div>
+<div>
+<p class="font-body text-ink-dark font-medium">You're on the free, self-hosted plan — unlimited everything.</p>
+</div>
+</div>
+<a class="text-brand-500 hover:text-brand-600 font-medium text-sm whitespace-nowrap flex items-center gap-1 relative z-10 transition-colors group" href="#">
+                    Learn more about open source
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+<!-- Bento Grid Layout for Settings -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Current Plan Card -->
+<div class="bg-surface-card rounded-2xl shadow-soft border border-divider p-6 flex flex-col hover:-translate-y-0.5 transition-transform duration-300">
+<h2 class="font-headline font-semibold text-ink-dark text-lg mb-1">Current Plan</h2>
+<p class="text-sm text-ink-light mb-6">Manage your workspace subscription.</p>
+<div class="flex-1 space-y-4">
+<div class="flex items-end justify-between">
+<div>
+<div class="text-2xl font-display font-bold text-ink-dark">Self-hosted Free</div>
+<div class="text-sm text-ink-light mt-1">Renews: Never</div>
+</div>
+<div class="text-right">
+<span class="text-3xl font-display font-bold text-brand-500">$0</span><span class="text-ink-light">/mo</span>
+</div>
+</div>
+<div class="h-px w-full bg-divider my-4"></div>
+<ul class="space-y-3 mb-6">
+<li class="flex items-center gap-2 text-sm text-ink-mid">
+<span class="material-symbols-outlined text-success text-[18px]">check_circle</span>
+                                Unlimited surveys
+                            </li>
+<li class="flex items-center gap-2 text-sm text-ink-mid">
+<span class="material-symbols-outlined text-success text-[18px]">check_circle</span>
+                                Unlimited responses
+                            </li>
+<li class="flex items-center gap-2 text-sm text-ink-mid">
+<span class="material-symbols-outlined text-success text-[18px]">check_circle</span>
+                                API access included
+                            </li>
+</ul>
+</div>
+<button class="w-full py-2.5 px-4 border border-divider rounded-lg font-headline font-medium text-ink-dark hover:bg-surface-panel hover:border-ink-dark/20 transition-all duration-200 active:scale-95">
+                        Manage plan
+                    </button>
+</div>
+<!-- Usage Meters Card -->
+<div class="bg-surface-card rounded-2xl shadow-soft border border-divider p-6 lg:col-span-2 flex flex-col hover:-translate-y-0.5 transition-transform duration-300">
+<h2 class="font-headline font-semibold text-ink-dark text-lg mb-1">Usage this billing cycle</h2>
+<p class="text-sm text-ink-light mb-8">Metrics update every few minutes.</p>
+<div class="space-y-6 flex-1">
+<!-- Meter 1 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-medium text-sm text-ink-dark">Responses this month</span>
+<span class="text-sm font-medium text-ink-mid">2,450 <span class="text-ink-light font-normal">/ Unlimited</span></span>
+</div>
+<div class="h-2 w-full bg-surface-panel rounded-full overflow-hidden">
+<div class="h-full bg-brand-500 rounded-full w-[15%]" style="transition: width 1s ease-out;"></div>
+</div>
+</div>
+<!-- Meter 2 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-medium text-sm text-ink-dark">Contacts</span>
+<span class="text-sm font-medium text-ink-mid">1,248 <span class="text-ink-light font-normal">/ Unlimited</span></span>
+</div>
+<div class="h-2 w-full bg-surface-panel rounded-full overflow-hidden">
+<div class="h-full bg-accent rounded-full w-[8%]" style="transition: width 1s ease-out;"></div>
+</div>
+</div>
+<!-- Meter 3 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-medium text-sm text-ink-dark">Seats used</span>
+<span class="text-sm font-medium text-ink-mid">3 <span class="text-ink-light font-normal">/ Unlimited</span></span>
+</div>
+<div class="h-2 w-full bg-surface-panel rounded-full overflow-hidden">
+<div class="h-full bg-success rounded-full w-[2%]" style="transition: width 1s ease-out;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment Method & Invoices List Stack -->
+<div class="bg-surface-card rounded-2xl shadow-soft border border-divider overflow-hidden">
+<!-- Payment Method Header Row -->
+<div class="p-6 border-b border-divider flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-surface-page/50">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-panel flex items-center justify-center text-ink-light border border-divider">
+<span class="material-symbols-outlined">credit_card</span>
+</div>
+<div>
+<h3 class="font-headline font-semibold text-ink-dark">Payment Method</h3>
+<p class="text-sm text-ink-light mt-0.5">No payment method on file.</p>
+</div>
+</div>
+<button class="py-2 px-4 bg-surface-panel hover:bg-divider border border-divider rounded-lg font-headline font-medium text-ink-dark text-sm transition-all duration-200 flex items-center gap-2 active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        Add card
+                    </button>
+</div>
+<!-- Invoices Table -->
+<div class="p-0">
+<div class="px-6 py-5 border-b border-divider">
+<h3 class="font-headline font-semibold text-ink-dark text-lg">Recent Invoices</h3>
+</div>
+<!-- Empty State / No Invoices (Since it's a free plan, we'll show a beautifully styled empty state, or example zero-dollar rows) -->
+<!-- Let's show zero-dollar rows to meet the prompt's request for "3-4 example rows" -->
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="text-ink-light bg-surface-page/30 border-b border-divider">
+<tr>
+<th class="px-6 py-3 font-medium">Date</th>
+<th class="px-6 py-3 font-medium">Amount</th>
+<th class="px-6 py-3 font-medium">Status</th>
+<th class="px-6 py-3 font-medium text-right">Receipt</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-divider">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-page/50 transition-colors group">
+<td class="px-6 py-4 text-ink-dark font-medium">Oct 1, 2023</td>
+<td class="px-6 py-4 text-ink-mid">$0.00</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                            Paid
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-light hover:text-brand-500 transition-colors p-1 rounded hover:bg-surface-panel opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-page/50 transition-colors group">
+<td class="px-6 py-4 text-ink-dark font-medium">Sep 1, 2023</td>
+<td class="px-6 py-4 text-ink-mid">$0.00</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                            Paid
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-light hover:text-brand-500 transition-colors p-1 rounded hover:bg-surface-panel opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-page/50 transition-colors group">
+<td class="px-6 py-4 text-ink-dark font-medium">Aug 1, 2023</td>
+<td class="px-6 py-4 text-ink-mid">$0.00</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                            Paid
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-light hover:text-brand-500 transition-colors p-1 rounded hover:bg-surface-panel opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Danger Zone (Requested in sub-nav, good to have a visual anchor at bottom of settings) -->
+<div class="mt-12 border-t border-divider pt-8">
+<h3 class="font-headline font-semibold text-[#dc2626] text-lg mb-2">Danger Zone</h3>
+<p class="text-sm text-ink-light mb-4">Irreversible actions for your workspace.</p>
+<div class="border border-[#dc2626]/20 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#fef2f2]/50">
+<div>
+<h4 class="font-medium text-ink-dark">Delete Workspace</h4>
+<p class="text-sm text-ink-light mt-1">Permanently remove your workspace and all its data. This cannot be undone.</p>
+</div>
+<button class="py-2 px-4 bg-white border border-[#dc2626]/30 hover:bg-[#dc2626] hover:text-white hover:border-[#dc2626] text-[#dc2626] rounded-lg font-headline font-medium text-sm transition-all duration-200 shadow-sm active:scale-95 whitespace-nowrap">
+                        Delete Workspace
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#faf8f7]" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Teams &amp; Access Control - OpenSurvey</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            heading: '#222b27',
+                            body: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            bg: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: 'rgba(34,43,39,0.10)'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(34,43,39,0.05)',
+                        'elevated': '0 10px 30px -5px rgba(34,43,39,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Outfit', sans-serif; }
+    </style>
+</head>
+<body class="h-full flex overflow-hidden text-ink-body bg-surface-bg">
+<!-- SideNavBar (JSON Component) -->
+<nav class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-neutral-900 shadow-xl dark:shadow-none flex flex-col py-6 px-4 gap-2 z-50">
+<div class="mb-8 px-4">
+<span class="text-2xl font-headline font-bold text-[#0d9488] dark:text-[#0f766e]">OpenSurvey</span>
+<div class="font-body text-sm font-medium text-ink-muted mt-1">Enterprise Admin</div>
+</div>
+<div class="flex-1 overflow-y-auto flex flex-col gap-1 font-body text-sm font-medium Headlines: font-headline font-bold">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 transition-colors duration-200 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 transition-colors duration-200 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="poll">poll</span>
+<span>Surveys</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 transition-colors duration-200 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 transition-colors duration-200 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="segment">segment</span>
+<span>Segments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 transition-colors duration-200 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Results</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#0d9488] bg-[#f2f4ef] dark:bg-neutral-800 font-bold scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span>Team</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 transition-colors duration-200 scale-95 active:scale-90 transition-transform mt-auto" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar (JSON Component) -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-white dark:bg-neutral-900 border-b border-neutral-100 dark:border-neutral-800 shadow-sm flex justify-between items-center px-8 z-40 font-body text-sm transition-all duration-200 ease-out">
+<div class="flex items-center">
+<!-- Search left -->
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm">search</span>
+<input class="pl-9 pr-4 py-2 bg-surface-panel border-transparent rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm w-64 transition-colors" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-[#666] dark:text-neutral-400">
+<button class="hover:text-[#0d9488] transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="hover:text-[#0d9488] transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="hover:text-[#0d9488] transition-colors font-medium">Support</button>
+</div>
+<button class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-transform scale-100 active:scale-95 shadow-sm">
+                Create Survey
+            </button>
+<div class="w-8 h-8 rounded-full bg-surface-panel overflow-hidden border border-border">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYc2IwEiVad0uEKZhtm_78hdwh1Jo66YXPxmouCtKkmBtbeDp5Cq21_UwivWC8ZR3kf0jiGJNNUA4Sfq65aEjNI4N3XWYSrL74PQf_EGbP0VsvozJIcn0v1Xzn2RBV1gnKpZKiCE7XhCEnRZ-nT_YNr3LK-qchZplKge3Z4FW23TNGbipCTBf9ELEplHUtFbQBhTWIpNsr-wLia0tntcCSvIAy34rizcE4NdQhcuo17P150BF8WbiaPRXWAo1StV9hXevUQAaUIChk"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 mt-16 flex-1 overflow-y-auto p-8 h-[calc(100vh-4rem)]">
+<!-- Page Header -->
+<div class="mb-8">
+<h1 class="text-3xl font-headline font-semibold text-ink-heading mb-2">Teams &amp; Access Control</h1>
+<p class="text-ink-muted text-base max-w-2xl">Manage organizational roles, team compositions, and granular workspace permissions across different survey environments.</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-8 items-start">
+<!-- Left Sidebar (Teams List) -->
+<aside class="w-full lg:w-72 flex-shrink-0 bg-surface-card rounded-xl shadow-soft border border-border overflow-hidden">
+<div class="px-5 py-4 border-b border-border flex justify-between items-center bg-white">
+<h2 class="font-headline font-semibold text-ink-heading text-lg">Teams</h2>
+<span class="text-xs bg-surface-panel text-ink-muted px-2 py-1 rounded-full font-medium">4 Active</span>
+</div>
+<div class="flex flex-col py-2">
+<!-- Team Item 1 -->
+<button class="flex items-center justify-between px-5 py-3 hover:bg-surface-panel transition-colors text-left group border-l-4 border-transparent">
+<div>
+<div class="font-medium text-ink-heading group-hover:text-primary transition-colors">Research</div>
+<div class="text-xs text-ink-muted mt-1">5 members</div>
+</div>
+<div class="flex -space-x-2">
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb664KuxLKInQq-nDFQGQvjBfQ3kuzIrff8k39smfQ0opwbnlFVOmZyJqRl4eM0y7Bsy4HUUbJxRjmACoAS4KrnN4QrR2wShnShd1yy4vto2zLYsCjiw0OCwdIRhzHeMqEcNQhGvv8_O37wRcYLHnZv1PXP98DUUsIawedPk2jZdyn7mfhyA99Ra52ZpNl1UEAXNIQ_AYHrnBAy_kew9xmDhTO7kjphW2mWFlRGg-LjL74-WKoq-K9JfG6oPJnhguzZnWfJFBUH_UG"/>
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5nHHqKpbsEeVxWsYcFalFABDWMyajdSOxAvzwSRDHs-U0iLh5DIvUPHtoPlfC4bno38UUA3Y2g4RRBkkkfGR975ko1zDAXrmZP6CnWq8vHSTo94AdhWp9dBQhuSHsWOWRewkqJOZk9j6mc1zPEU6RgxdbY73Tt3PszEM18EERO2XNfBXD0O9VPnXPKV2ddxpjyVbw-zk4W_DRkrzSz0IPTuMvibffi9uKuNhw-K84p2Ln_luhxE4FspDi9BY-r9NDek7WAbtmwdbp"/>
+<div class="w-6 h-6 rounded-full border border-white bg-surface-panel text-[10px] flex items-center justify-center font-medium text-ink-muted">+3</div>
+</div>
+</button>
+<!-- Team Item 2 (Selected) -->
+<button class="flex items-center justify-between px-5 py-3 bg-surface-panel text-left group border-l-4 border-primary">
+<div>
+<div class="font-medium text-primary">Marketing</div>
+<div class="text-xs text-ink-muted mt-1">3 members</div>
+</div>
+<div class="flex -space-x-2">
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4m_VG6u9CaawnoEFdxNQZPeGXn67yYan_FCvqdAqxdVJ8LdgwzHGn10waWBAC-Sk5RVV633tAjraAScokAplQaj9fj-UmPblVtpOWWVVRd-0Ctw1L3nPKSWgsdb-PRM3H7HQI3FUf8lvyk_B3zrygJlJp5bMQ9d-VkkWOd95qQdPV7zgTRHLo5FJZD66xN0MTsY8UiC2fe4I5VNmsGb1xNohfSIvfrvLa7KHreio2Sb06s_ufh-vEILvMSuJtPlTql25aJAqnmvLH"/>
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQQt7CJP-Baz93GglgZjSjEgFeuRGc6PYmzL8_Lgagi2RGDVu4yuw4-lUkpJHpm9dTCCqVoF3FCxeLsMOm4ZV0uQratON-wCP6-rmjS2fEW6gITCsRy2NTCUDS4oZx7cI5UOPp9xNtKR4lLdbuTEWz_HZLmk6ZoIOmCKEoecpPhXqhoJ1YKe7JFqs2HmHrUe6GFnUIMZzRcuxLYK__wKtwihnko4GXkbpeRCX-H_k640cLesFPjmiOKYYUw7PenH6nE4PgybdeHWzO"/>
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkKRZcgsQdUieQO-PVG6bVmF2JFRmAyMowW-5oep2ZKAqs-gY2D11R91plTcgFV1f20vQexNTzC96aHBD2rZkjprpgOzpSqILWd_KWfNn9wgQ6je33gANzG_Rf8xL4NwKMOhQbB5HWvRmhhEnrGrXCU_C_fGwFhnL7GlpesvNreCcUrQXuiswIvHnoXEjCn81IH5qk5fwIBaqyPQKq-eno1CL2Gy5mX6KsOTFiRv8iXyl3bpa2YAAUGg8hQ-KdKVmAiqY5hXiNdlOJ"/>
+</div>
+</button>
+<!-- Team Item 3 -->
+<button class="flex items-center justify-between px-5 py-3 hover:bg-surface-panel transition-colors text-left group border-l-4 border-transparent">
+<div>
+<div class="font-medium text-ink-heading group-hover:text-primary transition-colors">Product</div>
+<div class="text-xs text-ink-muted mt-1">8 members</div>
+</div>
+<div class="flex -space-x-2">
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFJnjokF_ra--cvwx88Byvy6D94cGLiz-bl_ZZ7XnOGUxUnqwUQJTtxesMIZyeUlTxL-5uqAEjaAaizUftl8cxFYNM49gfdjQhVQThOdsnM9J1rfBfcsZh9LYFjQxpUuN_COL5B-rx6MKrrX5nu0URnyOmVfIvLAa33bP3LaRlOyQlbsS46V7x5nndtt29ZygmBq7ngw_RMZ3Ko0MeDMav8sPfzn0X2g_5f0gjYigPlBHCxEj9TMRUd7RyxmDk0BJAKYcPJGKD5_AT"/>
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqAMnYgGWXftqxKF53S9_8adhu1oZQZwefKDMAr3dXjpHYH7S5VN5M_14gnZ3lmj42pkRTsm-VjNvX28zi5M9y2ql95KYxlkb_At8mgh5RSir9ykSR5uzV5QkhhvMCdURc8Nyu6csxZo8o5Z5RG8691lm8vdG22gjGqT-kjiC9wjJanhNe6u8wXz2M8weecZ6etDo-VNypiYKVPYOUDAgTWvsfG-8mzkiDdLBwHA_uxxeO2mlvRBypS7fT-BaVXL4JmKnv66EgE5N4"/>
+<div class="w-6 h-6 rounded-full border border-white bg-surface-panel text-[10px] flex items-center justify-center font-medium text-ink-muted">+6</div>
+</div>
+</button>
+<!-- Team Item 4 -->
+<button class="flex items-center justify-between px-5 py-3 hover:bg-surface-panel transition-colors text-left group border-l-4 border-transparent">
+<div>
+<div class="font-medium text-ink-heading group-hover:text-primary transition-colors">Customer Success</div>
+<div class="text-xs text-ink-muted mt-1">4 members</div>
+</div>
+<div class="flex -space-x-2">
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4b3ZZyRCE9NUPuHtV0xAL_BkUEQL9Ezu0G4336ruvw_u5_bDhsAha_JrMgnEboIisDnXyFLJtoddLIsQzeTOeKcZJtJnofC6GuFnT3daGIft0ATWaAfCy_l9JwFFyZSNKCgk9rbX3b_Dd5cqLwVVj5mBP1Ru_eQnJXJ4E3KZTjHSjEFNkdkELneV2w9EddCzW8v5esiOeJfWJEgcDV7kbUd9AtbaZP6tGWo1nFfqFOZvSFfjg6WrwE-q6lCqNMYY9Pab6lYF-Tq4i"/>
+<img alt="Member" class="w-6 h-6 rounded-full border border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB32W_Qqbk1AjgwKVznX4nCLf0-xGh-GD_kyeTPvQ4g55L-t72BL-WUr8yNKfAMVkvOH-zFmhRMFLJI3IHx1e9UNnqUqCJK0KcRGxfqcxScxQab8r2wQ1_gPidI5KjYdd2up4vH5VtFKZWdygTVRCU0Mz7KellmBu-RSbbzsL2GpGfMVEByIE7mVFTgGNrincpF-p1cd-W6xWak_qFDX4a6MrkeZk6hWZYxxxSbQKKqdGZauvEW4nJGv5GozbqVWV7U_xMuHHb6XuqI"/>
+<div class="w-6 h-6 rounded-full border border-white bg-surface-panel text-[10px] flex items-center justify-center font-medium text-ink-muted">+2</div>
+</div>
+</button>
+</div>
+<div class="p-4 border-t border-border">
+<button class="w-full py-2 px-4 border border-border border-dashed rounded-lg text-sm font-medium text-ink-body hover:text-primary hover:border-primary hover:bg-surface-panel transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                        New team
+                    </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col gap-6 min-w-0">
+<!-- Members Card -->
+<div class="bg-surface-card rounded-xl shadow-soft border border-border overflow-hidden">
+<div class="px-6 py-5 border-b border-border flex justify-between items-center bg-white">
+<div>
+<h3 class="font-headline font-semibold text-ink-heading text-lg">Marketing Team Members</h3>
+<p class="text-sm text-ink-muted mt-1">Manage users assigned to this team.</p>
+</div>
+<button class="bg-surface-panel hover:bg-gray-100 text-ink-heading px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-border flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="person_add">person_add</span>
+                            Add Member
+                        </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-surface-bg text-ink-muted border-b border-border">
+<tr>
+<th class="px-6 py-3 font-medium">User</th>
+<th class="px-6 py-3 font-medium">Org Role</th>
+<th class="px-6 py-3 font-medium text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<tr class="hover:bg-surface-panel transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Sarah Jenkins profile" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxJpKURke6d7tAdSn5bryS20mVqsxy-QwnFSTVCBGADcvo--GYRLbO5YFi4Wgwx4UZvr9PRKBrxbTgIrH9NHMM9GJScHUfPqebJHiSXRiq9MIy7qNIDpHTXWd06PoJ4WgYj26XHf-I8I6JM7l5_RvAISgCy54HZ7mXgLxrgkT1kgFxvf-j07syQGbz5Vh5fuxCPmvQ98sxHzU7EYtIyIchrtyBjh0900FtxaJhWnuF5QUW5XKlyOe_bIAG7OYlLScNSqRtdPTzwHlf"/>
+<div>
+<div class="font-medium text-ink-heading">Sarah Jenkins</div>
+<div class="text-xs text-ink-muted">sarah.j@company.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                                            Admin
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50">
+<span class="material-symbols-outlined text-lg" data-icon="person_remove">person_remove</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-panel transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Mike Ross profile" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy5P3v53pJqheGoyRUZSYyUiONO0CctRUQ634UYmNIvDSjOUiKETFCsios9vQl0VcYWGb-4X1HDtRtyvgpxvgO6sdxBbZ9ygq75QwWsycLbbmlZjy3hea-Tw1ctl5U2fz5P-7_OfT0VprKHs0BmVp2IINfje7K7ogw95O179zzOQUfhk0RCjCOLEUm0xhvl_H_63VwUrL9xu2o3Mz0Q95x_OfHZ8pqvVQefK21I4ed1cJl60oBG_iCJXkmUOh6yztAEnAHpntY2wti"/>
+<div>
+<div class="font-medium text-ink-heading">Mike Ross</div>
+<div class="text-xs text-ink-muted">m.ross@company.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-panel text-ink-body border border-border">
+                                            Member
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50">
+<span class="material-symbols-outlined text-lg" data-icon="person_remove">person_remove</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-panel transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Emily Chen profile" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ61Pck7hclUimgq6IVR_FH8bV7Sy_Rsb2PHxquqKlQ15kkzIgxAU-2fS3SCC85rqw3ctbsarjR26o6ro4i7z3uTITYNH2Nqn_teJBpEdSMjCg-3HEEy0O77EWDWC2HtEGCj5C8jwJ6XsovAzcxxMu5mruCgYA3ZwzAchp3B-PQLWOG1OIpgzUj6ZdQuOwXvwmwpx71tUs1U_jfBsVZVWSZEJ5cvAzpG1yeuefVjPnslDA6NAoyZHHqUYhWxxXA4fVPKFpxd9Y5vwc"/>
+<div>
+<div class="font-medium text-ink-heading">Emily Chen</div>
+<div class="text-xs text-ink-muted">echen@company.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-panel text-ink-body border border-border">
+                                            Member
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50">
+<span class="material-symbols-outlined text-lg" data-icon="person_remove">person_remove</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Access Matrix Card -->
+<div class="bg-surface-card rounded-xl shadow-soft border border-border overflow-hidden">
+<div class="px-6 py-5 border-b border-border bg-white">
+<h3 class="font-headline font-semibold text-ink-heading text-lg">Workspace Access Matrix</h3>
+<p class="text-sm text-ink-muted mt-1">Configure what the Marketing team can do in each environment.</p>
+</div>
+<div class="p-6">
+<div class="space-y-6">
+<!-- Row 1 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border border-dashed">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+<span class="material-symbols-outlined text-sm" data-icon="public">public</span>
+</div>
+<div>
+<div class="font-medium text-ink-heading">Production</div>
+<div class="text-xs text-ink-muted">Live customer-facing surveys</div>
+</div>
+</div>
+<div class="flex bg-surface-panel p-1 rounded-lg border border-border self-start sm:self-auto">
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">None</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Read</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Write</button>
+<button class="px-3 py-1.5 text-sm rounded-md bg-white shadow-sm text-primary font-medium border border-border/50">Manage</button>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border border-dashed">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined text-sm" data-icon="construction">construction</span>
+</div>
+<div>
+<div class="font-medium text-ink-heading">Staging</div>
+<div class="text-xs text-ink-muted">Pre-production testing area</div>
+</div>
+</div>
+<div class="flex bg-surface-panel p-1 rounded-lg border border-border self-start sm:self-auto">
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">None</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Read</button>
+<button class="px-3 py-1.5 text-sm rounded-md bg-white shadow-sm text-primary font-medium border border-border/50">Write</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Manage</button>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border border-dashed">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-sm" data-icon="science">science</span>
+</div>
+<div>
+<div class="font-medium text-ink-heading">Sandbox</div>
+<div class="text-xs text-ink-muted">Safe exploration and draft area</div>
+</div>
+</div>
+<div class="flex bg-surface-panel p-1 rounded-lg border border-border self-start sm:self-auto">
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">None</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Read</button>
+<button class="px-3 py-1.5 text-sm rounded-md bg-white shadow-sm text-primary font-medium border border-border/50">Write</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Manage</button>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-success">
+<span class="material-symbols-outlined text-sm" data-icon="lock_person">lock_person</span>
+</div>
+<div>
+<div class="font-medium text-ink-heading">Internal Research</div>
+<div class="text-xs text-ink-muted">Employee surveys and HR data</div>
+</div>
+</div>
+<div class="flex bg-surface-panel p-1 rounded-lg border border-border self-start sm:self-auto">
+<button class="px-3 py-1.5 text-sm rounded-md bg-white shadow-sm text-primary font-medium border border-border/50">None</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Read</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Write</button>
+<button class="px-3 py-1.5 text-sm rounded-md text-ink-muted hover:text-ink-heading transition-colors">Manage</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Access Legend -->
+<div class="bg-surface-bg px-6 py-4 border-t border-border">
+<div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-ink-muted">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="block">block</span>
+<span><strong class="font-medium text-ink-body">None:</strong> No visibility</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="visibility">visibility</span>
+<span><strong class="font-medium text-ink-body">Read:</strong> View results only</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="edit">edit</span>
+<span><strong class="font-medium text-ink-body">Write:</strong> Create &amp; edit drafts</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span><strong class="font-medium text-ink-body">Manage:</strong> Full control including deletion and publishing</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

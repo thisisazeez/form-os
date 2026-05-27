@@ -1,0 +1,28 @@
+{% extends "accounts/_auth_base.html" %}
+{% block title %}Check your email — OpenSurvey{% endblock %}
+
+{% comment %}"Verify your email" confirmation (matches designs/stitch/verify-email.png left card).
+   Keeps the "verification link" copy the page test asserts on. Centered card with an envelope
+   icon, brand wordmark + brand-tokened CTA back to login. `email` comes from the signup view.{% endcomment %}
+{% block content %}
+  <div class="mx-auto max-w-md">
+    <div class="rounded-xl border border-hairline bg-white p-8 text-center shadow-sm">
+      <a href="/" class="block font-display text-xl font-bold tracking-tight text-ink">
+        Open<span class="text-brand">Survey</span>
+      </a>
+      <div class="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand/10 text-brand">
+        <span class="material-symbols-outlined text-[32px]">mark_email_unread</span>
+      </div>
+      <h1 class="mt-6 font-display text-2xl font-bold tracking-tight text-ink">Verify your email</h1>
+      <p class="mt-2 text-sm text-muted">
+        We've sent a verification link to <strong class="text-ink">{{ email }}</strong>.
+        Click it to activate your account, then sign in.
+      </p>
+      <a href="{% url 'accounts_htmx:login' %}"
+         class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+        Back to sign in
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+{% endblock %}

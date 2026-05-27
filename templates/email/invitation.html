@@ -1,0 +1,11 @@
+{% extends "email/_base_email.html" %}
+{% block preheader %}You've been invited to join {{ org_name }} on OpenSurvey.{% endblock %}
+{% block content %}
+  <h1 style="margin:0 0 14px; font-size:22px; font-weight:700; color:#222b27;">You're invited to {{ org_name }}</h1>
+  <p style="margin:0 0 4px; font-size:15px; line-height:23px; color:#3f4542;">You've been invited to join <strong>{{ org_name }}</strong> on OpenSurvey as a <strong>{{ role }}</strong>. Accept to start collaborating on surveys, contacts and results.</p>
+  {% include "email/_button.html" with url=link label="Accept invitation" %}
+  <p style="margin:0; font-size:13px; line-height:20px; color:#9aa09d;">Or paste this link into your browser:<br />
+    <a href="{{ link }}" style="color:#3d63dc; word-break:break-all;">{{ link }}</a>
+  </p>
+  <p style="margin:18px 0 0; font-size:13px; line-height:20px; color:#9aa09d;">No OpenSurvey account yet? You'll be able to create one first. This invitation expires on {{ expires }}.</p>
+{% endblock %}

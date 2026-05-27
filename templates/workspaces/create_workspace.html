@@ -1,0 +1,45 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  New workspace. `/<org_slug>/workspaces/new` — apps.workspaces.views_htmx.create_workspace_page
+  (owner/admin only; gated by can(create_workspace)). Posts the workspace name to the SAME
+  services.create_workspace the DRF POST /workspaces uses, which auto-creates the production +
+  development environments. On success the view redirects to the org dashboard.
+
+  Context: org, name_error.
+{% endcomment %}
+
+{% block title %}New workspace — {{ org.name }}{% endblock %}
+{% block topbar_title %}New workspace{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-xl">
+    {% include "_components/page_header.html" with title="Create a workspace" subtitle="Workspaces group your surveys. A production and a development environment are created automatically." %}
+
+    <div class="mt-6 rounded-xl border border-hairline bg-white p-6 shadow-sm">
+      {% if name_error %}
+        <div class="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ name_error }}</div>
+      {% endif %}
+
+      {% comment %}Empty action posts to the current browser URL (keeps the org slug); request.path
+         is slug-stripped by TenantSlugMiddleware and would 404.{% endcomment %}
+      <form method="post" action="" class="space-y-5">
+        {% csrf_token %}
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ink" for="ws_name">Workspace name</label>
+          <input type="text" name="name" id="ws_name" required autofocus
+            placeholder="e.g. Marketing"
+            class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+          <p class="mt-1 text-xs text-muted">You can rename it later; the slug is fixed once created.</p>
+        </div>
+        <div class="flex items-center justify-end gap-3 border-t border-hairline pt-4">
+          <a href="/{{ org.slug }}/"
+            class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</a>
+          <button type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
+            <span class="material-symbols-outlined text-[18px]">add</span>Create workspace
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

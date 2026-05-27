@@ -1,0 +1,417 @@
+[
+  {
+    "name": "operators — openText contains (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": { "default": "Feedback" },
+          "config": { "inputType": "long" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "q1", "operator": "contains", "value": "refund" }, "action": { "type": "jumpTo", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "I want a refund please" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q3" }
+  },
+
+  {
+    "name": "operators — openText startsWith (false -> linear)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": { "default": "Code" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "q1", "operator": "startsWith", "value": "AB" }, "action": { "type": "jumpTo", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "XY123" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" }
+  },
+
+  {
+    "name": "operators — singleSelect isOneOf (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "color",
+          "type": "singleSelect",
+          "headline": { "default": "Favorite color?" },
+          "config": { "choices": [{ "id": "red", "label": { "default": "Red" } }, { "id": "green", "label": { "default": "Green" } }, { "id": "blue", "label": { "default": "Blue" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "color", "operator": "isOneOf", "value": ["red", "blue"] }, "action": { "type": "jumpTo", "target": "warm" } }
+          ]
+        },
+        { "id": "cool", "type": "openText", "headline": { "default": "cool" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "warm", "type": "openText", "headline": { "default": "warm" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "color": "blue" },
+    "currentQuestionId": "color",
+    "expected_next": { "type": "question", "id": "warm" }
+  },
+
+  {
+    "name": "operators — multiSelect includesAll (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "feat",
+          "type": "multiSelect",
+          "headline": { "default": "Which features?" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }, { "id": "c", "label": { "default": "C" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "feat", "operator": "includesAll", "value": ["a", "b"] }, "action": { "type": "jumpTo", "target": "power" } }
+          ]
+        },
+        { "id": "basic", "type": "openText", "headline": { "default": "basic" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "power", "type": "openText", "headline": { "default": "power" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "feat": ["a", "b", "c"] },
+    "currentQuestionId": "feat",
+    "expected_next": { "type": "question", "id": "power" }
+  },
+
+  {
+    "name": "operators — multiSelect includesAny (false -> linear)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "feat",
+          "type": "multiSelect",
+          "headline": { "default": "Which features?" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }, { "id": "c", "label": { "default": "C" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "feat", "operator": "includesAny", "value": ["a", "b"] }, "action": { "type": "jumpTo", "target": "power" } }
+          ]
+        },
+        { "id": "basic", "type": "openText", "headline": { "default": "basic" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "power", "type": "openText", "headline": { "default": "power" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "feat": ["c"] },
+    "currentQuestionId": "feat",
+    "expected_next": { "type": "question", "id": "basic" }
+  },
+
+  {
+    "name": "operators — multiSelect doesNotInclude (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "feat",
+          "type": "multiSelect",
+          "headline": { "default": "Which features?" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }, { "id": "c", "label": { "default": "C" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "feat", "operator": "doesNotInclude", "value": ["b"] }, "action": { "type": "jumpTo", "target": "noB" } }
+          ]
+        },
+        { "id": "hasB", "type": "openText", "headline": { "default": "hasB" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "noB", "type": "openText", "headline": { "default": "noB" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "feat": ["a", "c"] },
+    "currentQuestionId": "feat",
+    "expected_next": { "type": "question", "id": "noB" }
+  },
+
+  {
+    "name": "operators — rating greaterThanOrEqual (boundary true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "stars",
+          "type": "rating",
+          "headline": { "default": "Rate us" },
+          "config": { "range": 5, "scale": "star" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "stars", "operator": "greaterThanOrEqual", "value": 4 }, "action": { "type": "jumpTo", "target": "happy" } }
+          ]
+        },
+        { "id": "unhappy", "type": "openText", "headline": { "default": "unhappy" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "happy", "type": "openText", "headline": { "default": "happy" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "stars": 4 },
+    "currentQuestionId": "stars",
+    "expected_next": { "type": "question", "id": "happy" }
+  },
+
+  {
+    "name": "operators — date before (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "dob",
+          "type": "date",
+          "headline": { "default": "Date of birth" },
+          "config": { "format": "YYYY-MM-DD" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "dob", "operator": "before", "value": "2000-01-01" }, "action": { "type": "jumpTo", "target": "older" } }
+          ]
+        },
+        { "id": "younger", "type": "openText", "headline": { "default": "younger" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "older", "type": "openText", "headline": { "default": "older" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "dob": "1990-06-15" },
+    "currentQuestionId": "dob",
+    "expected_next": { "type": "question", "id": "older" }
+  },
+
+  {
+    "name": "operators — consent isAccepted (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "tos",
+          "type": "consent",
+          "headline": { "default": "Terms" },
+          "config": { "label": { "default": "I agree to the terms" } },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "tos", "operator": "isAccepted" }, "action": { "type": "jumpTo", "target": "proceed" } }
+          ]
+        },
+        { "id": "blocked", "type": "openText", "headline": { "default": "blocked" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "proceed", "type": "openText", "headline": { "default": "proceed" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "tos": true },
+    "currentQuestionId": "tos",
+    "expected_next": { "type": "question", "id": "proceed" }
+  },
+
+  {
+    "name": "conditions — AND connector (both true)",
+    "description": "Jump only if NPS>=9 AND plan==pro. Both hold -> jump.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "plan", "type": "singleSelect", "headline": { "default": "Plan?" }, "config": { "choices": [{ "id": "free", "label": { "default": "Free" } }, { "id": "pro", "label": { "default": "Pro" } }] }, "logic": [] },
+        {
+          "id": "nps",
+          "type": "nps",
+          "headline": { "default": "NPS?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "connector": "and",
+                "conditions": [
+                  { "leftQuestionId": "nps", "operator": "greaterThanOrEqual", "value": 9 },
+                  { "leftQuestionId": "plan", "operator": "equals", "value": "pro" }
+                ]
+              },
+              "action": { "type": "jumpTo", "target": "advocate" }
+            }
+          ]
+        },
+        { "id": "normal", "type": "openText", "headline": { "default": "normal" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "advocate", "type": "openText", "headline": { "default": "advocate" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "plan": "pro", "nps": 10 },
+    "currentQuestionId": "nps",
+    "expected_next": { "type": "question", "id": "advocate" }
+  },
+
+  {
+    "name": "conditions — AND connector (one false -> linear)",
+    "description": "NPS>=9 but plan==free -> AND false -> linear next normal.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "plan", "type": "singleSelect", "headline": { "default": "Plan?" }, "config": { "choices": [{ "id": "free", "label": { "default": "Free" } }, { "id": "pro", "label": { "default": "Pro" } }] }, "logic": [] },
+        {
+          "id": "nps",
+          "type": "nps",
+          "headline": { "default": "NPS?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "connector": "and",
+                "conditions": [
+                  { "leftQuestionId": "nps", "operator": "greaterThanOrEqual", "value": 9 },
+                  { "leftQuestionId": "plan", "operator": "equals", "value": "pro" }
+                ]
+              },
+              "action": { "type": "jumpTo", "target": "advocate" }
+            }
+          ]
+        },
+        { "id": "normal", "type": "openText", "headline": { "default": "normal" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "advocate", "type": "openText", "headline": { "default": "advocate" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "plan": "free", "nps": 10 },
+    "currentQuestionId": "nps",
+    "expected_next": { "type": "question", "id": "normal" }
+  },
+
+  {
+    "name": "conditions — OR connector (one true)",
+    "description": "Jump if NPS<=3 OR churnRisk==yes. churnRisk yes -> jump even though NPS is high.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "churnRisk", "type": "singleSelect", "headline": { "default": "At risk?" }, "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] }, "logic": [] },
+        {
+          "id": "nps",
+          "type": "nps",
+          "headline": { "default": "NPS?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "connector": "or",
+                "conditions": [
+                  { "leftQuestionId": "nps", "operator": "lessThanOrEqual", "value": 3 },
+                  { "leftQuestionId": "churnRisk", "operator": "equals", "value": "yes" }
+                ]
+              },
+              "action": { "type": "jumpTo", "target": "retention" } }
+          ]
+        },
+        { "id": "normal", "type": "openText", "headline": { "default": "normal" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "retention", "type": "openText", "headline": { "default": "retention" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "churnRisk": "yes", "nps": 9 },
+    "currentQuestionId": "nps",
+    "expected_next": { "type": "question", "id": "retention" }
+  },
+
+  {
+    "name": "conditions — nested AND within OR",
+    "description": "Jump if (planActive AND tenureLong) OR vip. planActive AND tenureLong both hold -> jump.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "vip", "type": "consent", "headline": { "default": "VIP?" }, "config": { "label": { "default": "VIP" } }, "logic": [] },
+        { "id": "tenure", "type": "number", "headline": { "default": "Months?" }, "config": {}, "logic": [] },
+        {
+          "id": "active",
+          "type": "consent",
+          "headline": { "default": "Active?" },
+          "config": { "label": { "default": "Active" } },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "connector": "or",
+                "conditions": [
+                  {
+                    "connector": "and",
+                    "conditions": [
+                      { "leftQuestionId": "active", "operator": "isAccepted" },
+                      { "leftQuestionId": "tenure", "operator": "greaterThan", "value": 12 }
+                    ]
+                  },
+                  { "leftQuestionId": "vip", "operator": "isAccepted" }
+                ]
+              },
+              "action": { "type": "jumpTo", "target": "loyal" }
+            }
+          ]
+        },
+        { "id": "standard", "type": "openText", "headline": { "default": "standard" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "loyal", "type": "openText", "headline": { "default": "loyal" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "vip": false, "tenure": 24, "active": true },
+    "currentQuestionId": "active",
+    "expected_next": { "type": "question", "id": "loyal" }
+  },
+
+  {
+    "name": "operators — isSkipped on an optional earlier question (true)",
+    "description": "q2 references whether optional q1 was skipped; q1 absent -> isSkipped true -> jump.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Optional comment" }, "required": false, "config": { "inputType": "short" }, "logic": [] },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": { "default": "q2" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "q1", "operator": "isSkipped" }, "action": { "type": "jumpTo", "target": "q4" } }
+          ]
+        },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q4", "type": "openText", "headline": { "default": "q4" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q2": "answered" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "question", "id": "q4" }
+  },
+
+  {
+    "name": "operators — notEquals on number (true)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "qty",
+          "type": "number",
+          "headline": { "default": "Quantity?" },
+          "config": {},
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "qty", "operator": "notEquals", "value": 0 }, "action": { "type": "jumpTo", "target": "hasItems" } }
+          ]
+        },
+        { "id": "empty", "type": "openText", "headline": { "default": "empty" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "hasItems", "type": "openText", "headline": { "default": "hasItems" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "qty": 3 },
+    "currentQuestionId": "qty",
+    "expected_next": { "type": "question", "id": "hasItems" }
+  }
+]

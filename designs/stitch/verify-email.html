@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Email Verification</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                primary: '#0d9488',
+                primaryHover: '#0f766e',
+                secondary: '#3d63dc',
+                success: '#8ac449',
+                ink: '#222b27',
+                muted: '#666666',
+                pageBg: '#faf8f7',
+                surface: '#ffffff',
+                panel: '#f2f4ef',
+                border: 'rgba(34,43,39,0.10)'
+              }
+            },
+            fontFamily: {
+              headline: ['Outfit', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+            },
+            boxShadow: {
+              soft: '0 10px 40px -10px rgba(34, 43, 39, 0.08)',
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #faf8f7;
+        color: #222b27;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Outfit', sans-serif;
+      }
+      .brand-text {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+    </style>
+</head>
+<body class="min-h-screen bg-brand-pageBg flex flex-col antialiased">
+<!-- No Navigation as per Semantic Shell Mandate (Transactional intent) -->
+<main class="flex-1 flex items-center justify-center p-6 w-full max-w-5xl mx-auto">
+<div class="flex flex-col lg:flex-row items-center justify-center gap-8 w-full">
+<!-- Card 1: Verification Pending -->
+<div class="bg-brand-surface rounded-[12px] shadow-soft p-10 w-full max-w-[440px] flex flex-col items-center text-center transition-transform duration-250 ease-out hover:-translate-y-[2px]">
+<!-- Logo -->
+<div class="brand-text text-2xl mb-8 flex items-center gap-1">
+<span class="text-brand-ink">Open</span><span class="text-brand-primary">Survey</span>
+</div>
+<!-- Illustration -->
+<div class="w-32 h-32 mb-6 rounded-full bg-brand-panel flex items-center justify-center overflow-hidden">
+<img alt="Email Envelope Illustration" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSk6sSTKGnJ6-5SjohzazCLdaeI94djG3gYN9h1ho0mVvXq7PpxWGHS-sSePPcH0ba9s4W44EI-nXTmZf5rC5wOBjWalxW6xp0Pi3JYKrtUPpnwWmBFbkHbckBMTzsZFXNYeJOgo7SJK58IK6EYLdNMqRiiIJxAsJ5uoDcIUenPdjXyTse1m3x-YaWpoJTckDKH9-W_Ybuv-McKLL7Hk0Qi2L8-J9ZMDfWelO8lJo8C6g6XHoaIYqERSKJfano3Vbj3w1zpBVVKDP2"/>
+</div>
+<!-- Content -->
+<h2 class="font-headline font-bold text-2xl text-brand-ink mb-3 tracking-tight">Verify your email</h2>
+<p class="font-body text-brand-muted text-[15px] leading-relaxed mb-8">
+                    We've sent a verification link to <span class="font-medium text-brand-ink">you@acme.com</span>. Click it to activate your account.
+                </p>
+<!-- Actions -->
+<div class="w-full space-y-4">
+<button class="w-full font-body font-medium text-[15px] text-brand-ink bg-transparent border border-brand-border py-3 px-6 rounded-[8px] hover:bg-brand-panel transition-colors duration-200 flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] text-brand-muted group-hover:text-brand-ink transition-colors">refresh</span>
+                        Resend email <span class="text-brand-muted font-normal ml-1">(54s)</span>
+</button>
+<a class="inline-block font-body text-[14px] text-brand-muted hover:text-brand-secondary transition-colors duration-200 underline underline-offset-4 decoration-brand-border hover:decoration-brand-secondary" href="#">
+                        Wrong address? Update it
+                    </a>
+</div>
+</div>
+<!-- Card 2: Success Variant - Compact -->
+<div class="bg-brand-surface rounded-[12px] shadow-soft p-10 w-full max-w-[380px] flex flex-col items-center text-center transition-transform duration-250 ease-out hover:-translate-y-[2px]">
+<!-- Success Icon -->
+<div class="w-20 h-20 mb-6 rounded-full bg-brand-success/10 flex items-center justify-center text-brand-success">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Content -->
+<h2 class="font-headline font-bold text-2xl text-brand-ink mb-8 tracking-tight">Email verified!</h2>
+<!-- Actions -->
+<button class="w-full font-body font-medium text-[15px] text-white bg-brand-primary py-3 px-6 rounded-[8px] hover:bg-brand-primaryHover active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2 shadow-sm">
+                    Continue to dashboard
+                    <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer - Excluded as this is a transactional screen, focusing entirely on the canvas -->
+</body></html>

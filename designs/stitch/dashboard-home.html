@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Dashboard</title>
+<!-- Google Fonts: Outfit (Headline/Display) & Inter (Body/Label) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e',
+                            light: 'rgba(230, 73, 24, 0.05)',
+                        },
+                        secondary: '#3d63dc',
+                        success: {
+                            DEFAULT: '#8ac449',
+                            bg: '#f3f9eb'
+                        },
+                        ink: {
+                            DEFAULT: '#222b27',
+                            secondary: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            DEFAULT: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)',
+                            light: 'rgba(34,43,39,0.05)'
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 24px -4px rgba(34, 43, 39, 0.04), 0 8px 16px -8px rgba(34, 43, 39, 0.02)',
+                        'sm': '0 1px 2px 0 rgba(34, 43, 39, 0.05)',
+                        'hover': '0 10px 32px -4px rgba(34, 43, 39, 0.08), 0 12px 20px -8px rgba(34, 43, 39, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400;
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(34,43,39,0.15); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(34,43,39,0.3); 
+        }
+    </style>
+</head>
+<body class="bg-surface text-ink font-body antialiased flex overflow-x-hidden">
+<!-- JSON Component: SideNavBar -->
+<aside class="bg-[#faf8f7] fixed left-0 top-0 h-screen w-[248px] border-r border-[#222b27]/10 flex flex-col py-6 px-4 z-40">
+<!-- Logo -->
+<div class="px-3 mb-8 flex items-center">
+<span class="text-xl font-bold text-[#222b27] font-headline tracking-tight">Open<span class="text-[#0d9488]">Survey</span></span>
+</div>
+<!-- Workspace Switcher -->
+<button class="mb-6 mx-2 px-3 py-2 bg-white border border-[#222b27]/10 rounded-lg flex items-center justify-between hover:bg-surface-panel transition-colors text-left group">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-primary text-white flex items-center justify-center font-headline font-bold text-xs">
+                    A
+                </div>
+<span class="text-sm font-medium text-ink">Acme Inc</span>
+</div>
+<span class="material-symbols-outlined text-ink-muted group-hover:text-ink transition-colors text-sm">unfold_more</span>
+</button>
+<!-- Navigation Tabs -->
+<nav class="flex-1 space-y-1 overflow-y-auto">
+<!-- Active Tab: Home -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#0d9488] font-semibold border-r-4 border-[#0d9488] bg-[#0d9488]/5 transition-colors group" href="#">
+<span class="material-symbols-outlined icon-fill">home</span>
+<span class="font-label text-sm">Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#f2f4ef] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">analytics</span>
+<span class="font-label text-sm">Surveys</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#f2f4ef] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">group</span>
+<span class="font-label text-sm">Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#f2f4ef] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">segment</span>
+<span class="font-label text-sm">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#f2f4ef] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">leaderboard</span>
+<span class="font-label text-sm">Results</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#f2f4ef] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">group_add</span>
+<span class="font-label text-sm">Team</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#f2f4ef] transition-colors group mt-4" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">settings</span>
+<span class="font-label text-sm">Settings</span>
+</a>
+</nav>
+<!-- Footer Area -->
+<div class="mt-auto pt-6 border-t border-border-light space-y-4">
+<!-- Storage Meter -->
+<div class="bg-surface-card rounded-lg p-3 border border-border-light shadow-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-medium text-ink-secondary">Storage: 80% Full</span>
+<span class="material-symbols-outlined text-[16px] text-ink-muted">cloud</span>
+</div>
+<div class="w-full bg-surface-panel rounded-full h-1.5 mb-2">
+<div class="bg-primary h-1.5 rounded-full" style="width: 80%"></div>
+</div>
+<a class="text-[11px] text-primary hover:text-primary-hover font-medium" href="#">Upgrade plan</a>
+</div>
+<!-- Footer Links -->
+<div class="flex gap-4 px-2">
+<a class="flex items-center gap-1.5 text-ink-muted hover:text-ink transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[16px]">help</span>
+                    Help
+                </a>
+<a class="flex items-center gap-1.5 text-ink-muted hover:text-ink transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[16px]">contact_support</span>
+                    Support
+                </a>
+</div>
+<!-- User Profile Card -->
+<div class="flex items-center gap-3 px-2 pt-2 cursor-pointer group">
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-border-light group-hover:border-primary transition-colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK4i6LhY27jVEgR4sHr_a-G2dmcfrXKUDi8s1_SvZbwiOOj6c0ZiiJF8BuP_58kCaA7h7GwNNBsoakrkkJILLNod5OwFz0_40dq9mndDPjgSuX_Lv6fyJIusg9V78Tw35n45JTDsVKHQeOnx5aYn3EHH5gACyTyhOpN4-c-GikCVd_lk7BOcYpsDHa9ANfql5KsHdh_DBa9YThsUTWFs3U6z1VdudbOslwZB3VRyMLeqmBFoa-5AxODXxAnGqjPorFktd2T_GGSZ-V"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-ink truncate">Mohit Sharma</p>
+<p class="text-[11px] text-ink-muted truncate">mohit@acme.inc</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="ml-[248px] flex-1 flex flex-col min-h-screen relative w-[calc(100%-248px)]">
+<!-- JSON Component: TopAppBar -->
+<header class="bg-white/80 backdrop-blur-md fixed top-0 right-0 left-[248px] h-16 border-b border-[#222b27]/10 shadow-sm flex justify-between items-center px-8 w-[calc(100%-248px)] z-30">
+<!-- Title -->
+<div class="flex items-center">
+<h1 class="text-xl font-headline font-semibold text-ink">Dashboard</h1>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative hidden md:block w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm">search</span>
+<input class="w-full bg-surface-panel border-transparent focus:border-primary focus:ring-1 focus:ring-primary rounded-full py-1.5 pl-9 pr-4 text-sm font-body placeholder-ink-muted transition-all" placeholder="Search surveys, contacts..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="relative p-2 text-ink-secondary hover:text-primary transition-colors rounded-full hover:bg-primary-light">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border border-white"></span>
+</button>
+<button class="bg-primary hover:bg-primary-hover text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm transition-transform scale-100 active:scale-95 flex items-center gap-2 font-headline tracking-wide">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        New survey
+                    </button>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<main class="pt-24 pb-12 px-8 flex-1 w-full max-w-7xl mx-auto space-y-8">
+<!-- Greeting -->
+<div class="animate-fade-in-up" style="animation-duration: 0.4s;">
+<h2 class="text-3xl font-headline font-bold text-ink mb-1">Good morning, Mohit 👋</h2>
+<p class="text-ink-muted font-body text-sm">Here's what's happening across your active surveys.</p>
+</div>
+<!-- Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+<!-- Stat Card 1 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-soft border border-border-light hover:-translate-y-0.5 hover:shadow-hover transition-all duration-200 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<p class="text-sm font-medium text-ink-muted font-label">Active surveys</p>
+<div class="p-1.5 bg-surface-panel rounded-md text-ink-secondary group-hover:text-primary group-hover:bg-primary-light transition-colors">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+</div>
+</div>
+<div class="flex items-end gap-3">
+<h3 class="text-3xl font-headline font-bold text-ink">12</h3>
+<div class="flex items-center gap-1 text-xs font-medium text-success mb-1 bg-success-bg px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+2 this week</span>
+</div>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-soft border border-border-light hover:-translate-y-0.5 hover:shadow-hover transition-all duration-200 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<p class="text-sm font-medium text-ink-muted font-label">Total responses</p>
+<div class="p-1.5 bg-surface-panel rounded-md text-ink-secondary group-hover:text-secondary group-hover:bg-blue-50 transition-colors">
+<span class="material-symbols-outlined text-[20px]">forum</span>
+</div>
+</div>
+<div class="flex items-end gap-3">
+<h3 class="text-3xl font-headline font-bold text-ink">2,450</h3>
+<div class="flex items-center gap-1 text-xs font-medium text-success mb-1 bg-success-bg px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>12%</span>
+</div>
+</div>
+<!-- Tiny decorative sparkline -->
+<div class="absolute bottom-0 right-0 w-24 h-12 opacity-20 pointer-events-none">
+<svg class="w-full h-full stroke-secondary fill-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 100 50">
+<path d="M0 40 Q 20 40, 30 25 T 60 20 T 100 5"></path>
+</svg>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-soft border border-border-light hover:-translate-y-0.5 hover:shadow-hover transition-all duration-200 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<p class="text-sm font-medium text-ink-muted font-label">Avg. completion rate</p>
+<div class="p-1.5 bg-surface-panel rounded-md text-ink-secondary group-hover:text-success group-hover:bg-success-bg transition-colors">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+</div>
+</div>
+<div class="flex items-end gap-3">
+<h3 class="text-3xl font-headline font-bold text-ink">68%</h3>
+<div class="flex items-center gap-1 text-xs font-medium text-success mb-1 bg-success-bg px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>4%</span>
+</div>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-soft border border-border-light hover:-translate-y-0.5 hover:shadow-hover transition-all duration-200 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<p class="text-sm font-medium text-ink-muted font-label">Avg. NPS Score</p>
+<div class="p-1.5 bg-surface-panel rounded-md text-ink-secondary group-hover:text-primary group-hover:bg-primary-light transition-colors">
+<span class="material-symbols-outlined text-[20px]">volunteer_activism</span>
+</div>
+</div>
+<div class="flex items-end gap-3">
+<h3 class="text-3xl font-headline font-bold text-ink">+42</h3>
+<div class="flex items-center gap-1 text-xs font-medium text-ink-muted mb-1 bg-surface-panel px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">horizontal_rule</span>
+<span>Flat</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Complex Layout Grid: Table + Sidebar -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Recent Surveys (Span 2) -->
+<div class="lg:col-span-2 bg-surface-card rounded-2xl shadow-soft border border-border-light flex flex-col overflow-hidden">
+<div class="p-6 border-b border-border-light flex justify-between items-center bg-white">
+<h3 class="font-headline font-semibold text-lg text-ink">Recent Surveys</h3>
+<button class="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors">View all</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-panel/50 border-b border-border-light">
+<th class="px-6 py-4 text-xs font-semibold text-ink-muted uppercase tracking-wider">Survey Name</th>
+<th class="px-6 py-4 text-xs font-semibold text-ink-muted uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-semibold text-ink-muted uppercase tracking-wider text-right">Responses</th>
+<th class="px-6 py-4 text-xs font-semibold text-ink-muted uppercase tracking-wider text-right">Completion</th>
+<th class="px-6 py-4 text-xs font-semibold text-ink-muted uppercase tracking-wider">Updated</th>
+<th class="px-6 py-4 w-12"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-light">
+<tr class="hover:bg-surface-panel/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-ink">Q4 Customer Satisfaction (CSAT)</div>
+<div class="text-xs text-ink-muted mt-0.5">Created by Mohit</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-success-bg text-success border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success mr-1.5"></span> Live
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-headline text-sm text-ink-secondary">1,245</td>
+<td class="px-6 py-4 text-right text-sm">
+<div class="flex items-center justify-end gap-2">
+<span class="font-headline text-ink-secondary">72%</span>
+<div class="w-12 h-1.5 bg-surface-panel rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 72%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-ink-muted">2 hrs ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-panel">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-panel/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-ink">Product Feature Prioritization</div>
+<div class="text-xs text-ink-muted mt-0.5">Created by Sarah</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+<span class="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span> Draft
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-headline text-sm text-ink-secondary">-</td>
+<td class="px-6 py-4 text-right text-sm text-ink-muted">-</td>
+<td class="px-6 py-4 text-sm text-ink-muted">Yesterday</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-panel">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-panel/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-ink">Annual Employee Engagement</div>
+<div class="text-xs text-ink-muted mt-0.5">Created by HR Team</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+<span class="material-symbols-outlined text-[12px] mr-1">lock</span> Closed
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-headline text-sm text-ink-secondary">890</td>
+<td class="px-6 py-4 text-right text-sm">
+<div class="flex items-center justify-end gap-2">
+<span class="font-headline text-ink-secondary">94%</span>
+<div class="w-12 h-1.5 bg-surface-panel rounded-full overflow-hidden">
+<div class="bg-success h-full rounded-full" style="width: 94%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-ink-muted">Oct 12, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-panel">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-panel/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-ink">Website Usability Feedback</div>
+<div class="text-xs text-ink-muted mt-0.5">Created by Design</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-success-bg text-success border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success mr-1.5"></span> Live
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-headline text-sm text-ink-secondary">315</td>
+<td class="px-6 py-4 text-right text-sm">
+<div class="flex items-center justify-end gap-2">
+<span class="font-headline text-ink-secondary">45%</span>
+<div class="w-12 h-1.5 bg-surface-panel rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-ink-muted">Oct 10, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-panel">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-surface-panel/30 border-t border-border-light text-center">
+<button class="text-sm font-medium text-ink-secondary hover:text-ink transition-colors">Load more</button>
+</div>
+</div>
+<!-- Right Column: Secondary Content (Span 1) -->
+<div class="flex flex-col gap-6">
+<!-- Chart Area: Responses Over Time -->
+<div class="bg-surface-card rounded-2xl shadow-soft border border-border-light p-6 h-64 flex flex-col relative overflow-hidden">
+<h3 class="font-headline font-semibold text-sm text-ink mb-1 z-10">Responses over time</h3>
+<p class="text-xs text-ink-muted mb-4 z-10">Last 7 days</p>
+<!-- Abstract Chart Mockup using SVG -->
+<div class="flex-1 w-full relative z-0 mt-2">
+<!-- Grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between border-l border-b border-border-light/50 pb-6 pl-1">
+<div class="w-full border-t border-dashed border-border-light"></div>
+<div class="w-full border-t border-dashed border-border-light"></div>
+<div class="w-full border-t border-dashed border-border-light"></div>
+<div class="w-full border-t border-dashed border-border-light"></div>
+</div>
+<!-- Data Line & Area -->
+<svg class="absolute inset-0 w-full h-full pb-6 pl-1" preserveaspectratio="none" viewbox="0 0 100 100">
+<defs>
+<lineargradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0d9488" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#0d9488" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<polygon fill="url(#areaGradient)" points="0,100 0,60 20,40 40,70 60,30 80,40 100,10 100,100"></polygon>
+<polyline fill="none" points="0,60 20,40 40,70 60,30 80,40 100,10" stroke="#0d9488" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></polyline>
+<!-- Data points -->
+<circle cx="60" cy="30" fill="#fff" r="3" stroke="#0d9488" stroke-width="2"></circle>
+<circle cx="100" cy="10" fill="#fff" r="3" stroke="#0d9488" stroke-width="2"></circle>
+</svg>
+<!-- X Axis Labels -->
+<div class="absolute bottom-0 left-1 right-0 flex justify-between text-[10px] text-ink-muted">
+<span>Mon</span>
+<span>Wed</span>
+<span>Fri</span>
+<span>Sun</span>
+</div>
+</div>
+</div>
+<!-- Activity Feed -->
+<div class="bg-surface-card rounded-2xl shadow-soft border border-border-light flex-1 flex flex-col overflow-hidden">
+<div class="p-5 border-b border-border-light">
+<h3 class="font-headline font-semibold text-sm text-ink">Recent Activity</h3>
+</div>
+<div class="p-5 space-y-6 overflow-y-auto max-h-[300px]">
+<!-- Feed Item -->
+<div class="flex gap-4 relative">
+<div class="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center flex-shrink-0 z-10 border border-white">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+</div>
+<div class="absolute top-8 left-4 w-[1px] h-full bg-border-light -ml-[0.5px]"></div>
+<div>
+<p class="text-sm text-ink">New response on <span class="font-medium">Q4 CSAT</span></p>
+<p class="text-xs text-ink-muted mt-0.5">2m ago</p>
+</div>
+</div>
+<!-- Feed Item -->
+<div class="flex gap-4 relative">
+<div class="w-8 h-8 rounded-full bg-success-bg text-success flex items-center justify-center flex-shrink-0 z-10 border border-white">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+</div>
+<div class="absolute top-8 left-4 w-[1px] h-full bg-border-light -ml-[0.5px]"></div>
+<div>
+<p class="text-sm text-ink"><span class="font-medium">Sarah</span> launched survey</p>
+<p class="text-xs text-ink-muted mt-0.5">Product Feature Prioritization</p>
+<p class="text-xs text-ink-muted mt-0.5">1 hr ago</p>
+</div>
+</div>
+<!-- Feed Item -->
+<div class="flex gap-4 relative">
+<div class="w-8 h-8 rounded-full bg-blue-50 text-secondary flex items-center justify-center flex-shrink-0 z-10 border border-white">
+<span class="material-symbols-outlined text-[16px]">group_add</span>
+</div>
+<!-- No line for last item -->
+<div>
+<p class="text-sm text-ink">New segment created</p>
+<p class="text-xs text-ink-muted mt-0.5">"High Value Customers"</p>
+<p class="text-xs text-ink-muted mt-0.5">3 hrs ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,95 @@
+{% extends "accounts/_auth_base.html" %}
+{% block title %}Sign up — OpenSurvey{% endblock %}
+
+{% comment %}Split layout (matches designs/stitch/signup.png): left form card + right warm
+   brand panel. Extends _auth_base.html but overrides {% block content %} for the split.
+   Fields render via _form_fields.html (SignupForm = name/email/password) so the form contract
+   is intact. The design also shows an "Organization name" field, but SignupForm has no such
+   field — org creation is a separate flow (organizations/create_organization) — so we do NOT
+   add a phantom input (noted in the producer report). The password-strength affordance is a
+   purely-visual Alpine meter bound to the rendered #id_password input (no behavior change).{% endcomment %}
+{% block content %}
+  <div class="mx-auto grid max-w-5xl items-stretch gap-8 lg:grid-cols-2">
+    {# Left: form card #}
+    <div class="flex flex-col justify-center">
+      <div class="mx-auto w-full max-w-md">
+        <a href="{% url 'accounts_htmx:login' %}"
+           class="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back
+        </a>
+        <div class="rounded-xl border border-hairline bg-white p-8 shadow-sm">
+          <a href="/" class="block text-center font-display text-xl font-bold tracking-tight text-ink">
+            Open<span class="text-brand">Survey</span>
+          </a>
+          <h1 class="mt-6 text-center font-display text-2xl font-bold tracking-tight text-ink">Create your account</h1>
+          <p class="mt-1 text-center text-sm text-muted">Start building better surveys today.</p>
+
+          <form class="mt-6" method="post" action="{% url 'accounts_htmx:signup' %}"
+                x-data="{ pw: document.getElementById('id_password')?.value || '' }">
+            {% csrf_token %}
+            <div @input="pw = $event.target.id === 'id_password' ? $event.target.value : pw">
+              {% include "accounts/_form_fields.html" %}
+            </div>
+
+            {# Password-strength affordance (visual only; reflects the typed #id_password value). #}
+            <div class="-mt-2 mb-4" x-show="pw.length > 0" style="display: none;">
+              <div class="flex items-center gap-2">
+                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-panel">
+                  <div class="h-full rounded-full transition-all"
+                       :class="pw.length < 8 ? 'bg-red-500' : (pw.length < 12 ? 'bg-brand' : 'bg-success')"
+                       :style="'width: ' + Math.min(100, pw.length * 8) + '%'"></div>
+                </div>
+                <span class="text-xs font-medium"
+                      :class="pw.length < 8 ? 'text-red-600' : (pw.length < 12 ? 'text-brand' : 'text-success')"
+                      x-text="pw.length < 8 ? 'Weak' : (pw.length < 12 ? 'Good' : 'Strong')"></span>
+              </div>
+            </div>
+
+            <button type="submit"
+              class="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+              Create account
+            </button>
+          </form>
+
+          <p class="mt-4 text-center text-xs text-muted">
+            By signing up you agree to the
+            <a href="#" class="text-brand hover:underline">Terms</a> &amp;
+            <a href="#" class="text-brand hover:underline">Privacy</a>.
+          </p>
+          <div class="my-6 h-px bg-hairline"></div>
+          <p class="text-center text-sm text-muted">
+            Already have an account?
+            <a href="{% url 'accounts_htmx:login' %}"
+               class="font-medium text-brand hover:text-brand-hover hover:underline">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {# Right: warm orange→coral brand panel #}
+    <div class="hidden overflow-hidden rounded-xl bg-gradient-to-br from-brand to-[#0f766e] p-10 text-white shadow-sm lg:flex lg:flex-col lg:justify-center">
+      <h2 class="font-display text-3xl font-bold leading-tight tracking-tight">
+        Build better surveys, together.
+      </h2>
+      <p class="mt-4 max-w-sm text-sm leading-relaxed text-white/90">
+        Enterprise-grade data collection with a beautiful, modern interface. Self-hosted and secure.
+      </p>
+      <div class="mt-10 rounded-xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm">
+        <div class="rounded-lg bg-white/95 p-4 text-ink shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-xs font-medium text-success">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span> +42 NPS
+            </span>
+            <span class="font-display text-lg font-bold text-ink">+42</span>
+          </div>
+          <p class="mt-3 text-sm text-muted">How likely are you to recommend our product to a friend or colleague?</p>
+          <div class="mt-3 flex gap-1.5">
+            {% for n in "0123456789" %}
+              <span class="flex h-6 w-6 items-center justify-center rounded text-xs font-medium {% if forloop.counter0 == 9 %}bg-brand text-white{% else %}bg-panel text-muted{% endif %}">{{ forloop.counter0 }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

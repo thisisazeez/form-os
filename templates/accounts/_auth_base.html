@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% comment %}Shared layout for the auth pages: a centered card. Keeps the auth surface visually
+   distinct from the dashboard while reusing the Tailwind/HTMX/Alpine base shell. Branded with
+   OpenSurvey tokens (surface card, hairline border, brand accents). Block structure is
+   unchanged — every auth page (login/signup/reset/verify) extends this via its own blocks.{% endcomment %}
+
+{% block content %}
+  <div class="mx-auto max-w-md">
+    <div class="rounded-xl border border-hairline bg-white p-8 shadow-sm">
+      <h1 class="font-display text-2xl font-bold tracking-tight text-ink">{% block card_title %}{% endblock %}</h1>
+      {% block card_subtitle %}{% endblock %}
+      <div class="mt-6">
+        {% block card_body %}{% endblock %}
+      </div>
+    </div>
+    <p class="mt-4 text-center text-sm text-muted">{% block card_footer %}{% endblock %}</p>
+  </div>
+{% endblock %}

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey Dashboard | Enterprise Workspace</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#0d9488",
+              secondary: "#3d63dc",
+              tertiary: "#8ac449",
+              ink: "#222b27",
+              muted: "#666666",
+              surface: "#faf8f7",
+              panel: "#f2f4ef",
+              border: "rgba(34,43,39,0.10)"
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "2xl": "1rem",
+              "full": "9999px"
+            },
+            fontFamily: {
+              headline: ["Public Sans", "sans-serif"],
+              display: ["Public Sans", "sans-serif"],
+              body: ["Inter", "sans-serif"],
+              label: ["Inter", "sans-serif"]
+            },
+            boxShadow: {
+              'soft': '0 10px 25px -5px rgba(34, 43, 39, 0.05), 0 8px 10px -6px rgba(34, 43, 39, 0.05)',
+              'heavy': '0 20px 25px -5px rgba(34, 43, 39, 0.1), 0 10px 10px -5px rgba(34, 43, 39, 0.04)'
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #faf8f7;
+            color: #222b27;
+        }
+    </style>
+</head>
+<body class="font-body overflow-hidden">
+<!-- Sidebar Wrapper -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-white dark:bg-neutral-900 border-r border-black/10 dark:border-white/10 shadow-sm flex flex-col p-4 z-50 overflow-visible">
+<!-- Org Switcher Trigger -->
+<div class="relative mb-6">
+<button class="w-full flex items-center gap-3 p-2 bg-white border border-black/10 rounded-lg text-left hover:bg-[#f2f4ef] transition-colors duration-200" id="org-switcher-trigger">
+<div class="w-10 h-10 bg-[#0d9488] rounded-lg flex items-center justify-center text-white font-bold text-xl font-headline">C</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-[10px] text-[#666] leading-none mb-0.5">Acme Inc</p>
+<p class="text-sm font-bold text-[#222b27] truncate">Customer Experience</p>
+</div>
+<span class="material-symbols-outlined text-[#666] text-sm">unfold_more</span>
+</button>
+<!-- Workspace Popover (Open State) -->
+<div class="absolute left-0 top-full mt-2 w-[320px] bg-white rounded-2xl shadow-heavy border border-black/5 z-[60] py-4 animate-in fade-in zoom-in duration-200 origin-top-left" id="org-popover">
+<!-- Header -->
+<div class="px-4 pb-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-[#0d9488] rounded flex items-center justify-center text-white font-bold text-sm">C</div>
+<div>
+<p class="text-sm font-bold text-[#222b27]">Acme Inc</p>
+<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#f2f4ef] text-[#666]">Owner</span>
+</div>
+</div>
+<a class="text-sm font-semibold text-[#0d9488] hover:opacity-80 transition-opacity" href="#">Switch ›</a>
+</div>
+<div class="h-px bg-black/5 mx-4 mb-4"></div>
+<!-- Workspaces List -->
+<div class="px-4 mb-2">
+<p class="text-[10px] font-bold text-[#666] tracking-wider mb-2">WORKSPACES</p>
+<div class="space-y-1">
+<!-- Active Workspace -->
+<div class="relative flex items-center justify-between p-2.5 bg-[#0d9488]/5 rounded-lg border-l-4 border-[#0d9488]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#0d9488] scale-90">layers</span>
+<span class="text-sm font-semibold text-[#0d9488]">Customer Experience</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] bg-white border border-[#0d9488]/20 px-1.5 py-0.5 rounded font-medium text-[#0d9488]">Manage</span>
+<span class="material-symbols-outlined text-[#0d9488] text-sm font-bold">check</span>
+</div>
+</div>
+<!-- Other Workspace -->
+<div class="group flex items-center justify-between p-2.5 hover:bg-[#f2f4ef] rounded-lg transition-colors cursor-pointer">
+<div class="flex items-center gap-3 text-[#444]">
+<span class="material-symbols-outlined scale-90">layers</span>
+<span class="text-sm font-medium">Product Research</span>
+</div>
+<span class="text-[10px] bg-white border border-black/5 px-1.5 py-0.5 rounded font-medium text-[#666]">Write</span>
+</div>
+<!-- Other Workspace -->
+<div class="group flex items-center justify-between p-2.5 hover:bg-[#f2f4ef] rounded-lg transition-colors cursor-pointer">
+<div class="flex items-center gap-3 text-[#444]">
+<span class="material-symbols-outlined scale-90">layers</span>
+<span class="text-sm font-medium">Brand Tracking</span>
+</div>
+<span class="text-[10px] bg-white border border-black/5 px-1.5 py-0.5 rounded font-medium text-[#666]">Read</span>
+</div>
+</div>
+</div>
+<div class="h-px bg-black/5 mx-4 my-4"></div>
+<!-- Actions -->
+<div class="px-4 space-y-1">
+<button class="w-full flex items-center gap-3 p-2 text-sm font-medium text-[#444] hover:text-[#0d9488] transition-colors">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+                        New workspace
+                    </button>
+<button class="w-full flex items-center gap-3 p-2 text-sm font-medium text-[#444] hover:text-[#0d9488] transition-colors">
+<span class="material-symbols-outlined text-lg">settings</span>
+                        Workspace settings
+                    </button>
+</div>
+</div>
+</div>
+<!-- Navigation Shell -->
+<nav class="flex-1 space-y-1 overflow-y-auto no-scrollbar">
+<!-- Active Nav Item -->
+<a class="flex items-center gap-3 px-4 py-2 text-[#0d9488] bg-[#faf8f7] dark:bg-neutral-800 rounded-lg font-semibold relative overflow-hidden active:scale-95 transition-transform" href="#">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#0d9488]"></div>
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-body text-sm font-medium">Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="poll">poll</span>
+<span class="font-body text-sm font-medium">Surveys</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body text-sm font-medium">Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="segment">segment</span>
+<span class="font-body text-sm font-medium">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-body text-sm font-medium">Results</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span class="font-body text-sm font-medium">Team</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-[#f2f4ef] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body text-sm font-medium">Settings</span>
+</a>
+</nav>
+<!-- Sidebar Footer -->
+<div class="mt-auto pt-4 border-t border-black/10">
+<!-- Usage Meter Card -->
+<div class="bg-[#f2f4ef] rounded-xl p-3 mb-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold text-[#666]">MONTHLY RESPONSES</span>
+<span class="text-[10px] font-bold text-[#222b27]">2.4k / 5k</span>
+</div>
+<div class="w-full h-1.5 bg-white rounded-full overflow-hidden">
+<div class="h-full bg-[#0d9488] w-[48%]"></div>
+</div>
+<button class="w-full mt-2 text-center text-[10px] font-bold text-[#0d9488] hover:underline">Upgrade Plan</button>
+</div>
+<div class="flex items-center gap-3 px-2">
+<img alt="Mohit Sharma" class="w-10 h-10 rounded-full border border-black/10 object-cover" data-alt="A professional, high-resolution portrait of a smiling Indian man with a friendly expression. He is wearing modern business casual attire against a clean, warm-toned studio background. The lighting is soft and flattering, emphasizing a bright, trustworthy workspace environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4AIQFmd_ZZ69j9Jei1WcMs8Gecgfu4rXMimBByMhcsqWBj1OjlGmCRllHwXBHhCQaH-MVKcYe5qTMrYRjCn4OfIGhBn6aLhfVfY0T1cIJMwzqECX_mfigSnmw92vV2GN_mMIeMjopBzJ_g88r6FAHUenm2yH143rFiy1OTv7-dSaYlzUvitxRWsb4MK8LBYXzDFgfoHhrnGgOeXXpeYFoPPDMaA4u7S2yx6oQYvAgmdvkHo_LZ4HeDS4RuIjIwrUJz6u_isEuBn4R"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-[#222b27] truncate">Mohit Sharma</p>
+<p class="text-[10px] text-[#666] truncate">Admin Account</p>
+</div>
+<button class="material-symbols-outlined text-[#666] hover:text-[#0d9488] transition-colors">logout</button>
+</div>
+</div>
+</aside>
+<!-- Content Overlay (Dimmed background because popover is open) -->
+<div class="fixed inset-0 bg-black/5 backdrop-blur-[2px] z-40 transition-opacity duration-300" id="backdrop"></div>
+<!-- Main Content Canvas -->
+<main class="pl-64 min-h-screen">
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-[#faf8f7]/80 backdrop-blur-md dark:bg-neutral-900/80 z-30 flex justify-between items-center px-8">
+<div class="flex items-center gap-4">
+<h1 class="font-headline font-bold text-xl text-[#222b27]">Dashboard</h1>
+<div class="h-4 w-px bg-black/10 mx-2"></div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#666] text-lg">search</span>
+<input class="pl-10 pr-4 py-2 bg-white border-transparent focus:border-[#0d9488] focus:ring-0 rounded-full text-sm w-64 shadow-sm" placeholder="Search surveys..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-[#666] hover:bg-white transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-[#0d9488] rounded-full border-2 border-white"></span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-[#666] hover:bg-white transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<button class="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center gap-2 shadow-lg shadow-[#0d9488]/20 hover:bg-[#0f766e] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg">add</span>
+                    New survey
+                </button>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="pt-24 px-8 pb-12">
+<!-- Bento Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<!-- Stat Card 1 -->
+<div class="bg-white p-6 rounded-2xl shadow-soft border border-black/[0.03] group hover:shadow-heavy transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 bg-[#0d9488]/10 rounded-lg flex items-center justify-center text-[#0d9488]">
+<span class="material-symbols-outlined">description</span>
+</div>
+<span class="text-[#8ac449] text-xs font-bold bg-[#8ac449]/10 px-2 py-0.5 rounded-full">+2 new</span>
+</div>
+<p class="text-[#666] text-sm font-medium">Active surveys</p>
+<h3 class="text-3xl font-headline font-bold text-[#222b27]">12</h3>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-white p-6 rounded-2xl shadow-soft border border-black/[0.03] group hover:shadow-heavy transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 bg-[#3d63dc]/10 rounded-lg flex items-center justify-center text-[#3d63dc]">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<span class="text-[#8ac449] text-xs font-bold bg-[#8ac449]/10 px-2 py-0.5 rounded-full">+12%</span>
+</div>
+<p class="text-[#666] text-sm font-medium">Total responses</p>
+<h3 class="text-3xl font-headline font-bold text-[#222b27]">2,450</h3>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-white p-6 rounded-2xl shadow-soft border border-black/[0.03] group hover:shadow-heavy transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 bg-[#8ac449]/10 rounded-lg flex items-center justify-center text-[#8ac449]">
+<span class="material-symbols-outlined">checklist</span>
+</div>
+<span class="text-[#0d9488] text-xs font-bold bg-[#0d9488]/10 px-2 py-0.5 rounded-full">-3%</span>
+</div>
+<p class="text-[#666] text-sm font-medium">Avg. completion</p>
+<h3 class="text-3xl font-headline font-bold text-[#222b27]">68%</h3>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-white p-6 rounded-2xl shadow-soft border border-black/[0.03] group hover:shadow-heavy transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-[#0d9488]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-[#8ac449] text-xs font-bold bg-[#8ac449]/10 px-2 py-0.5 rounded-full">Good</span>
+</div>
+<p class="text-[#666] text-sm font-medium">Avg. NPS</p>
+<h3 class="text-3xl font-headline font-bold text-[#222b27]">+42</h3>
+</div>
+</div>
+<!-- Dashboard Body -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Recent Activity (Asymmetric 2/3 column) -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-white rounded-2xl shadow-soft border border-black/[0.03] p-8 min-h-[400px] flex flex-col">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="text-xl font-headline font-bold text-[#222b27]">Performance Insights</h4>
+<p class="text-sm text-[#666]">Engagement trends across your workspace</p>
+</div>
+<div class="flex bg-[#f2f4ef] p-1 rounded-lg">
+<button class="px-3 py-1.5 text-xs font-bold text-[#222b27] bg-white rounded-md shadow-sm">Week</button>
+<button class="px-3 py-1.5 text-xs font-bold text-[#666] hover:text-[#222b27] transition-colors">Month</button>
+</div>
+</div>
+<!-- Placeholder for Data Visualization Graphic -->
+<div class="flex-1 w-full bg-[#f2f4ef]/50 rounded-xl flex items-end p-8 gap-4 overflow-hidden relative group">
+<div class="w-full h-full absolute inset-0 opacity-10 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:20px_20px]"></div>
+<div class="relative z-10 w-full h-48 flex items-end justify-between gap-2">
+<div class="w-full bg-[#0d9488]/20 rounded-t-lg h-[40%] transition-all duration-700 group-hover:h-[60%]"></div>
+<div class="w-full bg-[#0d9488]/40 rounded-t-lg h-[65%] transition-all duration-700 group-hover:h-[45%]"></div>
+<div class="w-full bg-[#0d9488]/60 rounded-t-lg h-[50%] transition-all duration-700 group-hover:h-[80%]"></div>
+<div class="w-full bg-[#0d9488]/30 rounded-t-lg h-[85%] transition-all duration-700 group-hover:h-[55%]"></div>
+<div class="w-full bg-[#0d9488]/80 rounded-t-lg h-[60%] transition-all duration-700 group-hover:h-[90%]"></div>
+<div class="w-full bg-[#0d9488] rounded-t-lg h-[95%] transition-all duration-700 group-hover:h-[70%]"></div>
+<div class="w-full bg-[#0d9488]/50 rounded-t-lg h-[30%] transition-all duration-700 group-hover:h-[50%]"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/40 backdrop-blur-sm pointer-events-none">
+<p class="text-sm font-bold text-[#222b27] bg-white px-4 py-2 rounded-full shadow-lg">Engagement up 14% this week</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Sidebar Inside Canvas -->
+<div class="space-y-6">
+<!-- Quick Actions Card -->
+<div class="bg-[#222b27] rounded-2xl p-8 text-white relative overflow-hidden shadow-heavy">
+<div class="absolute top-0 right-0 w-32 h-32 bg-[#0d9488]/20 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+<h4 class="text-lg font-headline font-bold mb-4 relative z-10">Workspace Goal</h4>
+<p class="text-sm text-neutral-400 mb-6 relative z-10 leading-relaxed">Reach 10,000 unique responses this quarter to unlock advanced cohort analysis.</p>
+<div class="relative z-10">
+<div class="flex justify-between text-xs font-bold mb-2">
+<span>24.5% Completed</span>
+<span>7,550 left</span>
+</div>
+<div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-[#0d9488] w-[24.5%] shadow-[0_0_10px_#0d9488]"></div>
+</div>
+</div>
+</div>
+<!-- Team Status -->
+<div class="bg-white rounded-2xl shadow-soft border border-black/[0.03] p-6">
+<h4 class="text-sm font-headline font-bold text-[#222b27] mb-4">Workspace Contributors</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">SM</div>
+<span class="text-xs font-semibold">Sarah Meyer</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-[#8ac449]"></span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600">JD</div>
+<span class="text-xs font-semibold">John Doe</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-neutral-300"></span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600">KC</div>
+<span class="text-xs font-semibold">Kevin Chen</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-[#8ac449]"></span>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-black/5 rounded-lg text-xs font-bold text-[#666] hover:bg-[#f2f4ef] transition-colors">Manage Team</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Simple Interaction logic
+        const trigger = document.getElementById('org-switcher-trigger');
+        const popover = document.getElementById('org-popover');
+        const backdrop = document.getElementById('backdrop');
+
+        // Initial state is open as per user request
+        let isOpen = true;
+
+        function togglePopover() {
+            isOpen = !isOpen;
+            if (isOpen) {
+                popover.style.display = 'block';
+                backdrop.style.opacity = '1';
+                backdrop.style.pointerEvents = 'auto';
+            } else {
+                popover.style.display = 'none';
+                backdrop.style.opacity = '0';
+                backdrop.style.pointerEvents = 'none';
+            }
+        }
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePopover();
+        });
+
+        backdrop.addEventListener('click', togglePopover);
+
+        // Map material icons from data-icon for programmatic consistency
+        document.querySelectorAll('[data-icon]').forEach(el => {
+            const iconName = el.getAttribute('data-icon');
+            el.classList.add('material-symbols-outlined');
+            el.textContent = iconName;
+        });
+    </script>
+</body></html>

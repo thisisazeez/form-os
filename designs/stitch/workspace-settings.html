@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workspace Settings - OpenSurvey</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            900: '#222b27',
+                            secondary: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: 'rgba(34,43,39,0.10)'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "8px",
+                        "lg": "12px",
+                        "xl": "16px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Outfit", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px rgba(34,43,39,0.04)',
+                        'float': '0 8px 30px rgba(34,43,39,0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf8f7; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Outfit', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface-page text-ink-900 min-h-screen flex text-sm">
+<!-- SideNavBar -->
+<nav class="bg-[#faf8f7] dark:bg-zinc-950 h-screen w-64 fixed left-0 top-0 border-r border-black/10 flex flex-col p-4 gap-2 z-40 hidden md:flex">
+<div class="mb-6 px-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-white font-headline font-bold">C</div>
+<div>
+<h1 class="font-['Outfit'] font-bold text-lg text-[#222b27] dark:text-white leading-tight">OpenSurvey</h1>
+<p class="text-xs text-ink-muted">Enterprise Workspace</p>
+</div>
+</div>
+</div>
+<button class="w-full py-2.5 px-4 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium mb-4 flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[20px]">add</span>
+            Create New Survey
+        </button>
+<div class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#666666] dark:text-zinc-500 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-zinc-900 transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#666666] dark:text-zinc-500 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-zinc-900 transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+                Surveys
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#666666] dark:text-zinc-500 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-zinc-900 transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+                Audience
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#666666] dark:text-zinc-500 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-zinc-900 transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">bar_chart</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-zinc-800 text-[#0d9488] shadow-sm rounded-lg transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-1 border-t border-black/10 pt-4">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#666666] dark:text-zinc-500 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-zinc-900 transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+                Documentation
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#666666] dark:text-zinc-500 hover:text-[#0d9488] hover:bg-white/50 dark:hover:bg-zinc-900 transition-all duration-200 ease-out font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-64 flex flex-col min-h-screen relative">
+<!-- TopNavBar -->
+<header class="bg-white dark:bg-zinc-900 w-full h-16 border-b border-black/10 shadow-sm flex justify-between items-center px-6 sticky top-0 z-30">
+<div class="flex items-center gap-2 text-ink-muted text-sm">
+<span>Settings</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="font-medium text-ink-900">General</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-[18px]">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-surface-panel border-transparent rounded-full text-sm focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Search settings..." type="text"/>
+</div>
+<button class="p-2 text-[#444444] dark:text-zinc-400 hover:bg-[#faf8f7] dark:hover:bg-zinc-800 transition-colors rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-panel overflow-hidden border border-black/10 cursor-pointer">
+<img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXRIccIQHye5wmbrUqREGzDHo5u96yIeIhPt4_dScU6OURDhTRMQKBJGtDmRFN2tZWMutHg4xjXYJFVaWPmc910QeVRs45cXHnjLc24k1dsppKy21Mt3IvuQ5nEmitUxfs1s68cvjAS9QFXpbTiFAK8LE6xPNrOm9YxIqGzJjZ6zyR5nYeq6kuLrrZE-Gik5HzmFOfyD8bIEXID4Ti1hqDL8Rapx3o6zq_jpnPoB__cLUl4skzGSAsDENAe4dRlps6lF95SrzBr-Hq"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-8 pb-32">
+<!-- Settings Sub-nav -->
+<aside class="w-full lg:w-60 flex-shrink-0">
+<h2 class="font-headline font-semibold text-lg mb-4 px-3">Workspace Settings</h2>
+<nav class="flex flex-col gap-1">
+<a class="px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium flex items-center justify-between" href="#">
+                        General
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</a>
+<a class="px-3 py-2 rounded-lg text-ink-secondary hover:bg-white hover:text-ink-900 transition-colors" href="#">Environments</a>
+<a class="px-3 py-2 rounded-lg text-ink-secondary hover:bg-white hover:text-ink-900 transition-colors" href="#">Members</a>
+<a class="px-3 py-2 rounded-lg text-ink-secondary hover:bg-white hover:text-ink-900 transition-colors" href="#">API keys</a>
+<a class="px-3 py-2 rounded-lg text-ink-secondary hover:bg-white hover:text-ink-900 transition-colors" href="#">Webhooks</a>
+<a class="px-3 py-2 rounded-lg text-ink-secondary hover:bg-white hover:text-ink-900 transition-colors" href="#">Branding</a>
+<div class="h-px bg-border my-2 mx-3"></div>
+<a class="px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" href="#">Danger zone</a>
+</nav>
+</aside>
+<!-- Settings Forms -->
+<div class="flex-1 flex flex-col gap-6 max-w-3xl">
+<!-- Workspace Identity -->
+<section class="bg-surface-card rounded-lg shadow-soft border border-black/5 p-6 md:p-8">
+<h3 class="font-headline font-semibold text-lg mb-1">Workspace Identity</h3>
+<p class="text-ink-muted text-sm mb-6">Manage your basic workspace details and how it appears in URLs.</p>
+<div class="space-y-5">
+<div>
+<label class="block text-sm font-medium text-ink-900 mb-1.5">Workspace Name</label>
+<input class="w-full px-3 py-2 bg-white border border-border rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow" type="text" value="Acme Inc"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink-900 mb-1.5">Workspace Slug</label>
+<div class="flex rounded border border-border overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-shadow">
+<span class="bg-surface-panel px-3 py-2 text-ink-muted border-r border-border text-sm flex items-center">opensurvey.com/</span>
+<input class="w-full px-3 py-2 bg-white border-none focus:ring-0 outline-none text-sm" type="text" value="acme"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Workspace Logo -->
+<section class="bg-surface-card rounded-lg shadow-soft border border-black/5 p-6 md:p-8">
+<h3 class="font-headline font-semibold text-lg mb-1">Workspace Logo</h3>
+<p class="text-ink-muted text-sm mb-6">This logo will appear on your surveys and invitations.</p>
+<div class="flex gap-6 items-start">
+<div class="w-20 h-20 rounded bg-surface-panel border border-border flex items-center justify-center flex-shrink-0">
+<span class="font-headline font-bold text-2xl text-ink-muted">A</span>
+</div>
+<div class="flex-1">
+<div class="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-surface-panel/50 transition-colors cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">upload</span>
+</div>
+<p class="text-sm font-medium text-ink-900 mb-1">Click to upload or drag and drop</p>
+<p class="text-xs text-ink-muted">SVG, PNG, JPG or GIF (max. 2MB)</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Default Branding -->
+<section class="bg-surface-card rounded-lg shadow-soft border border-black/5 p-6 md:p-8 flex flex-col md:flex-row gap-8">
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-lg mb-1">Default Survey Branding</h3>
+<p class="text-ink-muted text-sm mb-6">Set the default visual style for all new surveys in this workspace.</p>
+<div class="space-y-5">
+<div>
+<label class="block text-sm font-medium text-ink-900 mb-1.5">Brand Color</label>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded border border-border shadow-sm flex items-center justify-center overflow-hidden cursor-pointer" style="background-color: #0d9488;">
+<!-- Color picker hidden visually, triggered by parent -->
+<input class="opacity-0 w-full h-full cursor-pointer absolute" type="color" value="#0d9488"/>
+</div>
+<input class="w-24 px-3 py-2 bg-white border border-border rounded text-sm uppercase focus:border-primary outline-none text-center" type="text" value="#0d9488"/>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink-900 mb-1.5">Default Redirect URL</label>
+<input class="w-full px-3 py-2 bg-white border border-border rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow text-sm" placeholder="https://acme.com/thanks" type="url"/>
+</div>
+</div>
+</div>
+<!-- Preview Card -->
+<div class="w-full md:w-64 bg-surface-page rounded-lg p-4 flex flex-col items-center justify-center border border-black/5">
+<p class="text-xs text-ink-muted uppercase tracking-wider font-semibold mb-4 w-full text-center">Preview</p>
+<div class="bg-white p-4 rounded-lg shadow-sm border border-border w-full">
+<div class="w-6 h-6 rounded bg-surface-panel mb-3 text-xs flex items-center justify-center font-bold">A</div>
+<h4 class="font-headline font-medium text-sm mb-2">How likely are you to recommend us?</h4>
+<div class="flex gap-1 mb-4">
+<div class="w-6 h-6 rounded-sm bg-surface-panel border border-border flex items-center justify-center text-[10px]">0</div>
+<div class="w-6 h-6 rounded-sm bg-surface-panel border border-border flex items-center justify-center text-[10px]">...</div>
+<div class="w-6 h-6 rounded-sm bg-surface-panel border border-border flex items-center justify-center text-[10px]">10</div>
+</div>
+<div class="w-full h-1.5 bg-surface-panel rounded-full overflow-hidden mb-3">
+<div class="h-full w-1/2 bg-primary rounded-full"></div>
+</div>
+<button class="w-full py-1.5 bg-primary text-white text-xs font-medium rounded">Submit</button>
+</div>
+</div>
+</section>
+<!-- Environments Toggle -->
+<section class="bg-surface-card rounded-lg shadow-soft border border-black/5 p-6 flex items-center justify-between">
+<div>
+<h3 class="font-headline font-semibold text-lg mb-1">Environment</h3>
+<p class="text-ink-muted text-sm">Switch between development and production data.</p>
+</div>
+<div class="flex items-center bg-surface-panel p-1 rounded-lg border border-border">
+<button class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm border border-black/5 text-ink-900">Production</button>
+<button class="px-4 py-1.5 text-sm font-medium rounded-md text-ink-muted hover:text-ink-900 transition-colors">Development</button>
+</div>
+</section>
+<!-- Danger Zone -->
+<section class="bg-white rounded-lg shadow-soft border border-red-200 mt-4 overflow-hidden relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+<div class="p-6 md:p-8">
+<h3 class="font-headline font-semibold text-lg text-red-600 mb-1">Delete workspace</h3>
+<p class="text-ink-muted text-sm mb-6">This action is permanent and cannot be undone. All surveys, responses, and settings will be permanently removed.</p>
+<div class="flex flex-col sm:flex-row gap-4 items-end">
+<div class="flex-1 w-full">
+<label class="block text-xs font-medium text-ink-secondary mb-1.5">Type <strong class="text-ink-900">Acme Inc</strong> to confirm</label>
+<input class="w-full px-3 py-2 bg-white border border-border rounded focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-shadow text-sm" type="text"/>
+</div>
+<button class="w-full sm:w-auto px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded font-medium transition-colors">
+                                Delete workspace
+                            </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Action Bar) -->
+<div class="fixed bottom-0 right-0 w-full md:w-[calc(100%-16rem)] bg-white dark:bg-zinc-900 border-t border-black/10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] flex justify-between items-center px-6 py-4 z-40 transition-transform duration-300">
+<div class="flex items-center gap-2 text-sm text-ink-secondary font-medium">
+<span class="material-symbols-outlined text-amber-500 text-[18px]">info</span>
+                You have unsaved changes
+            </div>
+<div class="flex gap-3">
+<button class="px-4 py-2 text-ink-secondary hover:bg-surface-panel rounded font-medium transition-colors">Discard</button>
+<button class="bg-[#0d9488] text-white rounded px-6 py-2 font-['Inter'] font-semibold hover:bg-[#0f766e] active:scale-95 transition-all shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                    Save Changes
+                </button>
+</div>
+</div>
+</div>
+</body></html>

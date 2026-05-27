@@ -1,0 +1,404 @@
+[
+  {
+    "name": "calc number — add a literal",
+    "description": "score starts at 10; on answering q1, add 5 (literal) -> 15",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 10
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 5
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 3
+    },
+    "expected_variables": {
+      "score": 15
+    }
+  },
+  {
+    "name": "calc number — add a question-answer ref",
+    "description": "score += the numeric answer of q1 (ref)",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 7
+    },
+    "expected_variables": {
+      "score": 7
+    }
+  },
+  {
+    "name": "calc number — subtract / multiply / divide chained on one host",
+    "description": "score=20; on q1: subtract 4 (->16), multiply by 2 (->32), divide by 4 (->8) in array order",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 20
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "subtract",
+                "value": {
+                  "type": "literal",
+                  "value": 4
+                }
+              }
+            },
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "multiply",
+                "value": {
+                  "type": "literal",
+                  "value": 2
+                }
+              }
+            },
+            {
+              "id": "r3",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "divide",
+                "value": {
+                  "type": "literal",
+                  "value": 4
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "score": 8
+    }
+  },
+  {
+    "name": "calc number — assign overwrites the running value",
+    "description": "score=99; assign to 3 (literal) -> 3 (not added)",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 99
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "assign",
+                "value": {
+                  "type": "literal",
+                  "value": 3
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "score": 3
+    }
+  },
+  {
+    "name": "calc number — divide-by-zero is a no-op",
+    "description": "score=7; divide by 0 -> unchanged 7 (deterministic no-op)",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 7
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "divide",
+                "value": {
+                  "type": "literal",
+                  "value": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "score": 7
+    }
+  },
+  {
+    "name": "calc number — non-numeric operand (text answer) is a no-op",
+    "description": "score=5; add a text-answer ref (q1 is openText) -> non-numeric -> unchanged 5",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 5
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "t"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ],
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": "hello"
+    },
+    "expected_variables": {
+      "score": 5
+    }
+  },
+  {
+    "name": "calc number — host not answered: no replay, initial value kept",
+    "description": "q1 not in answers -> its calculate never fires -> score stays at initial 42",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 42
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 100
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {},
+    "expected_variables": {
+      "score": 42
+    }
+  }
+]

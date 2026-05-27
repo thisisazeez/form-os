@@ -1,0 +1,27 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Wave-0F TEMPORARY smoke fixture. Proves templates/_layouts/app_shell.html renders end-to-end
+  (logo, sidebar nav, brand tokens) so tests/test_app_shell.py has a real page to hit before any
+  production admin page is migrated to the shell. DELETE this file + apps.common.views
+  .app_shell_smoke + its url in config/urls.py once a real admin page extends the shell.
+
+  This also serves as a copy-paste EXAMPLE of the admin-page contract: extend the shell, mark the
+  active nav item with one `is-active` sentinel block, set the top-bar title, fill content.
+{% endcomment %}
+{% block title %}Shell smoke — OpenSurvey{% endblock %}
+{% block nav_home %}is-active{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="App shell smoke" subtitle="Wave-0F fixture — confirms the authenticated shell renders." %}
+
+  <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+    {% include "_components/stat_card.html" with label="Active surveys" value="12" delta="+2 this week" delta_dir="up" %}
+    {% include "_components/stat_card.html" with label="Total responses" value="2,450" delta="12%" delta_dir="up" %}
+    {% include "_components/stat_card.html" with label="Avg. NPS" value="+42" delta="Flat" %}
+  </div>
+
+  <div class="mt-6">
+    {% include "_components/empty_state.html" with icon="ballot" title="No surveys yet" message="Create your first survey to start collecting responses." action_label="New survey" action_href="?new=1" %}
+  </div>
+{% endblock %}

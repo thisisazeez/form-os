@@ -1,0 +1,308 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Segment builder — /<org_slug>/segments/new and /<org_slug>/segments/<id>
+  (apps.segments.views_htmx.segment_builder). Mirrors designs/stitch/segments-builder.png in
+  brand tokens: a two-column layout — the visual filter-group builder (left) and a live
+  matching-count + sample-contact preview (right).
+
+  The builder is an Alpine component over the FROZEN filter shape
+  (survey-schema.json#/$defs/segmentFilter / apps.segments.filters): a root group
+  {connector, conditions:[…]} whose conditions are either leaves {attributeKey, operator,
+  value?} or one level of nested groups. The UI caps nesting at depth-2 (the mockup's shape);
+  the validator accepts up to depth 64, so this is a UI simplification, not a data-model cap.
+
+  On every change the assembled filter JSON is POSTed to the preview endpoint (HTMX, debounced)
+  which validates + previews via the real segment-eval service; the same JSON is written into a
+  hidden field for save. Operator dropdowns + attribute lists come from the server (derived from
+  the env's ContactAttributeKeys + the frozen operator table) — never hardcoded.
+{% endcomment %}
+
+{% block title %}{% if segment %}Edit segment{% else %}New segment{% endif %} — OpenSurvey{% endblock %}
+{% block nav_segments %}is-active{% endblock %}
+{% block topbar_title %}Segments{% endblock %}
+
+{% block head_extra %}{{ block.super }}
+  <style>[x-cloak]{display:none!important}</style>
+{% endblock %}
+
+{% block content %}
+{% comment %}Server data for the Alpine component (json_script = safe JSON-in-HTML; no attribute-escape
+   corruption).{% endcomment %}
+{{ attribute_keys|json_script:"sb-keys" }}
+{{ operators_by_type|json_script:"sb-ops" }}
+{{ initial_filter|json_script:"sb-initial" }}
+
+<div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' x-data="segmentBuilder()" x-init="init()">
+  <div class="flex flex-col gap-6 lg:flex-row">
+
+    {# ================= Builder card (left) ================= #}
+    <div class="min-w-0 flex-1">
+      <form method="post" action="{{ post_url }}"
+            @submit="document.getElementById('sb-filter-field').value = JSON.stringify(serializeRoot())">
+        {% csrf_token %}
+        {% comment %}The resolved env the segment saves into (POST has no query string to carry it). Also
+           sent on every preview request via hx-include="closest form".{% endcomment %}
+        <input type="hidden" name="environment_id" value="{{ environment.id }}" />
+        <input type="hidden" name="filter" id="sb-filter-field" />
+
+        <div class="overflow-hidden rounded-xl border border-hairline bg-white shadow-sm">
+          {# Header: title input + live count chip #}
+          <div class="flex flex-wrap items-start justify-between gap-4 border-b border-hairline p-5">
+            <div class="min-w-0 flex-1">
+              <h1 class="font-display text-xl font-bold tracking-tight text-ink">{% if segment %}Edit segment{% else %}New segment{% endif %}</h1>
+              <p class="mt-1 text-sm text-muted">Define rules to filter your contacts dynamically.</p>
+            </div>
+          </div>
+
+          {% if save_errors %}
+            <div class="border-b border-hairline bg-red-50 px-5 py-3">
+              <ul class="space-y-1">
+                {% for err in save_errors %}<li class="text-sm text-red-700">{{ err }}</li>{% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <div class="p-5">
+            {# Segment title #}
+            <input type="text" name="title" value="{{ initial_title }}" placeholder="e.g., High-value customers" required
+                   class="mb-5 block w-full rounded-lg border border-hairline px-3 py-2 text-lg font-display font-semibold text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+
+            {% if attribute_keys %}
+              {# ---- Root group ---- #}
+              <div class="rounded-xl border border-hairline bg-surface p-4">
+                <div class="mb-4 inline-flex overflow-hidden rounded-lg border border-hairline bg-white text-xs font-semibold">
+                  <button type="button" @click="root.connector = 'and'; sync()"
+                          :class="root.connector === 'and' ? 'bg-brand text-white' : 'text-muted hover:bg-panel'"
+                          class="px-3 py-1.5 transition-colors">AND</button>
+                  <button type="button" @click="root.connector = 'or'; sync()"
+                          :class="root.connector === 'or' ? 'bg-brand text-white' : 'text-muted hover:bg-panel'"
+                          class="px-3 py-1.5 transition-colors">OR</button>
+                </div>
+
+                {# Condition rows (leaves + one-level nested groups) #}
+                <template x-for="(row, i) in root.conditions" :key="row._id">
+                  <div class="mb-3">
+                    {# ---- Leaf row ---- #}
+                    <template x-if="!row.conditions">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <select x-model="row.attributeKey" @change="onAttrChange(row); sync()"
+                                class="min-w-[10rem] flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                          <option value="" disabled>Select attribute…</option>
+                          <template x-for="k in keys" :key="k.key">
+                            <option :value="k.key" x-text="k.label"></option>
+                          </template>
+                        </select>
+                        <select x-model="row.operator" @change="sync()"
+                                class="min-w-[9rem] flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                          <template x-for="op in operatorsFor(row.attributeKey)" :key="op.op">
+                            <option :value="op.op" x-text="op.label"></option>
+                          </template>
+                        </select>
+                        <input type="text" x-model="row.value" @input="sync()"
+                               x-show="needsValue(row.operator)"
+                               :placeholder="isArrayOp(row.operator) ? 'a, b, c' : 'Value'"
+                               class="min-w-[9rem] flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                        <button type="button" @click="removeRow(i)" class="rounded-lg p-2 text-muted transition-colors hover:bg-panel hover:text-red-600" aria-label="Remove condition">
+                          <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                      </div>
+                    </template>
+
+                    {# ---- Nested group row (one level) ---- #}
+                    <template x-if="row.conditions">
+                      <div class="relative rounded-lg border border-hairline bg-white p-3">
+                        <div class="mb-3 flex items-center justify-between">
+                          <div class="inline-flex overflow-hidden rounded-lg border border-hairline text-xs font-semibold">
+                            <button type="button" @click="row.connector = 'and'; sync()"
+                                    :class="row.connector === 'and' ? 'bg-secondary text-white' : 'text-muted hover:bg-panel'"
+                                    class="px-2.5 py-1 transition-colors">AND</button>
+                            <button type="button" @click="row.connector = 'or'; sync()"
+                                    :class="row.connector === 'or' ? 'bg-secondary text-white' : 'text-muted hover:bg-panel'"
+                                    class="px-2.5 py-1 transition-colors">OR</button>
+                          </div>
+                          <button type="button" @click="removeRow(i)" class="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel hover:text-red-600" aria-label="Remove group">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                          </button>
+                        </div>
+                        <template x-for="(leaf, j) in row.conditions" :key="leaf._id">
+                          <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <select x-model="leaf.attributeKey" @change="onAttrChange(leaf); sync()"
+                                    class="min-w-[9rem] flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                              <option value="" disabled>Select attribute…</option>
+                              <template x-for="k in keys" :key="k.key">
+                                <option :value="k.key" x-text="k.label"></option>
+                              </template>
+                            </select>
+                            <select x-model="leaf.operator" @change="sync()"
+                                    class="min-w-[8rem] flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                              <template x-for="op in operatorsFor(leaf.attributeKey)" :key="op.op">
+                                <option :value="op.op" x-text="op.label"></option>
+                              </template>
+                            </select>
+                            <input type="text" x-model="leaf.value" @input="sync()"
+                                   x-show="needsValue(leaf.operator)"
+                                   :placeholder="isArrayOp(leaf.operator) ? 'a, b, c' : 'Value'"
+                                   class="min-w-[8rem] flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                            <button type="button" @click="row.conditions.splice(j, 1); sync()" class="rounded-lg p-2 text-muted transition-colors hover:bg-panel hover:text-red-600" aria-label="Remove condition">
+                              <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                          </div>
+                        </template>
+                        <button type="button" @click="row.conditions.push(newLeaf()); sync()"
+                                class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline">
+                          <span class="material-symbols-outlined text-[16px]">add</span> Add condition
+                        </button>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+
+                {# Add-condition / add-group affordances #}
+                <div class="mt-2 flex items-center gap-3">
+                  <button type="button" @click="addLeaf()"
+                          class="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+                    <span class="material-symbols-outlined text-[18px]">add</span> Add condition
+                  </button>
+                  <button type="button" @click="addGroup()"
+                          class="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-ink">
+                    <span class="material-symbols-outlined text-[18px]">data_object</span> Add group
+                  </button>
+                </div>
+              </div>
+            {% else %}
+              {# No attribute keys in this env yet — nothing to filter on. #}
+              <div class="rounded-xl border border-dashed border-hairline bg-surface px-5 py-10 text-center">
+                <span class="material-symbols-outlined mb-2 text-3xl text-muted">label_off</span>
+                <p class="text-sm text-muted">No contact attributes exist in this environment yet. Add contacts (with attributes) before building a segment.</p>
+              </div>
+            {% endif %}
+          </div>
+
+          {# Footer: cancel + save #}
+          <div class="flex items-center justify-end gap-3 border-t border-hairline bg-panel/30 px-5 py-4">
+            <a href="{{ cancel_url }}" class="text-sm font-medium text-muted transition-colors hover:text-ink">Cancel</a>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+              <span class="material-symbols-outlined text-[18px]">save</span> Save segment
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {# ================= Live preview (right) ================= #}
+    <aside class="w-full shrink-0 lg:w-80">
+      <div class="sticky top-20 rounded-xl border border-hairline bg-white p-5 shadow-sm">
+        <h2 class="mb-4 flex items-center gap-2 font-display text-base font-semibold text-ink">
+          <span class="material-symbols-outlined text-[20px] text-brand">visibility</span> Live preview
+        </h2>
+        {% comment %}The fragment swapped in by HTMX on every builder change. The Alpine sync() keeps the
+           hidden #sb-filter-field in sync and dispatches `sb:preview`; this div listens for it
+           and POSTs the hidden filter + environment_id fields (hx-include reaches them by id /
+           name even though they live in the form).{% endcomment %}
+        <div id="segment-preview"
+             hx-post="{{ preview_url }}"
+             hx-trigger="sb:preview from:body delay:300ms"
+             hx-include="#sb-filter-field, [name='environment_id']"
+             hx-swap="innerHTML">
+          {% include "segments/_preview.html" with count=None results="" errors=preview_seed_errors %}
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    function segmentBuilder() {
+      return {
+        keys: [],
+        ops: {},
+        root: { connector: 'and', conditions: [] },
+        _seq: 0,
+
+        init() {
+          this.keys = JSON.parse(document.getElementById('sb-keys').textContent || '[]');
+          this.ops = JSON.parse(document.getElementById('sb-ops').textContent || '{}');
+          const initial = JSON.parse(document.getElementById('sb-initial').textContent || '{}');
+          this.root = this.hydrate(initial);
+          // Seed the preview once the component is ready.
+          this.$nextTick(() => this.sync());
+        },
+
+        // --- ids for stable x-for keys ---
+        uid() { this._seq += 1; return 'r' + this._seq; },
+        newLeaf() { return { _id: this.uid(), attributeKey: '', operator: '', value: '' }; },
+        newGroup() { return { _id: this.uid(), connector: 'and', conditions: [this.newLeaf()] }; },
+
+        // --- hydrate a saved filter into the editable shape (adds _id + value strings) ---
+        hydrate(node) {
+          if (!node || typeof node !== 'object' || Object.keys(node).length === 0) {
+            return { connector: 'and', conditions: [] };
+          }
+          if ('conditions' in node) {
+            return {
+              _id: this.uid(),
+              connector: node.connector || 'and',
+              conditions: (node.conditions || []).map((c) => this.hydrate(c)),
+            };
+          }
+          // leaf
+          let v = node.value;
+          if (Array.isArray(v)) v = v.join(', ');
+          else if (v === undefined || v === null) v = '';
+          return { _id: this.uid(), attributeKey: node.attributeKey || '', operator: node.operator || '', value: String(v) };
+        },
+
+        // --- attribute / operator helpers (data from the server, never hardcoded) ---
+        typeOf(key) { const k = this.keys.find((x) => x.key === key); return k ? k.data_type : 'string'; },
+        operatorsFor(key) { return this.ops[this.typeOf(key)] || []; },
+        opMeta(op) { for (const t in this.ops) { const m = this.ops[t].find((o) => o.op === op); if (m) return m; } return null; },
+        needsValue(op) { const m = this.opMeta(op); return m ? m.needs_value : false; },
+        isArrayOp(op) { const m = this.opMeta(op); return m ? m.is_array : false; },
+
+        onAttrChange(row) {
+          // Reset the operator to the first valid one for the newly-chosen attribute's type.
+          const opts = this.operatorsFor(row.attributeKey);
+          row.operator = opts.length ? opts[0].op : '';
+          row.value = '';
+        },
+
+        // --- mutate ---
+        addLeaf() { this.root.conditions.push(this.newLeaf()); this.sync(); },
+        addGroup() { this.root.conditions.push(this.newGroup()); this.sync(); },
+        removeRow(i) { this.root.conditions.splice(i, 1); this.sync(); },
+
+        // --- serialize the editable tree → the frozen filter shape ---
+        serializeNode(node) {
+          if ('conditions' in node) {
+            const kids = node.conditions.map((c) => this.serializeNode(c)).filter((c) => c !== null);
+            if (kids.length === 0) return null;
+            if (kids.length === 1) return kids[0];
+            return { connector: node.connector, conditions: kids };
+          }
+          // leaf — needs a chosen attribute + operator.
+          if (!node.attributeKey || !node.operator) return null;
+          const leaf = { attributeKey: node.attributeKey, operator: node.operator };
+          if (this.needsValue(node.operator)) {
+            if (this.isArrayOp(node.operator)) {
+              leaf.value = String(node.value || '').split(',').map((s) => s.trim()).filter((s) => s.length);
+            } else {
+              leaf.value = node.value;
+            }
+          }
+          return leaf;
+        },
+        serializeRoot() {
+          const out = this.serializeNode(this.root);
+          return out === null ? {} : out;  // empty tree → match-all {}
+        },
+
+        // Push the assembled filter into the hidden field + trigger the HTMX preview.
+        sync() {
+          document.getElementById('sb-filter-field').value = JSON.stringify(this.serializeRoot());
+          this.$dispatch('sb:preview');
+        },
+      };
+    }
+  </script>
+</div>
+{% endblock %}

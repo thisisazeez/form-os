@@ -1,0 +1,103 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Dashboard home — the tenant landing (/<org_slug>/). 4 stat cards (active surveys, total
+  responses, avg completion, avg NPS — all REAL DB aggregates scoped to readable workspaces),
+  a recent-surveys list, and a 7-day responses activity panel (inline SVG, no chart libs).
+  Mirrors designs/stitch/dashboard-home.png; brand tokens only.
+{% endcomment %}
+
+{% block title %}Dashboard — OpenSurvey{% endblock %}
+{% block nav_home %}is-active{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+  <div class="mb-8">
+    <h1 class="font-display text-2xl font-bold tracking-tight text-ink">
+      Welcome back{% if request.user.name %}, {{ request.user.name }}{% endif %}
+    </h1>
+    <p class="mt-1 text-sm text-muted">Here's what's happening across your workspace.</p>
+  </div>
+
+  {# Stat cards (real counts) #}
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    {% include "_components/stat_card.html" with label="Active surveys" value=stat_active %}
+    {% include "_components/stat_card.html" with label="Total responses" value=stat_total_responses %}
+    {% include "_components/stat_card.html" with label="Avg. completion" value=stat_completion %}
+    {% include "_components/stat_card.html" with label="Avg. NPS" value=stat_nps %}
+  </div>
+
+  <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+    {# Recent surveys (real rows) #}
+    <div class="lg:col-span-2">
+      <div class="overflow-hidden rounded-xl border border-hairline bg-white">
+        <div class="flex items-center justify-between border-b border-hairline px-6 py-4">
+          <h2 class="font-display text-lg font-semibold text-ink">Recent surveys</h2>
+          <a href="/{{ org_slug }}/surveys" class="text-sm font-medium text-brand hover:text-brand-hover">View all</a>
+        </div>
+
+        {% if has_surveys %}
+          <table class="min-w-full divide-y divide-hairline text-sm">
+            <thead class="bg-panel/50 text-left">
+              <tr>
+                <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Survey</th>
+                <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Status</th>
+                <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Responses</th>
+                <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Updated</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-hairline">
+              {% for s in recent_surveys %}
+                <tr class="transition-colors hover:bg-panel/30">
+                  <td class="px-6 py-4">
+                    <a href="/{{ org_slug }}/surveys/{{ s.id }}/results" class="font-medium text-ink hover:text-brand">{{ s.name }}</a>
+                  </td>
+                  <td class="px-6 py-4">{% include "_components/status_pill.html" with status=s.display_status %}</td>
+                  <td class="px-6 py-4 text-muted">{{ s.response_count }}</td>
+                  <td class="px-6 py-4 text-muted">{{ s.updated_at|date:"M j, Y" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="p-6">
+            {% include "_components/empty_state.html" with icon="ballot" title="No surveys yet" message="Create your first survey to start collecting responses." action_label="New survey" action_href="/"|add:org_slug|add:"/surveys?new=1" %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Activity panel — real 7-day responses series as an inline SVG area chart #}
+    <div>
+      <div class="rounded-xl border border-hairline bg-white p-6">
+        <h2 class="font-display text-lg font-semibold text-ink">Responses</h2>
+        <p class="mt-1 text-xs text-muted">Last 7 days</p>
+
+        <div class="mt-4">
+          <svg viewBox="0 0 280 120" class="h-32 w-full" preserveAspectRatio="none" role="img" aria-label="Responses over the last 7 days">
+            <defs>
+              <linearGradient id="dash-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" class="text-brand" stop-color="currentColor" stop-opacity="0.18"/>
+                <stop offset="100%" class="text-brand" stop-color="currentColor" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            {% if activity_max %}
+              <polygon points="0,120 {{ activity_points }} 280,120" fill="url(#dash-area)" />
+              <polyline points="{{ activity_points }}" fill="none" class="text-brand" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+            {% else %}
+              <line x1="0" y1="114" x2="280" y2="114" class="text-hairline" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" />
+            {% endif %}
+          </svg>
+          <div class="mt-2 flex justify-between text-[11px] text-muted">
+            {% for point in activity %}
+              <span>{{ point.date|date:"D" }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% if not activity_max %}
+          <p class="mt-4 text-sm text-muted">No responses in the last 7 days yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

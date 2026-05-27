@@ -1,0 +1,283 @@
+[
+  {
+    "name": "calc text — assign a literal",
+    "description": "greeting assigned to a literal string",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "greeting",
+          "name": "Greeting",
+          "type": "text",
+          "initialValue": ""
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "t"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "greeting",
+                "operation": "assign",
+                "value": {
+                  "type": "literal",
+                  "value": "Hello"
+                }
+              }
+            }
+          ],
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": "x"
+    },
+    "expected_variables": {
+      "greeting": "Hello"
+    }
+  },
+  {
+    "name": "calc text — concat the answer (ref) onto the initial",
+    "description": "name starts 'Hi '; concat the openText answer 'there' -> 'Hi there'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "name",
+          "name": "Name",
+          "type": "text",
+          "initialValue": "Hi "
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "t"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "name",
+                "operation": "concat",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ],
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": "there"
+    },
+    "expected_variables": {
+      "name": "Hi there"
+    }
+  },
+  {
+    "name": "calc text — concat a number answer stringifies it (recall render rule)",
+    "description": "label='count: '; concat numeric q1=42 -> 'count: 42' (number stringified)",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "label",
+          "name": "Label",
+          "type": "text",
+          "initialValue": "count: "
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "label",
+                "operation": "concat",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 42
+    },
+    "expected_variables": {
+      "label": "count: 42"
+    }
+  },
+  {
+    "name": "calc text — concat an object-shaped answer (contactInfo) is a no-op",
+    "description": "object-shaped operand is unrenderable -> concat is a no-op -> initial kept",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "label",
+          "name": "Label",
+          "type": "text",
+          "initialValue": "stay"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "contactInfo",
+          "headline": {
+            "default": "c"
+          },
+          "config": {
+            "fields": {
+              "email": {
+                "show": true
+              }
+            }
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "label",
+                "operation": "concat",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": {
+        "email": "a@b.com"
+      }
+    },
+    "expected_variables": {
+      "label": "stay"
+    }
+  },
+  {
+    "name": "calc text — concat a boolean answer renders Yes/No (recall render rule)",
+    "description": "msg='consent: '; concat consent=true -> 'consent: Yes'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "msg",
+          "name": "Msg",
+          "type": "text",
+          "initialValue": "consent: "
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "consent",
+          "headline": {
+            "default": "c"
+          },
+          "config": {
+            "label": {
+              "default": "I agree"
+            }
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isAccepted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "msg",
+                "operation": "concat",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": true
+    },
+    "expected_variables": {
+      "msg": "consent: Yes"
+    }
+  }
+]

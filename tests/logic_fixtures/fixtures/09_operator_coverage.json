@@ -1,0 +1,203 @@
+[
+  {
+    "name": "operators — date after (true)",
+    "description": "FU-2 coverage: `after` on a date answer. dob 2010-05-01 is after 2000-01-01 -> rule fires -> jumpTo younger.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "dob",
+          "type": "date",
+          "headline": { "default": "Date of birth" },
+          "config": { "format": "YYYY-MM-DD" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "dob", "operator": "after", "value": "2000-01-01" }, "action": { "type": "jumpTo", "target": "younger" } }
+          ]
+        },
+        { "id": "older", "type": "openText", "headline": { "default": "older" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "younger", "type": "openText", "headline": { "default": "younger" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "dob": "2010-05-01" },
+    "currentQuestionId": "dob",
+    "expected_next": { "type": "question", "id": "younger" }
+  },
+
+  {
+    "name": "operators — openText doesNotContain (true)",
+    "description": "FU-2 coverage: `doesNotContain`. Answer has no 'refund' substring -> true -> jumpTo q3.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": { "default": "Feedback" },
+          "config": { "inputType": "long" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "q1", "operator": "doesNotContain", "value": "refund" }, "action": { "type": "jumpTo", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "Great product, very happy" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q3" }
+  },
+
+  {
+    "name": "operators — openText endsWith (true)",
+    "description": "FU-2 coverage: `endsWith`. 'ORDER-2024' ends with '2024' -> true -> jumpTo recent.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "ref",
+          "type": "openText",
+          "headline": { "default": "Order reference" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "ref", "operator": "endsWith", "value": "2024" }, "action": { "type": "jumpTo", "target": "recent" } }
+          ]
+        },
+        { "id": "old", "type": "openText", "headline": { "default": "old" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "recent", "type": "openText", "headline": { "default": "recent" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "ref": "ORDER-2024" },
+    "currentQuestionId": "ref",
+    "expected_next": { "type": "question", "id": "recent" }
+  },
+
+  {
+    "name": "operators — multiSelect includesOnly set-equal (true)",
+    "description": "FU-2 coverage: `includesOnly` (multi-select set-equality). Selected {a,b} EXACTLY equals target {a,b} -> true -> jumpTo exact.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "feat",
+          "type": "multiSelect",
+          "headline": { "default": "Which features?" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }, { "id": "c", "label": { "default": "C" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "feat", "operator": "includesOnly", "value": ["a", "b"] }, "action": { "type": "jumpTo", "target": "exact" } }
+          ]
+        },
+        { "id": "other", "type": "openText", "headline": { "default": "other" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "exact", "type": "openText", "headline": { "default": "exact" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "feat": ["a", "b"] },
+    "currentQuestionId": "feat",
+    "expected_next": { "type": "question", "id": "exact" }
+  },
+
+  {
+    "name": "operators — multiSelect includesOnly superset (false -> linear, discriminates from includesAll)",
+    "description": "FU-2 coverage: the DISCRIMINATING `includesOnly` case. Selected {a,b,c} CONTAINS target {a,b} but is not EQUAL to it -> includesOnly is FALSE (whereas includesAll would be TRUE here) -> no nav rule matches -> linear next 'other'. This is what makes includesOnly materially distinct from includesAll.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "feat",
+          "type": "multiSelect",
+          "headline": { "default": "Which features?" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }, { "id": "c", "label": { "default": "C" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "feat", "operator": "includesOnly", "value": ["a", "b"] }, "action": { "type": "jumpTo", "target": "exact" } }
+          ]
+        },
+        { "id": "other", "type": "openText", "headline": { "default": "other" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "exact", "type": "openText", "headline": { "default": "exact" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "feat": ["a", "b", "c"] },
+    "currentQuestionId": "feat",
+    "expected_next": { "type": "question", "id": "other" }
+  },
+
+  {
+    "name": "operators — cta isClicked (true)",
+    "description": "FU-2 coverage: `isClicked` on a cta. The cta answer is boolean true (clicked) -> isClicked true -> jumpTo engaged.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "promo",
+          "type": "cta",
+          "headline": { "default": "Check out our new plan" },
+          "config": { "buttonLabel": { "default": "Learn more" }, "buttonUrl": "https://example.com/plan" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "promo", "operator": "isClicked" }, "action": { "type": "jumpTo", "target": "engaged" } }
+          ]
+        },
+        { "id": "ignored", "type": "openText", "headline": { "default": "ignored" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "engaged", "type": "openText", "headline": { "default": "engaged" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "promo": true },
+    "currentQuestionId": "promo",
+    "expected_next": { "type": "question", "id": "engaged" }
+  },
+
+  {
+    "name": "operators — isEmpty on a present-but-empty earlier answer (true)",
+    "description": "FU-2 coverage: `isEmpty`. The optional earlier question 'comment' was submitted as an empty string '' -> isEmpty true (per README §3: present-but-empty counts as empty) -> jumpTo noComment.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "comment", "type": "openText", "required": false, "headline": { "default": "Optional comment" }, "config": { "inputType": "long" }, "logic": [] },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": { "default": "q2" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "comment", "operator": "isEmpty" }, "action": { "type": "jumpTo", "target": "noComment" } }
+          ]
+        },
+        { "id": "hasComment", "type": "openText", "headline": { "default": "hasComment" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "noComment", "type": "openText", "headline": { "default": "noComment" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "comment": "", "q2": "answered" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "question", "id": "noComment" }
+  },
+
+  {
+    "name": "operators — isNotEmpty on a non-empty earlier answer (true)",
+    "description": "FU-2 coverage: `isNotEmpty`. The earlier question 'comment' has a non-empty value -> isNotEmpty true -> jumpTo hasComment.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "comment", "type": "openText", "required": false, "headline": { "default": "Optional comment" }, "config": { "inputType": "long" }, "logic": [] },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": { "default": "q2" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "comment", "operator": "isNotEmpty" }, "action": { "type": "jumpTo", "target": "hasComment" } }
+          ]
+        },
+        { "id": "hasComment", "type": "openText", "headline": { "default": "hasComment" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "noComment", "type": "openText", "headline": { "default": "noComment" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "comment": "Loved the onboarding", "q2": "answered" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "question", "id": "hasComment" }
+  }
+]

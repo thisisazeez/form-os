@@ -1,0 +1,151 @@
+[
+  {
+    "name": "skip — single target removes it from the path",
+    "description": "On q1, skip(q2) fires -> advance linearly past q2 -> q3.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Skip q2?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "s1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "skip", "target": "q2" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q3" }
+  },
+
+  {
+    "name": "skip — condition false, no skip, linear next",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Skip q2?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "s1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "skip", "target": "q2" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "no" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" }
+  },
+
+  {
+    "name": "skip — multiple targets (array) removes all from the path",
+    "description": "skip(['q2','q3']) -> advance past both -> q4.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Skip q2 and q3?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "s1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "skip", "target": ["q2", "q3"] } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q4", "type": "openText", "headline": { "default": "q4" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q4" }
+  },
+
+  {
+    "name": "skip — cumulative across questions, then linear advance steps over earlier skip",
+    "description": "q1 skipped q3 (earlier). Now on q2 (no rule), linear next would be q3 but it is in the cumulative skip set -> q4.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Skip q3 later?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "s1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "skip", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q4", "type": "openText", "headline": { "default": "q4" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes", "q2": "hello" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "question", "id": "q4" }
+  },
+
+  {
+    "name": "skip — cumulative, skipped last questions cause end-of-survey",
+    "description": "q1 skipped both q2 and q3 (the only remaining questions) -> from q1 advance, both skipped -> first ending.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Skip the rest?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "s1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "skip", "target": ["q2", "q3"] } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "ending", "id": "end1" }
+  },
+
+  {
+    "name": "skip — start of survey is unaffected (no answers yet)",
+    "description": "At start, no question is answered, so the skip set is empty -> first question q1.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Skip q2?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "s1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "skip", "target": "q2" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": {},
+    "currentQuestionId": null,
+    "expected_next": { "type": "question", "id": "q1" }
+  }
+]

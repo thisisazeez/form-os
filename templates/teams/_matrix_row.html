@@ -1,0 +1,50 @@
+{% comment %}
+  One workspace-access matrix ROW = the segmented None/Read/Write/Manage control for a single
+  workspace, reflecting the selected team's REAL current WorkspaceTeam.access (selected pill =
+  white + brand text; "None" = no WorkspaceTeam row).
+
+  Interactive when `can_manage_access` (org owner/admin): each pill is a button that hx-posts
+  {workspace_id, access} to teams/<id>/access and swaps THIS row's radiogroup (outerHTML) with
+  the server's re-rendered state. Read-only callers get static pills (no buttons). The
+  data-team-id / data-workspace-id / data-access attributes are preserved for the page contract
+  + tests.
+
+  Context: org_slug, selected_team, row ({workspace, access}), access_levels, can_manage_access,
+  row_error.
+{% endcomment %}
+<div class="flex flex-col gap-2 self-start sm:items-end"
+     id="matrix-row-{{ row.workspace.id }}">
+  <div class="flex self-start rounded-lg border border-hairline bg-panel p-1 sm:self-auto"
+       role="radiogroup" aria-label="{{ row.workspace.name }} access"
+       data-team-id="{{ selected_team.id }}" data-workspace-id="{{ row.workspace.id }}"
+       data-can-manage="{{ can_manage_access|yesno:'1,0' }}">
+
+    {% if can_manage_access %}
+      {% comment %}Interactive: each pill hx-posts its level and swaps this whole row.{% endcomment %}
+      {# None (revoke) #}
+      <button type="button" role="radio" aria-checked="{% if not row.access %}true{% else %}false{% endif %}"
+              hx-post="/{{ org_slug }}/teams/{{ selected_team.id }}/access"
+              hx-vals='{"workspace_id": "{{ row.workspace.id }}", "access": "none"}'
+              hx-target="#matrix-row-{{ row.workspace.id }}" hx-swap="outerHTML"
+              class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if not row.access %}border border-hairline bg-white text-brand shadow-sm{% else %}text-muted hover:text-ink{% endif %}">None</button>
+      {% for level in access_levels %}
+        <button type="button" role="radio" data-access="{{ level }}" aria-checked="{% if level == row.access %}true{% else %}false{% endif %}"
+                hx-post="/{{ org_slug }}/teams/{{ selected_team.id }}/access"
+                hx-vals='{"workspace_id": "{{ row.workspace.id }}", "access": "{{ level }}"}'
+                hx-target="#matrix-row-{{ row.workspace.id }}" hx-swap="outerHTML"
+                class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if level == row.access %}border border-hairline bg-white text-brand shadow-sm{% else %}text-muted hover:text-ink{% endif %}">{{ level|capfirst }}</button>
+      {% endfor %}
+    {% else %}
+      {% comment %}Read-only display: static pills (no business surface for non-managers).{% endcomment %}
+      <span role="radio" aria-checked="{% if not row.access %}true{% else %}false{% endif %}"
+            class="rounded-md px-3 py-1.5 text-sm font-medium {% if not row.access %}border border-hairline bg-white text-brand shadow-sm{% else %}text-muted{% endif %}">None</span>
+      {% for level in access_levels %}
+        <span role="radio" data-access="{{ level }}" aria-checked="{% if level == row.access %}true{% else %}false{% endif %}"
+              class="rounded-md px-3 py-1.5 text-sm font-medium {% if level == row.access %}border border-hairline bg-white text-brand shadow-sm{% else %}text-muted{% endif %}">{{ level|capfirst }}</span>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% if row_error %}
+    <p class="rounded-md bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 sm:text-right" role="alert">{{ row_error }}</p>
+  {% endif %}
+</div>

@@ -1,0 +1,69 @@
+[
+  {
+    "name": "operators — equals on a contactInfo (object-shaped) answer -> no-match (TS<->PY drift-guard)",
+    "description": "FROZEN drift-guard (FU-1). The host question 'gate' runs `equals` against the answer of the contactInfo question 'contact', whose answer is an OBJECT ({firstName, email}). Per the operator `$comment` in survey-schema.json, the equality-family operators (equals/notEquals/isOneOf) treat an object-shaped answer as NOT a valid comparison target -> equals deterministically returns FALSE in BOTH languages (Python no longer deep-compares dicts; TS deepEqual already returns false for non-array objects). So the jumpTo does NOT fire and we advance linearly to 'next'. This pins the validator-reachable consequence of the no-match rule (equals on contactInfo is the only equality-family/object-answer pairing validateSurvey permits — isOneOf is not a contactInfo operator and matrix permits only isSubmitted/isSkipped). Note: a schema-valid `value` cannot itself be an object (conditionLeaf.value forbids it), so the historical deep-compare divergence was never reachable in a valid survey; this fixture locks in the documented semantics regardless.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "contact",
+          "type": "contactInfo",
+          "required": false,
+          "headline": { "default": "Your contact details" },
+          "config": { "fields": { "firstName": { "show": true }, "email": { "show": true } } },
+          "logic": []
+        },
+        {
+          "id": "gate",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "Anything else?" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "contact", "operator": "equals", "value": "ada@example.com" }, "action": { "type": "jumpTo", "target": "trap" } }
+          ]
+        },
+        { "id": "next", "type": "openText", "headline": { "default": "next" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "trap", "type": "openText", "headline": { "default": "trap (should NOT be reached)" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "contact": { "firstName": "Ada", "email": "ada@example.com" }, "gate": "yes" },
+    "currentQuestionId": "gate",
+    "expected_next": { "type": "question", "id": "next" }
+  },
+
+  {
+    "name": "operators — notEquals on a contactInfo (object-shaped) answer -> vacuously true, fires (TS<->PY drift-guard)",
+    "description": "FROZEN drift-guard (FU-1), complement of the equals case. `notEquals` against the object-shaped 'contact' answer is VACUOUSLY TRUE (an object is not a valid equality-family target), so the rule fires and jumpTo 'flagged' is taken — identically in TS and Python. Pins the notEquals->true branch of the no-match rule.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "contact",
+          "type": "contactInfo",
+          "required": false,
+          "headline": { "default": "Your contact details" },
+          "config": { "fields": { "firstName": { "show": true }, "email": { "show": true } } },
+          "logic": []
+        },
+        {
+          "id": "gate",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "Anything else?" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "contact", "operator": "notEquals", "value": "ada@example.com" }, "action": { "type": "jumpTo", "target": "flagged" } }
+          ]
+        },
+        { "id": "linear", "type": "openText", "headline": { "default": "linear (should NOT be reached)" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "flagged", "type": "openText", "headline": { "default": "flagged" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "contact": { "firstName": "Ada", "email": "ada@example.com" }, "gate": "yes" },
+    "currentQuestionId": "gate",
+    "expected_next": { "type": "question", "id": "flagged" }
+  }
+]

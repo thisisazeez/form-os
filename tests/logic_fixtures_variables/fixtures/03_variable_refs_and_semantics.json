@@ -1,0 +1,590 @@
+[
+  {
+    "name": "calc — value ref to ANOTHER variable",
+    "description": "total starts 0; bonus=5 (initial); add bonus (variable ref) -> total=5",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "total",
+          "name": "Total",
+          "type": "number",
+          "initialValue": 0
+        },
+        {
+          "id": "bonus",
+          "name": "Bonus",
+          "type": "number",
+          "initialValue": 5
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "total",
+                "operation": "add",
+                "value": {
+                  "type": "ref",
+                  "ref": "bonus"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "total": 5,
+      "bonus": 5
+    }
+  },
+  {
+    "name": "calc — mutation on a host is visible to a later rule on the SAME host",
+    "description": "score=0; r1 add 10 (->10); r2 multiply by 3 (->30) — sequential visibility",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 10
+                }
+              }
+            },
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "multiply",
+                "value": {
+                  "type": "literal",
+                  "value": 3
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "score": 30
+    }
+  },
+  {
+    "name": "calc — a matching navigation rule HALTS replay for that host",
+    "description": "r1 add 1 fires (->1); r2 jumpTo matches and halts; r3 add 100 NEVER applies (after a matched nav)",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 1
+                }
+              }
+            },
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "jumpTo",
+                "target": "q3"
+              }
+            },
+            {
+              "id": "r3",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 100
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "config": {}
+        },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": {
+            "default": "b"
+          },
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "score": 1
+    },
+    "currentQuestionId": "q1",
+    "expected_next": {
+      "type": "question",
+      "id": "q3"
+    }
+  },
+  {
+    "name": "calc — require does NOT halt replay (keep scanning past it)",
+    "description": "r1 require (non-nav, keep scanning), r2 calculate add 9 still applies -> 9",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "require",
+                "target": "q2"
+              }
+            },
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "expected_variables": {
+      "score": 9
+    },
+    "expected_required": [
+      "q2"
+    ]
+  },
+  {
+    "name": "condition reads a variable to drive navigation (jumpTo)",
+    "description": "q1 adds 12 to score; q2's rule jumps to q4 because score > 10 (variable condition)",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 12
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "score",
+                "operator": "greaterThan",
+                "value": 10
+              },
+              "action": {
+                "type": "jumpTo",
+                "target": "q4"
+              }
+            }
+          ],
+          "config": {}
+        },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": {
+            "default": "b"
+          },
+          "config": {}
+        },
+        {
+          "id": "q4",
+          "type": "openText",
+          "headline": {
+            "default": "c"
+          },
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1,
+      "q2": "hi"
+    },
+    "currentQuestionId": "q2",
+    "expected_next": {
+      "type": "question",
+      "id": "q4"
+    }
+  },
+  {
+    "name": "condition reads a variable — below threshold falls through linearly",
+    "description": "score only reaches 4 (<10); q2's variable-condition jump does NOT fire -> linear q3",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 4
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "score",
+                "operator": "greaterThan",
+                "value": 10
+              },
+              "action": {
+                "type": "jumpTo",
+                "target": "q4"
+              }
+            }
+          ],
+          "config": {}
+        },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": {
+            "default": "b"
+          },
+          "config": {}
+        },
+        {
+          "id": "q4",
+          "type": "openText",
+          "headline": {
+            "default": "c"
+          },
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1,
+      "q2": "hi"
+    },
+    "currentQuestionId": "q2",
+    "expected_next": {
+      "type": "question",
+      "id": "q3"
+    }
+  },
+  {
+    "name": "text condition reads a variable (equals)",
+    "description": "tier var assigned 'gold'; q2 jumps to q4 when tier equals 'gold'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "tier",
+          "name": "Tier",
+          "type": "text",
+          "initialValue": ""
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "tier",
+                "operation": "assign",
+                "value": {
+                  "type": "literal",
+                  "value": "gold"
+                }
+              }
+            }
+          ],
+          "config": {}
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "tier",
+                "operator": "equals",
+                "value": "gold"
+              },
+              "action": {
+                "type": "jumpTo",
+                "target": "q4"
+              }
+            }
+          ],
+          "config": {}
+        },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": {
+            "default": "b"
+          },
+          "config": {}
+        },
+        {
+          "id": "q4",
+          "type": "openText",
+          "headline": {
+            "default": "c"
+          },
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": "x",
+      "q2": "hi"
+    },
+    "currentQuestionId": "q2",
+    "expected_next": {
+      "type": "question",
+      "id": "q4"
+    }
+  }
+]

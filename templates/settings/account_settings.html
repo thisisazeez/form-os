@@ -1,0 +1,174 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Settings → Account settings. `/<org_slug>/account` —
+  apps.organizations.views_settings.account_settings_page (any active member). Matches
+  designs/stitch/account-settings.png: profile (name/email + verified chip/timezone), a
+  password card, and notification toggles (Alpine). The display NAME save is wired (written in
+  the PUBLIC schema). Email is read-only with a verified chip; timezone is presentational (no
+  User.timezone column in v1); password + notifications are presentational placeholders.
+
+  Context: org, membership, account (the request.user), name_saved.
+{% endcomment %}
+
+{% block title %}Account settings — {{ org.name }}{% endblock %}
+{% block nav_settings %}is-active{% endblock %}
+{% block topbar_title %}Account settings{% endblock %}
+
+{% block content %}
+<div x-data="{ newResponses: true, weeklyDigest: true, mentions: false, fileName: '', previewUrl: '' }">
+  {% include "_components/page_header.html" with title="Account settings" subtitle="Manage your personal profile, security, and notifications." %}
+
+  <div class="mt-6 max-w-3xl space-y-6">
+
+    {# ---- profile ---- #}
+    <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+      <h2 class="font-display text-lg font-semibold text-ink">Profile information</h2>
+      <p class="mt-1 text-sm text-muted">Update your personal details.</p>
+
+      {% if name_saved %}
+        <div class="mt-4 rounded-lg bg-success/15 px-3 py-2 text-sm text-success">Profile saved.</div>
+      {% endif %}
+
+      {% if avatar_error %}
+        <div class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{{ avatar_error }}</div>
+      {% endif %}
+
+      <form method="post" action="/{{ org.slug }}/account" enctype="multipart/form-data" class="mt-5 space-y-4">
+        {% csrf_token %}
+        <div class="flex items-center gap-4">
+          {# Live preview of a just-picked file (before Save), else the saved avatar, else initial. #}
+          <img x-show="previewUrl" x-cloak :src="previewUrl" alt="Selected photo preview"
+            class="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-brand" />
+          {% if account.avatar %}
+            <img x-show="!previewUrl" src="{{ account.avatar.url }}" alt="Profile photo"
+              class="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-hairline" />
+          {% else %}
+            <span x-show="!previewUrl" class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand/10 font-display text-xl font-semibold text-brand">
+              {% firstof account.name account.email "?" as dn %}{{ dn|first|upper }}
+            </span>
+          {% endif %}
+          <div class="space-y-1.5">
+            <div class="text-sm font-medium text-ink">Profile photo</div>
+            <div class="text-xs text-muted">PNG, JPEG, GIF or WEBP, up to 2&nbsp;MB. Your initial is shown until you upload one.</div>
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+              <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-panel">
+                <span class="material-symbols-outlined text-[16px]">upload</span>
+                <span>Choose image</span>
+                <input type="file" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp" class="sr-only"
+                  @change="const f = $event.target.files[0]; if (previewUrl) URL.revokeObjectURL(previewUrl); fileName = f ? f.name : ''; previewUrl = f ? URL.createObjectURL(f) : ''" />
+              </label>
+              <span class="text-xs text-muted" x-text="fileName"></span>
+              {% if account.avatar %}
+                <button type="submit" name="op" value="remove_avatar"
+                  class="text-xs font-medium text-red-600 hover:underline">Remove photo</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ink" for="acct_name">Full name</label>
+          <input type="text" name="name" id="acct_name" value="{{ account.name }}" placeholder="Your name"
+            class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ink" for="acct_email">Email address</label>
+          <div class="flex items-center gap-2">
+            <input type="email" id="acct_email" value="{{ account.email }}" disabled
+              class="block w-full rounded-lg border border-hairline bg-panel/40 px-3 py-2 text-sm text-muted shadow-sm focus:outline-none" />
+            {% if account.is_verified %}
+              <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+                <span class="material-symbols-outlined text-[14px]">verified</span>Verified
+              </span>
+            {% else %}
+              <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-panel px-2.5 py-1 text-xs font-medium text-muted">Unverified</span>
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ink" for="acct_tz">Timezone</label>
+          <select id="acct_tz" disabled
+            class="block w-full rounded-lg border border-hairline bg-panel/40 px-3 py-2 text-sm text-muted shadow-sm focus:outline-none">
+            <option>UTC (Coordinated Universal Time)</option>
+          </select>
+          <p class="mt-1 text-xs text-muted">Timezone is set organization-wide for now.</p>
+        </div>
+        <div class="flex justify-end border-t border-hairline pt-4">
+          <button type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
+            <span class="material-symbols-outlined text-[18px]">save</span>Save changes
+          </button>
+        </div>
+      </form>
+    </section>
+
+    {# ---- password & security (presentational; the real flow is the auth surface) ---- #}
+    <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+      <h2 class="font-display text-lg font-semibold text-ink">Password &amp; security</h2>
+      <p class="mt-1 text-sm text-muted">Change your password to keep your account secure.</p>
+      <div class="mt-5 space-y-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ink" for="cur_pw">Current password</label>
+          <input type="password" id="cur_pw" disabled placeholder="••••••••"
+            class="block w-full rounded-lg border border-hairline bg-panel/40 px-3 py-2 text-sm text-muted shadow-sm focus:outline-none" />
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-ink" for="new_pw">New password</label>
+          <input type="password" id="new_pw" disabled placeholder="••••••••"
+            class="block w-full rounded-lg border border-hairline bg-panel/40 px-3 py-2 text-sm text-muted shadow-sm focus:outline-none" />
+        </div>
+        <div class="flex items-center justify-between border-t border-hairline pt-4">
+          <a href="/auth/reset-password" class="text-sm font-medium text-secondary hover:underline">Reset via email instead</a>
+          <button type="button" disabled
+            class="cursor-not-allowed rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white opacity-60">Update password</button>
+        </div>
+      </div>
+    </section>
+
+    {# ---- notifications (Alpine toggles; presentational) ---- #}
+    <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+      <h2 class="font-display text-lg font-semibold text-ink">Notifications</h2>
+      <p class="mt-1 text-sm text-muted">Choose how and when we contact you.</p>
+      <div class="mt-5 divide-y divide-hairline">
+
+        <div class="flex items-center justify-between py-4">
+          <div>
+            <div class="text-sm font-medium text-ink">Email on new responses</div>
+            <div class="text-xs text-muted">Get an email when a survey receives a new response.</div>
+          </div>
+          <button type="button" @click="newResponses = !newResponses" :aria-pressed="newResponses"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+            :class="newResponses ? 'bg-brand' : 'bg-panel'">
+            <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform" :class="newResponses ? 'translate-x-5' : 'translate-x-0.5'"></span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between py-4">
+          <div>
+            <div class="text-sm font-medium text-ink">Weekly summary digest</div>
+            <div class="text-xs text-muted">A weekly rollup of responses and completion rates.</div>
+          </div>
+          <button type="button" @click="weeklyDigest = !weeklyDigest" :aria-pressed="weeklyDigest"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+            :class="weeklyDigest ? 'bg-brand' : 'bg-panel'">
+            <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform" :class="weeklyDigest ? 'translate-x-5' : 'translate-x-0.5'"></span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between py-4">
+          <div>
+            <div class="text-sm font-medium text-ink">Mentions</div>
+            <div class="text-xs text-muted">Notify me when someone mentions me in a comment.</div>
+          </div>
+          <button type="button" @click="mentions = !mentions" :aria-pressed="mentions"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+            :class="mentions ? 'bg-brand' : 'bg-panel'">
+            <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform" :class="mentions ? 'translate-x-5' : 'translate-x-0.5'"></span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

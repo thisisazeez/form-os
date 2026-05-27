@@ -1,0 +1,15 @@
+{
+  "name": "@opensurvey/logic-fixtures-variables",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Survey-variables + calculate-action TS<->PY parity harness (TS side). Runs the SAME fixtures as run_py.py against the production frontend/src/lib evaluators (computeVariables/nextStep/validateSurvey + resolveRecall) to prove byte-identical TS/Python results. SEPARATE from tests/logic_fixtures (the frozen 64-case corpus stays untouched).",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

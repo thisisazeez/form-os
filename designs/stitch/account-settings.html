@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Settings - OpenSurvey</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            heading: '#222b27',
+                            body: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)'
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "display": ["Public Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(34,43,39,0.05)',
+                        'hover': '0 8px 30px -4px rgba(34,43,39,0.08)'
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Switch */
+        .switch-input:checked + .switch-label .switch-dot {
+            transform: translateX(100%);
+        }
+        .switch-input:checked + .switch-label {
+            background-color: #0d9488;
+        }
+    </style>
+</head>
+<body class="bg-surface-page text-ink-body font-body antialiased min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#faf8f7]/80 backdrop-blur-md dark:bg-neutral-950/80 border-b border-black/10 dark:border-white/10 z-10 hidden md:flex">
+<div class="flex justify-between items-center px-8 h-full w-full">
+<div class="flex items-center gap-4">
+<!-- Search bar on left -->
+<div class="relative focus-within:ring-2 focus-within:ring-[#0d9488]/20 rounded-lg transition-all">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-surface-card border border-border rounded-lg text-sm font-body text-ink-body focus:outline-none focus:border-primary/50 focus:ring-0 w-64 shadow-sm placeholder:text-ink-muted" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button aria-label="Notifications" class="text-[#666] hover:text-[#0d9488] transition-colors p-2 rounded-full hover:bg-surface-panel">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button aria-label="Help" class="text-[#666] hover:text-[#0d9488] transition-colors p-2 rounded-full hover:bg-surface-panel">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-px h-6 bg-border mx-2"></div>
+<button class="text-sm font-medium text-ink-body hover:text-primary transition-colors">Support</button>
+<button class="text-sm font-bold text-primary hover:text-primary-hover transition-colors px-4 py-1.5 rounded-lg border border-primary/20 hover:bg-primary/5">Upgrade</button>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-border object-cover cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all" data-alt="A small, circular profile picture of a young professional woman with dark hair, smiling warmly. The image is brightly lit with a clean, light background, fitting seamlessly into a modern, light-mode enterprise UI dashboard header. The overall mood is confident and approachable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaAPWZMoVHBtHnyAQ0qNIvKUhblponPOP9rUcRCk60S0E7nz5lGBorfd_XERepH4DEJu6pKmmjJkLadi4ssmK-CIjtYjLsEqZwE-6oUySEcxV5KoIF4PK-CaWBfwb1Vk79pEhjJLvnrLOS9g3J0nyqMVdTsSi4A5Xx9PZapKBe3ANJEVwbYMijONJXc3Z8y4vvdAiPuTvEMucIrzV7Bmd5yp0JpjqWfQlN7xMxGhdp0j2-36jqs7TvGHj8876tAzfH0knluJi49ltk"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-white dark:bg-neutral-900 border-r border-black/10 dark:border-white/10 shadow-sm z-20 flex flex-col p-4 hidden md:flex">
+<div class="mb-8 px-4 py-2 flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#0d9488] text-2xl fill">analytics</span>
+<span class="text-2xl font-headline font-bold text-[#0d9488] dark:text-[#0f766e] tracking-tight">OpenSurvey</span>
+</div>
+<span class="text-xs font-label text-ink-muted uppercase tracking-wider ml-8">Admin Console</span>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#444] dark:text-neutral-400 hover:text-[#222b27] dark:hover:text-white transition-colors hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 duration-200 rounded-lg active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg">home</span>
+                Home
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#444] dark:text-neutral-400 hover:text-[#222b27] dark:hover:text-white transition-colors hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 duration-200 rounded-lg active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg">poll</span>
+                Surveys
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#444] dark:text-neutral-400 hover:text-[#222b27] dark:hover:text-white transition-colors hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 duration-200 rounded-lg active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg">contacts</span>
+                Contacts
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#444] dark:text-neutral-400 hover:text-[#222b27] dark:hover:text-white transition-colors hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 duration-200 rounded-lg active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg">group_work</span>
+                Segments
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#444] dark:text-neutral-400 hover:text-[#222b27] dark:hover:text-white transition-colors hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 duration-200 rounded-lg active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg">analytics</span>
+                Results
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#444] dark:text-neutral-400 hover:text-[#222b27] dark:hover:text-white transition-colors hover:bg-[#f2f4ef] dark:hover:bg-neutral-800 duration-200 rounded-lg active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg">group</span>
+                Team
+            </a>
+</div>
+<div class="mt-auto pt-4 border-t border-border/50">
+<!-- Active State for Settings -->
+<a class="flex items-center gap-3 px-4 py-3 bg-[#faf8f7] dark:bg-neutral-800 text-[#0d9488] font-semibold rounded-lg scale-98 active:scale-95 transition-transform font-label text-sm" href="#">
+<span class="material-symbols-outlined text-lg fill">settings</span>
+                Settings
+            </a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-16 min-h-screen p-8 max-w-7xl mx-auto">
+<div class="mb-8">
+<h1 class="text-3xl font-headline font-bold text-ink-heading tracking-tight mb-2">Account Settings</h1>
+<p class="text-ink-muted text-sm">Manage your profile, security, and preferences.</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-8 items-start">
+<!-- Left Sidebar Settings Nav (Sub-nav) -->
+<div class="w-full lg:w-64 flex-shrink-0 sticky top-24">
+<nav class="flex flex-col space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-primary bg-primary/5 font-medium text-sm transition-colors border-l-2 border-primary" href="#profile">
+<span class="material-symbols-outlined text-[20px]">person</span>
+                        Profile
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading font-medium text-sm transition-colors border-l-2 border-transparent" href="#password">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+                        Password
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading font-medium text-sm transition-colors border-l-2 border-transparent" href="#notifications">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+                        Notifications
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading font-medium text-sm transition-colors border-l-2 border-transparent" href="#sessions">
+<span class="material-symbols-outlined text-[20px]">devices</span>
+                        Sessions
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading font-medium text-sm transition-colors border-l-2 border-transparent" href="#appearance">
+<span class="material-symbols-outlined text-[20px]">palette</span>
+                        Appearance
+                    </a>
+</nav>
+</div>
+<!-- Settings Cards Stack -->
+<div class="flex-1 w-full space-y-8">
+<!-- Profile Card -->
+<section class="bg-surface-card rounded-xl p-8 shadow-soft border border-border/50 hover:shadow-hover transition-shadow duration-300" id="profile">
+<div class="mb-6 border-b border-border/50 pb-4">
+<h2 class="text-xl font-headline font-semibold text-ink-heading">Profile Information</h2>
+<p class="text-sm text-ink-muted mt-1">Update your personal details and public profile.</p>
+</div>
+<div class="flex items-start gap-6 mb-8">
+<div class="relative group">
+<div class="w-24 h-24 rounded-full bg-surface-panel border-2 border-border flex items-center justify-center text-ink-muted text-2xl font-headline font-bold overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A clear, high-resolution portrait of a young professional woman with a warm smile. The lighting is soft and even, highlighting her features against a subtle, light-mode compatible background. This image is used as a user avatar in a modern, clean UI dashboard, conveying approachability and professionalism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkpiCAZNkntu1dNhA5tSlWvOOr8Lih-twSBpLUL98rlbAsnGK-hk6JCqHqu48EnflucOsm6djXU176Rjlu2HsxTjCBdyPL9hj7HPRjop67OYIYWyiT6_-PPrI88QZVms3pTfwpA_Tw4t7GI7VZjvZchDnX2oo8l7ZRKAFrB_vvmAPHVDbKqeXbPPScmFXj-ji6YLxDB_EpIH1C7KlDOU-8jrppmxsDy6KEdNqXUiC6KpHtozQNV-jUt_dchhXIvR0cufdtX2JbI5FA"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-white border border-border p-1.5 rounded-full shadow-sm text-ink-body hover:text-primary transition-colors group-hover:scale-105">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="pt-2">
+<h3 class="font-medium text-ink-heading text-sm mb-1">Profile Photo</h3>
+<p class="text-xs text-ink-muted mb-3">Recommended: Square JPG, PNG, or GIF, at least 1,000 pixels per side.</p>
+<div class="flex gap-3">
+<button class="text-sm font-medium text-primary hover:text-primary-hover bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10 transition-colors">Upload new</button>
+<button class="text-sm font-medium text-ink-muted hover:text-ink-heading px-3 py-1.5 rounded-lg transition-colors">Remove</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">Full Name</label>
+<input class="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-card" type="text" value="Jane Doe"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">Email Address</label>
+<div class="relative">
+<input class="w-full rounded-lg border border-border px-4 py-2.5 pr-24 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-panel text-ink-muted" readonly="" type="email" value="jane@acme.inc"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-success text-xs font-medium bg-success/10 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Verified
+                                </span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">Timezone</label>
+<div class="relative">
+<select class="w-full rounded-lg border border-border px-4 py-2.5 text-sm appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-card cursor-pointer">
+<option>UTC-5 Eastern Time</option>
+<option>UTC-8 Pacific Time</option>
+<option>UTC+0 Greenwich Mean Time</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">Language</label>
+<div class="relative">
+<select class="w-full rounded-lg border border-border px-4 py-2.5 text-sm appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-card cursor-pointer">
+<option>English</option>
+<option>Spanish</option>
+<option>French</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="flex justify-end pt-4 border-t border-border/50">
+<button class="bg-primary hover:bg-primary-hover text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm transition-all active:scale-95">
+                            Save changes
+                        </button>
+</div>
+</section>
+<!-- Password Card -->
+<section class="bg-surface-card rounded-xl p-8 shadow-soft border border-border/50 hover:shadow-hover transition-shadow duration-300" id="password">
+<div class="mb-6 border-b border-border/50 pb-4">
+<h2 class="text-xl font-headline font-semibold text-ink-heading">Password &amp; Security</h2>
+<p class="text-sm text-ink-muted mt-1">Manage your password and secure your account.</p>
+</div>
+<div class="space-y-5 max-w-md">
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">Current Password</label>
+<div class="relative">
+<input class="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-card" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-heading" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">New Password</label>
+<div class="relative mb-2">
+<input class="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-card" type="password"/>
+</div>
+<!-- Strength Meter -->
+<div class="flex items-center gap-2 mb-1">
+<div class="h-1 flex-1 bg-success rounded-full"></div>
+<div class="h-1 flex-1 bg-success rounded-full"></div>
+<div class="h-1 flex-1 bg-success rounded-full"></div>
+<div class="h-1 flex-1 bg-surface-panel rounded-full"></div>
+</div>
+<p class="text-xs text-success font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">shield_lock</span> Strong password
+                            </p>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink-heading mb-1.5">Confirm New Password</label>
+<input class="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-surface-card" type="password"/>
+</div>
+</div>
+<div class="flex justify-start mt-6">
+<button class="bg-primary hover:bg-primary-hover text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" disabled="">
+                            Update Password
+                        </button>
+</div>
+</section>
+<!-- Notifications Card -->
+<section class="bg-surface-card rounded-xl p-8 shadow-soft border border-border/50 hover:shadow-hover transition-shadow duration-300" id="notifications">
+<div class="mb-6 border-b border-border/50 pb-4">
+<h2 class="text-xl font-headline font-semibold text-ink-heading">Notifications</h2>
+<p class="text-sm text-ink-muted mt-1">Choose how and when we contact you.</p>
+</div>
+<div class="space-y-6">
+<!-- Toggle 1 -->
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-sm font-medium text-ink-heading">Email on new response</h4>
+<p class="text-xs text-ink-muted mt-0.5">Receive an email immediately when a survey gets a new response.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only switch-input" type="checkbox" value=""/>
+<div class="switch-label w-11 h-6 bg-border rounded-full transition-colors duration-200 ease-in-out relative">
+<div class="switch-dot w-5 h-5 bg-white rounded-full shadow absolute top-0.5 left-0.5 transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+<!-- Toggle 2 -->
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-sm font-medium text-ink-heading">Weekly summary digest</h4>
+<p class="text-xs text-ink-muted mt-0.5">A weekly email containing performance metrics and completion rates.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only switch-input" type="checkbox" value=""/>
+<div class="switch-label w-11 h-6 bg-border rounded-full transition-colors duration-200 ease-in-out relative">
+<div class="switch-dot w-5 h-5 bg-white rounded-full shadow absolute top-0.5 left-0.5 transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+<!-- Toggle 3 -->
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-sm font-medium text-ink-heading">Mentions</h4>
+<p class="text-xs text-ink-muted mt-0.5">Notify me when someone mentions me in comments or notes.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only switch-input" type="checkbox" value=""/>
+<div class="switch-label w-11 h-6 bg-border rounded-full transition-colors duration-200 ease-in-out relative">
+<div class="switch-dot w-5 h-5 bg-white rounded-full shadow absolute top-0.5 left-0.5 transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+</div>
+</section>
+<!-- Sessions Card -->
+<section class="bg-surface-card rounded-xl p-8 shadow-soft border border-border/50 hover:shadow-hover transition-shadow duration-300" id="sessions">
+<div class="mb-6 border-b border-border/50 pb-4">
+<h2 class="text-xl font-headline font-semibold text-ink-heading">Active Sessions</h2>
+<p class="text-sm text-ink-muted mt-1">Review devices currently logged into your account.</p>
+</div>
+<div class="space-y-4">
+<!-- Session 1 -->
+<div class="flex items-start justify-between p-4 rounded-lg border border-border/50 bg-surface-panel/30">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-card border border-border flex items-center justify-center text-ink-muted shadow-sm">
+<span class="material-symbols-outlined">laptop_mac</span>
+</div>
+<div>
+<h4 class="text-sm font-medium text-ink-heading flex items-center gap-2">
+                                        Chrome on macOS
+                                        <span class="text-[10px] uppercase tracking-wider font-bold text-success bg-success/10 px-2 py-0.5 rounded">Current</span>
+</h4>
+<p class="text-xs text-ink-muted mt-1">San Francisco, USA • Active now</p>
+<p class="text-xs text-ink-muted mt-0.5 font-mono">IP: 192.168.1.1</p>
+</div>
+</div>
+</div>
+<!-- Session 2 -->
+<div class="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-surface-card hover:bg-surface-panel/30 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-panel border border-border flex items-center justify-center text-ink-muted">
+<span class="material-symbols-outlined">smartphone</span>
+</div>
+<div>
+<h4 class="text-sm font-medium text-ink-heading">Safari on iPhone 15</h4>
+<p class="text-xs text-ink-muted mt-1">New York, USA • Last active 2 hours ago</p>
+</div>
+</div>
+<button class="text-sm font-medium text-ink-muted hover:text-[#0d9488] transition-colors px-3 py-1.5 rounded-lg border border-transparent hover:border-[#0d9488]/20 hover:bg-[#0d9488]/5">
+                                Revoke
+                            </button>
+</div>
+</div>
+</section>
+<!-- Appearance Card -->
+<section class="bg-surface-card rounded-xl p-8 shadow-soft border border-border/50 hover:shadow-hover transition-shadow duration-300" id="appearance">
+<div class="mb-6 border-b border-border/50 pb-4">
+<h2 class="text-xl font-headline font-semibold text-ink-heading">Appearance</h2>
+<p class="text-sm text-ink-muted mt-1">Customize how OpenSurvey looks on your device.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<label class="flex-1 cursor-pointer group">
+<input checked="" class="peer sr-only" name="theme" type="radio" value="light"/>
+<div class="border-2 border-border rounded-xl p-4 flex flex-col items-center gap-3 peer-checked:border-primary peer-checked:bg-primary/5 transition-all group-hover:border-primary/50">
+<span class="material-symbols-outlined text-3xl text-ink-muted group-hover:text-ink-heading peer-checked:text-primary transition-colors">light_mode</span>
+<span class="text-sm font-medium text-ink-heading">Light</span>
+</div>
+</label>
+<label class="flex-1 cursor-pointer group">
+<input class="peer sr-only" name="theme" type="radio" value="dark"/>
+<div class="border-2 border-border rounded-xl p-4 flex flex-col items-center gap-3 peer-checked:border-primary peer-checked:bg-primary/5 transition-all group-hover:border-primary/50">
+<span class="material-symbols-outlined text-3xl text-ink-muted group-hover:text-ink-heading peer-checked:text-primary transition-colors">dark_mode</span>
+<span class="text-sm font-medium text-ink-heading">Dark</span>
+</div>
+</label>
+<label class="flex-1 cursor-pointer group">
+<input class="peer sr-only" name="theme" type="radio" value="system"/>
+<div class="border-2 border-border rounded-xl p-4 flex flex-col items-center gap-3 peer-checked:border-primary peer-checked:bg-primary/5 transition-all group-hover:border-primary/50">
+<span class="material-symbols-outlined text-3xl text-ink-muted group-hover:text-ink-heading peer-checked:text-primary transition-colors">settings_brightness</span>
+<span class="text-sm font-medium text-ink-heading">System</span>
+</div>
+</label>
+</div>
+</section>
+</div>
+</div>
+</main>
+</body></html>

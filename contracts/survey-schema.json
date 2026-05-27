@@ -1,0 +1,1163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opensurvey.dev/contracts/survey-schema.json",
+  "title": "OpenSurvey Survey Definition",
+  "description": "FROZEN Wave-0 contract. Single source of truth for the Survey.questions array, per-question declarative logic, survey-level config (languages/status/close/styling), the segment filter, and answer value shapes. Consumed by: the React runtime (TS), the React builder (TS), and Django (Python jsonschema). Every user-facing display string is an i18n map {langCode: text}. Enum string values MUST match contracts/models.md PART C and contracts/openapi.yaml.",
+  "type": "object",
+  "$comment": "Top-level object validates a full Survey definition payload. Survey.questions == #/properties/questions; Survey.languages == #/properties/languages; Survey.styling == #/properties/styling; Survey.close_on == #/properties/closeConditions. Segment.filter validates against #/$defs/segmentFilter.",
+
+  "required": ["questions", "languages"],
+  "additionalProperties": true,
+  "properties": {
+    "name": { "type": "string", "maxLength": 255 },
+    "status": { "$ref": "#/$defs/surveyStatus" },
+    "languages": { "$ref": "#/$defs/surveyLanguages" },
+    "questions": { "$ref": "#/$defs/questions" },
+    "hiddenFields": { "$ref": "#/$defs/hiddenFields" },
+    "styling": { "$ref": "#/$defs/styling" },
+    "closeConditions": { "$ref": "#/$defs/closeConditions" },
+    "welcomeCard": { "$ref": "#/$defs/welcomeCard" },
+    "endings": {
+      "type": "array",
+      "description": "One or more ending/thank-you screens. action 'end-survey' may target a specific ending by id.",
+      "items": { "$ref": "#/$defs/ending" },
+      "default": []
+    },
+    "followUps": {
+      "type": "array",
+      "description": "Survey-level follow-up automations (the editor's 4th 'Follow-ups' tab). Each entry fires an action when a response is finalized, optionally gated by a condition over the answers. Mirrors how `endings` is defined: a re-broadcast array of #/$defs/followUp. Server-persisted on Survey.follow_ups (JSONField default=[]); the snake_case body key is `follow_ups` -> validated as `followUps` (additionalProperties:false on the item), exactly like welcome_card -> welcomeCard.",
+      "items": { "$ref": "#/$defs/followUp" },
+      "default": []
+    },
+    "blocks": {
+      "type": "array",
+      "description": "OPTIONAL question-grouping overlay (the editor's 'Block 1..N' grouping). ADDITIVE + backward-compatible: an absent/empty `blocks` array == today's exact FLAT behavior. The FLAT `questions[]` array remains the SINGLE SOURCE OF TRUTH for flow order + logic resolution — blocks NEVER move questions inside the schema and NEVER reorder `questions[]`. A block is purely a DISPLAY GROUPING (the builder lists its member questions together) plus an optional WITHIN-BLOCK randomization of the order those member questions are PRESENTED at runtime (seeded per-response so back-nav is stable). The same key on the wire in both the admin body and the model column (`blocks` -> `blocks`, no snake/camel rename), so it needs no _SNAKE_TO_SCHEMA_KEY entry — unlike welcome_card/hidden_fields/follow_ups. Cross-references (every questionId resolves to a real question; a question appears in at most one block; unique block ids) cannot be expressed in jsonschema and are enforced in-code by apps.surveys.blocks_validation.validate_blocks (mirroring apps.followups.validation.validate_follow_ups). DEFERRED (noted, out of scope to bound risk): block-level LOGIC. Server-persisted on Survey.blocks (JSONField default=[]; mirrors `endings`).",
+      "items": { "$ref": "#/$defs/block" },
+      "default": []
+    },
+    "variables": {
+      "type": "array",
+      "description": "OPTIONAL author-defined survey variables (Formbricks parity). ADDITIVE + backward-compatible: an absent/empty `variables` array == today's exact behavior (no variable replay). Each variable is a named, typed mutable value (number | text) seeded from `initialValue`. A NEW `calculate` logic action (#/$defs/action) mutates a variable as the respondent progresses; recall/piping + conditions can READ a variable value by its id (variables share the question/ending/hidden-field id namespace, so a recall token `#recall:<varId>/...#` and a condition `leftQuestionId: <varId>` both resolve to the variable's live value). Variables are computed deterministically at runtime by replaying the matching `calculate` actions along the answered path (apps.surveys.logic.compute_variables + its TS twin) — they are NOT persisted into Response.data. The same key on the wire in both the admin body and the model column (`variables` -> `variables`, no snake/camel rename). Cross-references (unique variable ids across the question/ending/hidden-field/variable namespace; `calculate.variableId` resolves; type-compatible operation; ref values resolve; a condition leaf referencing a variable uses a type-valid operator) cannot be expressed in jsonschema and are enforced in-code by apps.surveys.logic.validate_survey (the same in-code validator that owns the unique-id + operator/type checks; variables are intrinsic to the logic evaluator, so they live there rather than in a separate module — mirrored line-for-line by the TS validateSurvey). Server-persisted on Survey.variables (JSONField default=[]; mirrors `endings`).",
+      "items": { "$ref": "#/$defs/variable" },
+      "default": []
+    },
+    "quotas": {
+      "type": "array",
+      "description": "OPTIONAL response quotas (Formbricks parity). ADDITIVE + backward-compatible: an absent/empty `quotas` array == today's exact behavior (no quota enforcement). Each quota caps how many FINISHED responses matching a `condition` (a #/$defs/conditionGroup — the SAME shape logic rules + follow-ups use) are accepted; once the cap is hit, the (Nth+1) matching respondent is marked OVER-QUOTA at finalize and the runtime shows the quota's `endingId` (or a built-in 'quota full' screen when `endingId` is absent). Enforcement lives in apps.responses.public_services.finalize_response (a hook alongside the webhook/follow-up dispatch); the condition is evaluated by the SAME frozen evaluator as logic (apps.surveys.logic._eval_condition) against the final Response.data (no variable replay) — ZERO drift with logic gating. The same key on the wire in both the admin body and the model column (`quotas` -> `quotas`, no snake/camel rename). Cross-references (unique quota ids; `endingId` resolves to a declared endings[].id; condition `leftQuestionId` refs resolve to a real question/hidden-field id with a type-valid operator) cannot be expressed in jsonschema and are enforced in-code by apps.surveys.quotas_validation.validate_quotas (mirroring apps.followups.validation.validate_follow_ups). NOT exposed on the public runtime serializer — quota conditions are server-only (never leaked to respondents). Server-persisted on Survey.quotas (JSONField default=[]; mirrors `endings`).",
+      "items": { "$ref": "#/$defs/quota" },
+      "default": []
+    }
+  },
+
+  "$defs": {
+
+    "langCode": {
+      "type": "string",
+      "description": "BCP-47-ish language code, or the literal 'default'. Must equal a Language.code declared in survey.languages, OR the reserved 'default'.",
+      "pattern": "^(default|[a-zA-Z]{2,3}(-[A-Za-z0-9]{2,8})?)$"
+    },
+
+    "i18nString": {
+      "type": "object",
+      "description": "A localized display string: map of langCode -> text. MUST contain the 'default' key (the fallback shown when a response language has no entry). Every user-facing string in this schema uses this type. RECALL/PIPING: a headline/subheader string MAY embed recall tokens of the FROZEN form `#recall:<id>/fallback:<text>#`, where <id> is an EARLIER question id or a hiddenFields[].id, and <text> is shown when that source is unanswered (the fallback text may not contain '#'). Tokens are plain text to jsonschema (they validate as ordinary strings) and are resolved at render time by the shared resolveRecall() helper in BOTH the runtime and the builder preview.",
+      "propertyNames": { "$ref": "#/$defs/langCode" },
+      "patternProperties": {
+        "^(default|[a-zA-Z]{2,3}(-[A-Za-z0-9]{2,8})?)$": { "type": "string" }
+      },
+      "required": ["default"],
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+
+    "i18nStringOptional": {
+      "$comment": "Same as i18nString but the 'default' key is not required (for optional subtitles/placeholders).",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/langCode" },
+      "patternProperties": {
+        "^(default|[a-zA-Z]{2,3}(-[A-Za-z0-9]{2,8})?)$": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "questionId": {
+      "type": "string",
+      "description": "Stable, survey-unique question identifier. Referenced by logic jumpTo/conditions and used as the key in Response.data. Immutable once responses exist.",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,63}$"
+    },
+
+    "choiceId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+    },
+
+    "surveyStatus": {
+      "type": "string",
+      "enum": ["draft", "published", "paused", "closed"],
+      "$comment": "MUST match models.md SurveyStatus. Public runtime serves only 'published'."
+    },
+
+    "surveyLanguages": {
+      "type": "array",
+      "description": "Declared languages. Exactly one MUST have default=true; its code is the i18n fallback and pairs with the 'default' i18nString key.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["code", "default"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "$ref": "#/$defs/langCode" },
+          "label": { "type": "string" },
+          "default": { "type": "boolean" },
+          "enabled": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "hiddenFields": {
+      "type": "array",
+      "description": "Survey-level hidden fields (re-broadcast — parallel to the per-question `hidden` type, which remains for Formbricks-compat single-question prefills). Each entry declares a query-param key captured into the response at runtime: a URL like `?userId=123&plan=pro` populates the matching hidden field values into Response.data, where they become available to recall/piping (#recall:<key>/fallback:#) and to logic conditions. The `id` is the Response.data key + the recall lookup key; `name` is the human label shown in the builder. Ids must be unique across hidden fields AND must not collide with question ids (enforced in code, mirroring the unique-question-id check).",
+      "items": { "$ref": "#/$defs/hiddenField" },
+      "default": []
+    },
+
+    "hiddenField": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/questionId",
+          "$comment": "The query-param key AND the Response.data / recall lookup key. Reuses #/$defs/questionId so it shares the question-id charset and can be referenced by recall tokens the same way a question answer is."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Human-friendly label shown in the builder's Hidden fields section + recall insert list. Optional; defaults to the id."
+        }
+      }
+    },
+
+    "variable": {
+      "type": "object",
+      "description": "An author-defined survey variable (Formbricks parity). A named, typed mutable value seeded from `initialValue`; mutated by `calculate` logic actions as the respondent progresses; readable by recall tokens (#recall:<id>/...#) and logic conditions (leftQuestionId: <id>). `id` shares the question/ending/hidden-field id namespace (#/$defs/questionId charset) — it must be unique across that whole namespace (enforced in code, mirroring the unique-question-id check) so recall + condition refs resolve unambiguously.",
+      "required": ["id", "name", "type", "initialValue"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/questionId",
+          "$comment": "The variable id AND its recall lookup key / condition leftQuestionId. Reuses #/$defs/questionId so it shares the id charset + namespace with questions/endings/hidden fields."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Human-friendly label shown in the builder's Variables panel + recall/calculate insert lists."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["number", "text"],
+          "description": "The variable's value type. number -> assign/add/subtract/multiply/divide; text -> assign/concat (#/$defs/action calculate.operation validity is enforced in-code)."
+        },
+        "initialValue": {
+          "type": ["number", "string"],
+          "description": "The variable's seed value (a number for type:number, a string for type:text — enforced by the type-conditional allOf below). Variable replay starts from this value each response."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "number" } } },
+          "then": { "properties": { "initialValue": { "type": "number" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "text" } } },
+          "then": { "properties": { "initialValue": { "type": "string" } } }
+        }
+      ]
+    },
+
+    "quota": {
+      "type": "object",
+      "description": "One response quota (survey `quotas[]`). Caps how many FINISHED responses matching `condition` are accepted; once `limit` matching finished responses exist, the next (Nth+1) matching respondent is marked over-quota at finalize and routed to `endingId` (or a built-in 'quota full' screen when absent). `condition` is a #/$defs/conditionGroup — the SAME boolean-tree shape logic rules + follow-up triggers use, evaluated by the SAME frozen evaluator against the final Response.data. Constraints jsonschema can't express (checked in-code by apps.surveys.quotas_validation.validate_quotas, mirroring follow-up cross-refs): unique quota ids; `endingId` resolves to a declared endings[].id; every condition `leftQuestionId` resolves to a real question/hidden-field id with a type-valid operator.",
+      "required": ["id", "name", "limit", "condition"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/questionId",
+          "$comment": "Stable, survey-unique quota id (reuses the question-id charset). Distinct namespace from questions/endings/hidden-fields/variables — a quota id is NOT a Response.data key or a recall/condition source, so it is NOT cross-checked against that id namespace; only uniqueness AMONG quotas is enforced."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Human label shown in the builder's Quotas section (internal only — no i18n). E.g. 'US respondents', 'Detractors'."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of FINISHED responses matching `condition` to accept. The (limit+1)th matching finished respondent is over-quota."
+        },
+        "condition": {
+          "$ref": "#/$defs/conditionGroup",
+          "description": "The matching condition (a #/$defs/conditionGroup over the response answers + hidden fields, identical to logic conditions). A response counts toward this quota iff its final Response.data satisfies this condition (evaluated by the SAME Python/TS evaluator as logic, _eval_condition)."
+        },
+        "endingId": {
+          "$ref": "#/$defs/questionId",
+          "$comment": "OPTIONAL: which ending screen to show an over-quota respondent. Must resolve to a declared endings[].id (enforced in-code: quota_unknown_ending). Absent -> the runtime shows a built-in 'quota full' screen (no survey ending needed)."
+        }
+      }
+    },
+
+    "calcValue": {
+      "description": "The right-hand operand of a `calculate` action: a typed LITERAL scalar, or a REF to a question answer / another variable / hidden field by id (all share the id namespace). The tagged shape removes the literal-vs-id ambiguity (is 'q1' the string \"q1\" or a reference to question q1?). The in-code validator + evaluator resolve a ref by id against the answers map enriched with the live variable values; an unresolved/empty/type-incompatible operand makes the calculate a deterministic no-op (the variable is left unchanged) — identical in TS and Python.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "literal" },
+            "value": { "type": ["string", "number"], "$comment": "string for text ops; number for numeric ops (validity enforced in-code)." }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "ref"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "ref" },
+            "ref": { "$ref": "#/$defs/questionId", "$comment": "An id in the shared namespace: a question id, another variable id, or a hidden-field id." }
+          }
+        }
+      ]
+    },
+
+    "closeConditions": {
+      "type": ["object", "null"],
+      "description": "Auto-close rules. Either or both may be set. by_date closes after the timestamp; by_response_cap closes once finished responses reach the cap. null = no auto-close.",
+      "additionalProperties": false,
+      "properties": {
+        "by_date": { "type": "string", "format": "date-time" },
+        "by_response_cap": { "type": "integer", "minimum": 1 }
+      }
+    },
+
+    "styling": {
+      "type": "object",
+      "description": "Theming. All keys optional; runtime applies defaults. Colors are CSS color strings (#hex or rgb()).",
+      "additionalProperties": false,
+      "properties": {
+        "brandColor": { "type": "string" },
+        "questionColor": { "type": "string" },
+        "backgroundColor": { "type": "string" },
+        "buttonColor": { "type": "string" },
+        "buttonTextColor": { "type": "string" },
+        "background": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "type": "string", "enum": ["color", "image", "none"] },
+            "value": { "type": "string" }
+          }
+        },
+        "logoUrl": { "type": "string", "format": "uri" },
+        "roundness": { "type": "number", "minimum": 0, "maximum": 32 },
+        "hideProgressBar": { "type": "boolean", "default": false },
+        "cardArrangement": { "type": "string", "enum": ["straight", "casual"], "default": "straight" }
+      }
+    },
+
+    "welcomeCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "headline": { "$ref": "#/$defs/i18nString" },
+        "html": { "$ref": "#/$defs/i18nStringOptional" },
+        "buttonLabel": { "$ref": "#/$defs/i18nStringOptional" }
+      }
+    },
+
+    "ending": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/questionId" },
+        "type": { "type": "string", "enum": ["endScreen", "redirect"] },
+        "headline": { "$ref": "#/$defs/i18nStringOptional" },
+        "subheader": { "$ref": "#/$defs/i18nStringOptional" },
+        "buttonLabel": { "$ref": "#/$defs/i18nStringOptional" },
+        "buttonLink": { "type": "string", "format": "uri" },
+        "redirectUrl": { "type": "string", "format": "uri" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "redirect" } } },
+          "then": { "required": ["redirectUrl"] }
+        }
+      ]
+    },
+
+    "followUp": {
+      "type": "object",
+      "description": "One survey follow-up automation (the editor's 'Follow-ups' tab). On response finalize, if `trigger` fires (optionally gated by a `condition` over the answers), `action` runs — v1: send an email to a response-derived recipient. Re-broadcast structure: {id, name?, trigger, action}, mirroring #/$defs/ending's {id, type, ...} shape. `id` is stable + survey-unique (the FollowUpDelivery dedup key per response).",
+      "required": ["id", "trigger", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/questionId" },
+        "name": { "type": "string", "maxLength": 255, "description": "Human label shown in the builder list. Optional." },
+        "trigger": { "$ref": "#/$defs/followUpTrigger" },
+        "action": { "$ref": "#/$defs/followUpAction" }
+      }
+    },
+
+    "followUpTrigger": {
+      "type": "object",
+      "description": "When a follow-up fires. v1 supports the 'responseFinished' event (fires on the finalize POST). An optional `condition` (a #/$defs/conditionGroup over the response answers + hidden fields, identical to logic conditions) gates the fire: absent/null condition = always fire on finish; present = fire only when it evaluates true against the final Response.data (evaluated by the SAME Python/TS evaluator as logic, _eval_condition).",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["responseFinished"] },
+        "condition": {
+          "oneOf": [
+            { "$ref": "#/$defs/conditionGroup" },
+            { "type": "null" }
+          ],
+          "description": "Optional gating condition. null/absent = unconditional (fire on every finish)."
+        }
+      }
+    },
+
+    "followUpAction": {
+      "type": "object",
+      "description": "What a follow-up does. v1: type 'sendEmail' — render `subject` (i18nString + recall tokens) and `body` (HTML i18nString + recall tokens) against the response, resolve `recipient`, and enqueue the email via the existing email infra (apps.followups.tasks -> the shared send_mail_task / Postmark backend). Recall tokens (#recall:<id>/fallback:<text>#) in subject/body resolve against the final Response.data (answers + captured hidden fields) at send time.",
+      "required": ["type", "recipient", "subject", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["sendEmail"] },
+        "recipient": { "$ref": "#/$defs/followUpRecipient" },
+        "subject": {
+          "$ref": "#/$defs/i18nString",
+          "$comment": "Email subject line; i18nString (default required). MAY embed recall tokens, resolved against Response.data at send time, then stripped of HTML (subjects are plain text)."
+        },
+        "body": {
+          "$ref": "#/$defs/i18nString",
+          "$comment": "Email body HTML; i18nString (default required). MAY embed recall tokens (resolved first) + a sanitized HTML subset (same allow-list as question descriptionHtml)."
+        }
+      }
+    },
+
+    "followUpRecipient": {
+      "type": "object",
+      "description": "Who receives a follow-up email. A DISCRIMINATED object (NOT a string overload — a fixed email like 'q1@x.com' must not collide with a question id 'q1'). Three forms:\n- {type:'contact'} — the response's associated Contact's `email` attribute (server-derived from the SurveyLink, the only trusted contact source; rbac.md §11). No email on the contact -> no send (recorded skipped).\n- {type:'fixedEmail', email} — a static address (e.g. an ops inbox).\n- {type:'responseField', questionId} — the email the RESPONDENT typed: the answer at `questionId` (a contactInfo question's `email` sub-field, or an openText/contactInfo answer that is itself an email string). This is the 'respondent' recipient.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "contact" } }
+        },
+        {
+          "type": "object",
+          "required": ["type", "email"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "fixedEmail" },
+            "email": { "type": "string", "format": "email", "maxLength": 320 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "questionId"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "responseField" },
+            "questionId": { "$ref": "#/$defs/questionId" }
+          }
+        }
+      ]
+    },
+
+    "block": {
+      "type": "object",
+      "description": "One question-grouping block (survey `blocks[]`). A block GROUPS a subset of the flat `questions[]` for display and OPTIONALLY randomizes the order in which its member questions are presented at runtime. It does NOT own the questions (they live in `questions[]`) and does NOT reorder the flat array — `questionIds` is a list of REFERENCES into `questions[]`. Constraints jsonschema can't express (checked in-code, mirroring follow-up cross-refs): each id in `questionIds` resolves to a real question; a question id appears in at most one block across the whole survey; block ids are unique.",
+      "required": ["id", "questionIds"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/questionId",
+          "$comment": "Stable, survey-unique block id (reuses the question-id charset). Distinct namespace from questions/endings — a block id is NOT a Response.data key, so it is NOT cross-checked against the question/ending/hidden-field id namespace; only uniqueness AMONG blocks is enforced."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Human label shown on the block in the builder (e.g. 'Block 1', 'Demographics'). Optional; the builder defaults to 'Block N'."
+        },
+        "questionIds": {
+          "type": "array",
+          "description": "The member question ids, IN BUILDER DISPLAY ORDER (a presentation grouping, not the flow order — flow order is `questions[]`). Each entry MUST be a question id present in `questions[]`; a question id may appear in at most ONE block (enforced in-code). May be empty (an empty block is harmless — it groups nothing and randomizes nothing).",
+          "items": { "$ref": "#/$defs/questionId" },
+          "default": []
+        },
+        "randomize": {
+          "type": "string",
+          "enum": ["none", "all", "exceptLast"],
+          "default": "none",
+          "description": "Within-block question-order randomization at runtime: 'none' (default — present member questions in `questions[]` flat order, byte-identical to no-block behavior), 'all' (shuffle all member questions), 'exceptLast' (shuffle all but the last member question, which stays pinned at the block's end). Seeded per-response (the response id) so the permutation is stable across back-navigation. Mirrors the per-question singleSelect/multiSelect `shuffle` enum."
+        }
+      }
+    },
+
+    "questions": {
+      "type": "array",
+      "description": "Ordered question array. Order defines linear flow; logic overrides via jumpTo. IDs must be unique (enforced in code: jsonschema cannot assert cross-item uniqueness of a nested key, so the Python/TS validators add a 'unique question ids' check — see REVIEW.md).",
+      "items": { "$ref": "#/$defs/question" }
+    },
+
+    "question": {
+      "type": "object",
+      "description": "Discriminated union on 'type'. Common fields below; per-type config under oneOf.",
+      "$comment": "INTENTIONAL: `additionalProperties` is deliberately omitted (i.e. left open) on the question object so new common question-level fields (e.g. future `recallInfo`, `imageUrl`) can be added without breaking older validators during the forward-compat window. Tightening is per-type instead: each `config` object under oneOf sets `additionalProperties: false`. Do not add `additionalProperties: false` here without a contract re-broadcast.",
+      "required": ["id", "type", "headline"],
+      "properties": {
+        "id": { "$ref": "#/$defs/questionId" },
+        "type": { "$ref": "#/$defs/questionType" },
+        "headline": { "$ref": "#/$defs/i18nString" },
+        "subheader": { "$ref": "#/$defs/i18nStringOptional" },
+        "descriptionHtml": {
+          "$ref": "#/$defs/i18nStringOptional",
+          "description": "OPTIONAL rich-text question description (a SANITIZED HTML subset). RE-BROADCAST NOTE (backward-compatible additive field): when present + non-empty for the active language, the runtime renders this (sanitized) below the headline IN PLACE OF the plain `subheader`; absent it, behavior is unchanged (plain `subheader`). Allowed tags are b/strong/i/em/u/a[href]/br/p/ul/ol/li/span ONLY — every other tag, all event-handler attributes, and javascript:/data:/vbscript: hrefs are stripped at render time by the shared sanitizeHtml() helper (frontend/src/lib/sanitizeHtml.ts). Like other display strings it MAY embed recall tokens of the FROZEN form `#recall:<id>/fallback:<text>#`; tokens are resolved (resolveRecall) BEFORE sanitization so piped answer values cannot smuggle markup. Stored as an i18nStringOptional map (per-language descriptions)."
+        },
+        "required": { "type": "boolean", "default": false },
+        "logic": {
+          "type": "array",
+          "description": "Ordered list of logic rules evaluated AFTER this question is answered. See #/$defs/logicRule and the evaluation-order note.",
+          "items": { "$ref": "#/$defs/logicRule" },
+          "default": []
+        },
+        "buttonLabel": { "$ref": "#/$defs/i18nStringOptional" },
+        "backButtonLabel": { "$ref": "#/$defs/i18nStringOptional" }
+      },
+      "oneOf": [
+        { "$ref": "#/$defs/q_openText" },
+        { "$ref": "#/$defs/q_singleSelect" },
+        { "$ref": "#/$defs/q_multiSelect" },
+        { "$ref": "#/$defs/q_pictureChoice" },
+        { "$ref": "#/$defs/q_rating" },
+        { "$ref": "#/$defs/q_nps" },
+        { "$ref": "#/$defs/q_cta" },
+        { "$ref": "#/$defs/q_consent" },
+        { "$ref": "#/$defs/q_date" },
+        { "$ref": "#/$defs/q_fileUpload" },
+        { "$ref": "#/$defs/q_matrix" },
+        { "$ref": "#/$defs/q_ranking" },
+        { "$ref": "#/$defs/q_number" },
+        { "$ref": "#/$defs/q_contactInfo" },
+        { "$ref": "#/$defs/q_address" },
+        { "$ref": "#/$defs/q_scheduleMeeting" },
+        { "$ref": "#/$defs/q_hidden" }
+      ]
+    },
+
+    "questionType": {
+      "type": "string",
+      "description": "The 16 v1 question types + hidden fields. (Re-broadcast: added pictureChoice authoring + address + scheduleMeeting to reach Formbricks question-type parity.) FROZEN; adding a type is a contract re-broadcast.",
+      "enum": [
+        "openText",
+        "singleSelect",
+        "multiSelect",
+        "pictureChoice",
+        "rating",
+        "nps",
+        "cta",
+        "consent",
+        "date",
+        "fileUpload",
+        "matrix",
+        "ranking",
+        "number",
+        "contactInfo",
+        "address",
+        "scheduleMeeting",
+        "hidden"
+      ]
+    },
+
+    "choice": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/choiceId" },
+        "label": { "$ref": "#/$defs/i18nString" },
+        "isOther": { "type": "boolean", "default": false, "description": "If true, renders an 'Other' free-text input; answer captures the typed value." }
+      }
+    },
+
+    "pictureChoiceOption": {
+      "type": "object",
+      "required": ["id", "imageUrl"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/choiceId" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "label": { "$ref": "#/$defs/i18nStringOptional" }
+      }
+    },
+
+    "q_openText": {
+      "properties": {
+        "type": { "const": "openText" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "inputType": { "type": "string", "enum": ["short", "long"], "default": "short" },
+            "placeholder": { "$ref": "#/$defs/i18nStringOptional" },
+            "minLength": { "type": "integer", "minimum": 0 },
+            "maxLength": { "type": "integer", "minimum": 1 }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_singleSelect": {
+      "properties": {
+        "type": { "const": "singleSelect" },
+        "config": {
+          "type": "object",
+          "required": ["choices"],
+          "additionalProperties": false,
+          "properties": {
+            "choices": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/choice" } },
+            "shuffle": { "type": "string", "enum": ["none", "all", "exceptLast"], "default": "none" },
+            "display": { "type": "string", "enum": ["list", "dropdown"], "default": "list" }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_multiSelect": {
+      "properties": {
+        "type": { "const": "multiSelect" },
+        "config": {
+          "type": "object",
+          "required": ["choices"],
+          "additionalProperties": false,
+          "properties": {
+            "choices": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/choice" } },
+            "shuffle": { "type": "string", "enum": ["none", "all", "exceptLast"], "default": "none" },
+            "minSelections": { "type": "integer", "minimum": 0 },
+            "maxSelections": { "type": "integer", "minimum": 1 }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_pictureChoice": {
+      "properties": {
+        "type": { "const": "pictureChoice" },
+        "config": {
+          "type": "object",
+          "required": ["options"],
+          "additionalProperties": false,
+          "properties": {
+            "options": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/pictureChoiceOption" } },
+            "allowMulti": { "type": "boolean", "default": false }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_rating": {
+      "properties": {
+        "type": { "const": "rating" },
+        "config": {
+          "type": "object",
+          "required": ["range", "scale"],
+          "additionalProperties": false,
+          "properties": {
+            "range": { "type": "integer", "minimum": 3, "maximum": 10, "description": "Number of steps, e.g. 5 stars." },
+            "scale": { "type": "string", "enum": ["star", "number", "smiley"] },
+            "lowerLabel": { "$ref": "#/$defs/i18nStringOptional" },
+            "upperLabel": { "$ref": "#/$defs/i18nStringOptional" }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_nps": {
+      "properties": {
+        "type": { "const": "nps" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lowerLabel": { "$ref": "#/$defs/i18nStringOptional" },
+            "upperLabel": { "$ref": "#/$defs/i18nStringOptional" }
+          },
+          "$comment": "NPS is always a fixed 0..10 scale (11 buttons). No range config. Analytics computes the NPS score from the 0..10 answer (detractors 0-6, passives 7-8, promoters 9-10)."
+        }
+      }
+    },
+
+    "q_cta": {
+      "$comment": "Statement / Call-to-Action. Displays content; optional external link. Not a data-collecting question unless 'required' (acts as an acknowledged gate). Answer is boolean (clicked/dismissed) or null.",
+      "properties": {
+        "type": { "const": "cta" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "html": { "$ref": "#/$defs/i18nStringOptional" },
+            "buttonLabel": { "$ref": "#/$defs/i18nStringOptional" },
+            "buttonUrl": { "type": "string", "format": "uri" },
+            "dismissable": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+
+    "q_consent": {
+      "properties": {
+        "type": { "const": "consent" },
+        "config": {
+          "type": "object",
+          "required": ["label"],
+          "additionalProperties": false,
+          "properties": {
+            "label": { "$ref": "#/$defs/i18nString", "$comment": "The consent checkbox label, e.g. 'I agree to the terms'." },
+            "html": { "$ref": "#/$defs/i18nStringOptional" }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_date": {
+      "properties": {
+        "type": { "const": "date" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": { "type": "string", "enum": ["YYYY-MM-DD", "DD-MM-YYYY", "MM-DD-YYYY"], "default": "YYYY-MM-DD" },
+            "min": { "type": "string", "format": "date" },
+            "max": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    },
+
+    "q_fileUpload": {
+      "properties": {
+        "type": { "const": "fileUpload" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowMultiple": { "type": "boolean", "default": false },
+            "maxFiles": { "type": "integer", "minimum": 1, "default": 1 },
+            "maxSizeMb": { "type": "number", "minimum": 1, "maximum": 100, "default": 10 },
+            "allowedExtensions": {
+              "type": "array",
+              "items": { "type": "string", "pattern": "^\\.[a-zA-Z0-9]+$" },
+              "description": "e.g. ['.pdf', '.png']. Empty = allow all (still server-validated)."
+            }
+          }
+        }
+      }
+    },
+
+    "q_matrix": {
+      "properties": {
+        "type": { "const": "matrix" },
+        "config": {
+          "type": "object",
+          "required": ["rows", "columns", "selection"],
+          "additionalProperties": false,
+          "properties": {
+            "rows": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/choice" } },
+            "columns": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/choice" } },
+            "selection": { "type": "string", "enum": ["single", "multiple"], "description": "Per-row: one column or many." }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_ranking": {
+      "properties": {
+        "type": { "const": "ranking" },
+        "config": {
+          "type": "object",
+          "required": ["choices"],
+          "additionalProperties": false,
+          "properties": {
+            "choices": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/choice" } }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_number": {
+      "properties": {
+        "type": { "const": "number" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "step": { "type": "number", "exclusiveMinimum": 0 },
+            "placeholder": { "$ref": "#/$defs/i18nStringOptional" }
+          }
+        }
+      }
+    },
+
+    "q_contactInfo": {
+      "$comment": "Contact-info composite. Each enabled sub-field collects a validated value; answer is an object keyed by sub-field. email/phone carry format validation.",
+      "properties": {
+        "type": { "const": "contactInfo" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fields": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "firstName": { "$ref": "#/$defs/contactSubField" },
+                "lastName": { "$ref": "#/$defs/contactSubField" },
+                "email": { "$ref": "#/$defs/contactSubField" },
+                "phone": { "$ref": "#/$defs/contactSubField" },
+                "company": { "$ref": "#/$defs/contactSubField" }
+              },
+              "minProperties": 1
+            }
+          },
+          "required": ["fields"]
+        }
+      },
+      "required": ["config"]
+    },
+
+    "contactSubField": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show": { "type": "boolean", "default": true },
+        "required": { "type": "boolean", "default": false },
+        "placeholder": { "$ref": "#/$defs/i18nStringOptional" }
+      }
+    },
+
+    "q_address": {
+      "$comment": "Address composite (multi-subfield, mirrors contactInfo). Each enabled sub-field collects a plain-text value; answer is an object keyed by sub-field. Postal codes / regions are NOT format-validated (they vary by country) — values are plain text, like contactInfo's non-email fields.",
+      "properties": {
+        "type": { "const": "address" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fields": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "addressLine1": { "$ref": "#/$defs/addressSubField" },
+                "addressLine2": { "$ref": "#/$defs/addressSubField" },
+                "city": { "$ref": "#/$defs/addressSubField" },
+                "state": { "$ref": "#/$defs/addressSubField" },
+                "zip": { "$ref": "#/$defs/addressSubField" },
+                "country": { "$ref": "#/$defs/addressSubField" }
+              },
+              "minProperties": 1
+            }
+          },
+          "required": ["fields"]
+        }
+      },
+      "required": ["config"]
+    },
+
+    "addressSubField": {
+      "$comment": "An address sub-field (addressLine1/addressLine2/city/state/zip/country). Same shape as contactSubField.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show": { "type": "boolean", "default": true },
+        "required": { "type": "boolean", "default": false },
+        "placeholder": { "$ref": "#/$defs/i18nStringOptional" }
+      }
+    },
+
+    "q_scheduleMeeting": {
+      "$comment": "Schedule-a-meeting via a Cal.com inline embed. config.calLink is the cal.com path (username or username/event-type, e.g. 'jane' or 'jane/30min'). The runtime renders the inline embed; the answer records the booking ({booked:true, uid?}). Treated as object-shaped for logic (isSubmitted/isSkipped only).",
+      "properties": {
+        "type": { "const": "scheduleMeeting" },
+        "config": {
+          "type": "object",
+          "required": ["calLink"],
+          "additionalProperties": false,
+          "properties": {
+            "calLink": {
+              "type": "string",
+              "minLength": 1,
+              "description": "cal.com path: 'username' or 'username/event-type'. Not a full URL — the embed prepends https://cal.com/."
+            }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "q_hidden": {
+      "$comment": "Hidden field: not rendered. Value supplied via URL query param or single-use/per-contact link prefill. Stored in Response.data like any answer. Carries no UI; headline used only as an admin label.",
+      "properties": {
+        "type": { "const": "hidden" },
+        "config": {
+          "type": "object",
+          "required": ["fieldKey"],
+          "additionalProperties": false,
+          "properties": {
+            "fieldKey": { "type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$", "description": "Query-param / prefill key (e.g. 'utm_source'). Also the Response.data key if different from question id is desired; default key is the question id." }
+          }
+        }
+      },
+      "required": ["config"]
+    },
+
+    "logicRule": {
+      "type": "object",
+      "description": "A single logic rule attached to a question. If `condition` evaluates true against the response so far, `action` fires. Rules are evaluated top-to-bottom; see evaluation-order note in the action $comment.",
+      "required": ["id", "condition", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{1,64}$" },
+        "condition": { "$ref": "#/$defs/conditionGroup" },
+        "action": { "$ref": "#/$defs/action" }
+      }
+    },
+
+    "conditionGroup": {
+      "type": "object",
+      "description": "Boolean tree of conditions. Either a leaf (single condition) or a connector node with `connector` + `conditions`.",
+      "oneOf": [
+        { "$ref": "#/$defs/conditionLeaf" },
+        {
+          "type": "object",
+          "required": ["connector", "conditions"],
+          "additionalProperties": false,
+          "properties": {
+            "connector": { "type": "string", "enum": ["and", "or"] },
+            "conditions": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/conditionGroup" }
+            }
+          }
+        }
+      ]
+    },
+
+    "conditionLeaf": {
+      "type": "object",
+      "description": "A single comparison against a question's answer. `operator` validity depends on the referenced question's type (see operator-validity table below). The evaluator (TS & Python) enforces operator/type validity; jsonschema only checks structure.",
+      "required": ["leftQuestionId", "operator"],
+      "additionalProperties": false,
+      "properties": {
+        "leftQuestionId": {
+          "$ref": "#/$defs/questionId",
+          "description": "Question whose answer is the left operand. SHOULD reference a question at or before the rule's host question in linear order (forward refs are undefined at eval time and rejected by the validator)."
+        },
+        "operator": { "$ref": "#/$defs/operator" },
+        "value": {
+          "description": "Right operand. Type depends on operator/question: string|number|boolean for scalar comparisons; array for isOneOf/includesAll/includesAny; omitted for isSubmitted/isSkipped/isEmpty/isNotEmpty.",
+          "type": ["string", "number", "boolean", "array", "null"],
+          "items": { "type": ["string", "number"] }
+        }
+      }
+    },
+
+    "operator": {
+      "type": "string",
+      "description": "Comparison operators. OPERATOR-VALIDITY BY TYPE (enforced by evaluators + builder, per REVIEW.md):\n- openText/contactInfo/address(text): equals, notEquals, contains, doesNotContain, startsWith, endsWith, isSubmitted, isSkipped, isEmpty, isNotEmpty\n- singleSelect/pictureChoice(single): equals, notEquals, isOneOf, isSubmitted, isSkipped\n- multiSelect/pictureChoice(multi): includesAll, includesAny, includesOnly, doesNotInclude, isSubmitted, isSkipped\n- rating/nps/number: equals, notEquals, greaterThan, greaterThanOrEqual, lessThan, lessThanOrEqual, isOneOf, isSubmitted, isSkipped\n- date: equals, notEquals, before, after, isSubmitted, isSkipped\n- consent: isAccepted, isNotAccepted (boolean), isSubmitted, isSkipped\n- cta: isClicked, isSkipped\n- matrix/ranking/scheduleMeeting: isSubmitted, isSkipped (fine-grained operators deferred; scheduleMeeting's booking object is opaque)",
+      "$comment": "OPERAND TYPES for the equality-family operators (equals, notEquals, isOneOf): these operate on SCALARS (string/number/boolean) or ARRAYS OF SCALARS only — matching #/$defs/conditionLeaf 'value', which permits string|number|boolean|array|null but NOT object. An OBJECT-SHAPED answer (the answerShapes for contactInfo -> {firstName?,...}, address -> {addressLine1?,...}, matrix -> {rowId: columnId|[columnId]}, scheduleMeeting -> {booked,uid?}) is NOT a valid comparison target for these operators and deterministically DOES NOT MATCH: equals -> false, notEquals -> true (vacuously not-equal), isOneOf -> false. This holds IDENTICALLY in the TS and Python evaluators (no deep object comparison). This resolves the prior TS<->PY drift where Python deep-compared dicts while TS returned false (FU-1; pinned by the 'operators — equals/notEquals on a contactInfo (object-shaped) answer -> no-match (TS<->PY drift-guard)' fixture). Note: most equality-family-on-object-answer pairings are already rejected by validateSurvey's operator/type table (isOneOf is not a contactInfo/address operator; matrix/ranking/scheduleMeeting permit only isSubmitted/isSkipped), so the validator-reachable case is equals/notEquals on contactInfo/address (and hidden); the no-match rule above governs any object-shaped left operand should one reach the evaluator.",
+      "enum": [
+        "equals",
+        "notEquals",
+        "contains",
+        "doesNotContain",
+        "startsWith",
+        "endsWith",
+        "greaterThan",
+        "greaterThanOrEqual",
+        "lessThan",
+        "lessThanOrEqual",
+        "before",
+        "after",
+        "isOneOf",
+        "includesAll",
+        "includesAny",
+        "includesOnly",
+        "doesNotInclude",
+        "isAccepted",
+        "isNotAccepted",
+        "isClicked",
+        "isSubmitted",
+        "isSkipped",
+        "isEmpty",
+        "isNotEmpty"
+      ]
+    },
+
+    "action": {
+      "type": "object",
+      "description": "What fires when a rule's condition is true. EVALUATION ORDER (frozen; implemented identically in TS runtime + Python):\n1. The respondent answers question Q (or skips, if optional).\n2. Q's `logic` rules are evaluated in array order against the full set of answers given so far (including Q's just-submitted answer).\n3. The FIRST rule whose `condition` is true determines the navigation action (jumpTo / skip / endSurvey). 'require' actions are NOT navigation and are applied during answering (they make a target question required); all matching 'require' rules apply.\n4. If no rule matches, advance to the next question in linear array order.\n5. A jumpTo target must be a later question id or an ending id; backward jumps are rejected by the validator to guarantee termination.\n6. 'skip' removes the named target question(s) from the path for THIS respondent; their Response.data keys are absent.\nThe shared fixture suite (REVIEW.md) encodes (survey_logic, answers) -> expected_next cases run in BOTH languages.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "target"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "jumpTo" },
+            "target": { "$ref": "#/$defs/questionId", "$comment": "A later question id OR an ending id." }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "target"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "skip" },
+            "target": {
+              "oneOf": [
+                { "$ref": "#/$defs/questionId" },
+                { "type": "array", "items": { "$ref": "#/$defs/questionId" }, "minItems": 1 }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "endSurvey" },
+            "endingId": { "$ref": "#/$defs/questionId", "$comment": "Optional: which ending screen to show. Defaults to the first ending." }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "target"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "require" },
+            "target": { "$ref": "#/$defs/questionId", "$comment": "Make this (later) question required for this respondent." }
+          }
+        },
+        {
+          "type": "object",
+          "$comment": "calculate is a NON-NAVIGATION action (like require): it mutates a survey variable but does NOT decide the next step. During evaluation `firstMatchingNavAction` keeps scanning past it; all matching calculate rules on a host apply in array order (their mutations are visible to subsequent rules on the same host), and a matching navigation rule (jumpTo/skip/endSurvey) HALTS the scan (a calculate after a matched nav rule does not apply). `variableId` must resolve to a declared survey.variables[].id; `operation` must be valid for that variable's type (number -> assign/add/subtract/multiply/divide; text -> assign/concat — enforced in-code). `value` is a #/$defs/calcValue (literal scalar OR a ref by id). A divide-by-zero, a non-numeric numeric operand, or an unresolvable/empty/type-incompatible ref makes the calculate a deterministic NO-OP (variable unchanged) — identical in TS + Python.",
+          "required": ["type", "variableId", "operation", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "calculate" },
+            "variableId": { "$ref": "#/$defs/questionId", "$comment": "The survey.variables[].id this action mutates." },
+            "operation": {
+              "type": "string",
+              "enum": ["assign", "add", "subtract", "multiply", "divide", "concat"],
+              "$comment": "number variables: assign/add/subtract/multiply/divide. text variables: assign/concat. Operation/type validity is enforced in-code by validate_survey (the schema only checks the enum)."
+            },
+            "value": { "$ref": "#/$defs/calcValue" }
+          }
+        }
+      ]
+    },
+
+    "segmentFilter": {
+      "type": "object",
+      "description": "Reusable contact filter stored on Segment.filter (models.md §2.13). Boolean tree of attribute conditions. Operators must be valid for the ContactAttributeKey.data_type (string|number|boolean|date) — same operator family as conditionLeaf, enforced in code.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["attributeKey", "operator"],
+          "additionalProperties": false,
+          "properties": {
+            "attributeKey": { "type": "string", "description": "ContactAttributeKey.key" },
+            "operator": { "$ref": "#/$defs/operator" },
+            "value": { "type": ["string", "number", "boolean", "array", "null"] }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["connector", "conditions"],
+          "additionalProperties": false,
+          "properties": {
+            "connector": { "type": "string", "enum": ["and", "or"] },
+            "conditions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/segmentFilter" } }
+          }
+        }
+      ]
+    },
+
+    "answerShapes": {
+      "$comment": "NON-VALIDATING reference doc: the value stored in Response.data[questionId] per type. Used by analytics + the Python finalize validator (which checks answers against question type). openText/cta-> string|bool; singleSelect-> choiceId (or {choiceId, other} when isOther); multiSelect-> [choiceId]; pictureChoice-> choiceId (single) or [choiceId] (when allowMulti); rating-> integer 1..range; nps-> integer 0..10; consent-> boolean; date-> 'YYYY-MM-DD'; fileUpload-> [fileUrl]; number-> number; ranking-> [choiceId] ordered; matrix-> {rowId: columnId | [columnId]}; contactInfo-> {firstName?,lastName?,email?,phone?,company?}; address-> {addressLine1?,addressLine2?,city?,state?,zip?,country?}; scheduleMeeting-> {booked:true, uid?:string} once a meeting is booked; hidden-> string."
+    }
+  },
+
+  "examples": [
+    {
+      "$comment": "Example 1 — simple single-question NPS survey.",
+      "name": "Product NPS",
+      "status": "published",
+      "languages": [ { "code": "en", "label": "English", "default": true } ],
+      "styling": { "brandColor": "#0F62FE", "hideProgressBar": true },
+      "questions": [
+        {
+          "id": "nps1",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?", "en": "How likely are you to recommend us?" },
+          "config": {
+            "lowerLabel": { "default": "Not at all likely", "en": "Not at all likely" },
+            "upperLabel": { "default": "Extremely likely", "en": "Extremely likely" }
+          },
+          "logic": []
+        }
+      ],
+      "endings": [
+        { "id": "end1", "type": "endScreen", "headline": { "default": "Thank you!", "en": "Thank you!" } }
+      ]
+    },
+
+    {
+      "$comment": "Example 2 — multi-question survey with a conditional jump. Detractors (NPS <= 6) jump to an open-text reason; others go to the rating, then both reach the same ending.",
+      "name": "Post-purchase feedback",
+      "status": "published",
+      "languages": [
+        { "code": "en", "label": "English", "default": true },
+        { "code": "es", "label": "Español", "default": false }
+      ],
+      "questions": [
+        {
+          "id": "nps",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?", "en": "How likely are you to recommend us?", "es": "¿Qué tan probable es que nos recomiende?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": { "leftQuestionId": "nps", "operator": "lessThanOrEqual", "value": 6 },
+              "action": { "type": "jumpTo", "target": "reason" }
+            }
+          ]
+        },
+        {
+          "id": "rating",
+          "type": "rating",
+          "required": false,
+          "headline": { "default": "How was the checkout experience?", "en": "How was the checkout experience?", "es": "¿Cómo fue la experiencia de pago?" },
+          "config": { "range": 5, "scale": "star" },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": { "leftQuestionId": "rating", "operator": "isSubmitted" },
+              "action": { "type": "jumpTo", "target": "end1" }
+            }
+          ]
+        },
+        {
+          "id": "reason",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "What could we do better?", "en": "What could we do better?", "es": "¿Qué podríamos mejorar?" },
+          "config": { "inputType": "long", "maxLength": 2000 },
+          "logic": []
+        }
+      ],
+      "endings": [
+        { "id": "end1", "type": "endScreen", "headline": { "default": "Thanks for your feedback!", "en": "Thanks for your feedback!", "es": "¡Gracias por sus comentarios!" } }
+      ]
+    },
+
+    {
+      "$comment": "Example 3 — single select with branching + a required-by-logic follow-up.",
+      "name": "Feature interest",
+      "status": "draft",
+      "languages": [ { "code": "en", "label": "English", "default": true } ],
+      "questions": [
+        {
+          "id": "interested",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Are you interested in a demo?" },
+          "config": {
+            "choices": [
+              { "id": "yes", "label": { "default": "Yes" } },
+              { "id": "no", "label": { "default": "No" } }
+            ]
+          },
+          "logic": [
+            {
+              "id": "g1",
+              "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "no" },
+              "action": { "type": "skip", "target": "email" }
+            },
+            {
+              "id": "g2",
+              "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "yes" },
+              "action": { "type": "require", "target": "email" }
+            }
+          ]
+        },
+        {
+          "id": "email",
+          "type": "contactInfo",
+          "required": false,
+          "headline": { "default": "Where should we reach you?" },
+          "config": { "fields": { "email": { "show": true, "required": true } } },
+          "logic": []
+        }
+      ],
+      "endings": [
+        { "id": "end1", "type": "endScreen", "headline": { "default": "Thanks!" } }
+      ],
+      "followUps": [
+        {
+          "id": "fu1",
+          "name": "Notify sales of interested leads",
+          "trigger": {
+            "type": "responseFinished",
+            "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "yes" }
+          },
+          "action": {
+            "type": "sendEmail",
+            "recipient": { "type": "fixedEmail", "email": "sales@acme.com" },
+            "subject": { "default": "New interested lead" },
+            "body": { "default": "<p>A respondent said they are interested. Reach out at #recall:email/fallback:(no email)#.</p>" }
+          }
+        },
+        {
+          "id": "fu2",
+          "name": "Thank-you receipt to the respondent",
+          "trigger": { "type": "responseFinished" },
+          "action": {
+            "type": "sendEmail",
+            "recipient": { "type": "responseField", "questionId": "email" },
+            "subject": { "default": "Thanks for your interest!" },
+            "body": { "default": "<p>We'll be in touch shortly.</p>" }
+          }
+        }
+      ]
+    }
+  ]
+}

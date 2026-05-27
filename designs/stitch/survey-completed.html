@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Survey Completed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@400;600;700&amp;family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        tertiary: '#8ac449',
+                        ink: {
+                            DEFAULT: '#222b27',
+                            secondary: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: 'rgba(34,43,39,0.10)'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "card": "16px",
+                        "button": "8px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                        'hover': '0 20px 40px -10px rgba(0,0,0,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #faf8f7;
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center font-body text-ink-secondary bg-surface-page antialiased selection:bg-primary/20 selection:text-ink">
+<main class="flex-1 w-full max-w-md mx-auto px-6 py-12 flex flex-col items-center justify-center text-center">
+<!-- Hero Image -->
+<div class="mb-8 fade-in-up">
+<img alt="Success checkmark with confetti" class="w-48 h-48 object-contain mx-auto mix-blend-multiply drop-shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2d_wWL0m6cuxLlgyTdequ9Hx0f8zMUdGxEKLB8Pqqs3wT_wrVgOrMiAAYvjOjKd5W-WFCYOOQyWZhRukpu5gwT-5COR3FzEOqxhHz9Ul-2nW3zrTNOaknqBez65Y0N4GOmbdu_5Bv3nA1FBKcc4fABHyvxuntrDxQtUgxbP__Y06ktDWk5Fhh3YBd9OcSJA65x3i3bNEPzovbnIVDE8v5qi_FJLb2FLUqVCoSdGeBRD62TaXzpSxH3hUJXXrWS7R6SfW_fR8s95Qr"/>
+</div>
+<!-- Typography -->
+<div class="space-y-4 mb-10">
+<h1 class="font-headline font-bold text-3xl md:text-4xl text-ink tracking-tight fade-in-up delay-100">
+                Thanks for your feedback! 🎉
+            </h1>
+<p class="font-body text-base text-ink-muted leading-relaxed max-w-sm mx-auto fade-in-up delay-200">
+                Your response helps us improve. We truly appreciate you taking the time to share your thoughts with our team.
+            </p>
+</div>
+<!-- Actions -->
+<div class="w-full space-y-4 flex flex-col items-center fade-in-up delay-300">
+<button class="w-full max-w-xs bg-primary hover:bg-primary-hover text-white font-body font-medium text-base py-3.5 px-6 rounded-button shadow-soft hover:shadow-hover hover:-translate-y-0.5 active:scale-95 transition-all duration-200 ease-out flex items-center justify-center gap-2 group">
+                Visit our website
+                <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="text-ink-muted hover:text-secondary font-body font-medium text-sm py-2 px-4 rounded-button transition-colors duration-150">
+                Edit your response
+            </button>
+</div>
+</main>
+<!-- Footer Component mapped from JSON -->
+<footer class="bg-transparent w-full flex flex-col items-center gap-2 pb-8 px-4 fade-in-up delay-300">
+<div class="flex items-center justify-center gap-4 mb-2">
+<a class="text-[#666] hover:text-[#222b27] transition-colors font-body text-sm font-medium" href="#">Privacy Policy</a>
+<a class="text-[#666] hover:text-[#222b27] transition-colors font-body text-sm font-medium" href="#">Report Abuse</a>
+</div>
+<p class="font-headline font-semibold text-[#666] text-sm">Powered by OpenSurvey</p>
+</footer>
+</body></html>

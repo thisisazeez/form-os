@@ -1,0 +1,31 @@
+{% comment %}
+  status_pill.html — a colored survey-status badge.
+
+  USAGE:
+    {% include "_components/status_pill.html" with status=survey.status %}
+    {% include "_components/status_pill.html" with status="live" %}
+
+  PARAMS:
+    status (required) — one of live / draft / closed (case-insensitive). Anything else falls
+                        through to the neutral (closed-style) pill.
+
+  COLORS (brand tokens only):
+    live   → bg-success/15 text-success  (+ a success dot)
+    draft  → bg-panel text-muted
+    closed → bg-panel text-muted  (neutral; lock glyph) — also the fallback for unknown values.
+{% endcomment %}
+{% with s=status|lower %}
+{% if s == "live" %}
+  <span class="inline-flex items-center rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+    <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-success"></span>Live
+  </span>
+{% elif s == "draft" %}
+  <span class="inline-flex items-center rounded-full bg-panel px-2.5 py-1 text-xs font-medium text-muted">
+    <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-muted"></span>Draft
+  </span>
+{% else %}
+  <span class="inline-flex items-center rounded-full bg-panel px-2.5 py-1 text-xs font-medium text-muted">
+    <span class="material-symbols-outlined mr-1 text-[12px]">lock</span>{{ status|default:"Closed"|capfirst }}
+  </span>
+{% endif %}
+{% endwith %}

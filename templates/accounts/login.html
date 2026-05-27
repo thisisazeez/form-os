@@ -1,0 +1,80 @@
+{% extends "accounts/_auth_base.html" %}
+{% block title %}Sign in — OpenSurvey{% endblock %}
+
+{% comment %}Split layout (matches designs/stitch/login.png): left form card + right warm
+   brand panel. We extend _auth_base.html for the parent chain but override {% block content %}
+   directly (the centered max-w-md card can't hold the split panel). Form fields render via the
+   shared _form_fields.html partial (email + password) so the LoginForm contract is intact;
+   the view supplies `form` and surfaces the "Invalid credentials…" non-field error there.{% endcomment %}
+{% block content %}
+  <div class="mx-auto grid max-w-5xl items-stretch gap-8 lg:grid-cols-2">
+    {# Left: form card #}
+    <div class="flex flex-col justify-center">
+      <div class="mx-auto w-full max-w-md rounded-xl border border-hairline bg-white p-8 shadow-sm">
+        <a href="/" class="block text-center font-display text-xl font-bold tracking-tight text-ink">
+          Open<span class="text-brand">Survey</span>
+        </a>
+        <h1 class="mt-6 text-center font-display text-2xl font-bold tracking-tight text-ink">Welcome back</h1>
+        <p class="mt-1 text-center text-sm text-muted">Please enter your details to sign in.</p>
+
+        <form class="mt-6"
+              method="post"
+              action="{% url 'accounts_htmx:login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+          {% csrf_token %}
+          {% include "accounts/_form_fields.html" %}
+
+          <div class="mb-4 flex items-center justify-between text-sm">
+            <label class="inline-flex items-center gap-2 text-muted">
+              <input type="checkbox" name="remember"
+                     class="rounded border-hairline text-brand focus:ring-brand" />
+              Remember me
+            </label>
+            <a href="{% url 'accounts_htmx:password-reset' %}"
+               class="font-medium text-brand hover:text-brand-hover hover:underline">Forgot password?</a>
+          </div>
+
+          <button type="submit"
+            class="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+            Sign in
+          </button>
+        </form>
+
+        <div class="my-6 flex items-center gap-3 text-xs text-muted">
+          <span class="h-px flex-1 bg-hairline"></span>or<span class="h-px flex-1 bg-hairline"></span>
+        </div>
+
+        <p class="text-center text-sm text-muted">
+          New here?
+          <a href="{% url 'accounts_htmx:signup' %}"
+             class="font-medium text-brand hover:text-brand-hover hover:underline">Create an account</a>
+        </p>
+      </div>
+    </div>
+
+    {# Right: warm orange→coral brand panel #}
+    <div class="hidden overflow-hidden rounded-xl bg-gradient-to-br from-brand to-[#0f766e] p-10 text-white shadow-sm lg:flex lg:flex-col lg:justify-center">
+      <h2 class="font-display text-3xl font-bold leading-tight tracking-tight">
+        Build better surveys, together.
+      </h2>
+      <p class="mt-4 max-w-sm text-sm leading-relaxed text-white/90">
+        Enterprise-grade data collection with a beautiful, modern interface. Self-hosted and secure.
+      </p>
+      <div class="mt-10 rounded-xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm">
+        <div class="rounded-lg bg-white/95 p-4 text-ink shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-xs font-medium text-success">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span> +42 NPS
+            </span>
+            <span class="font-display text-lg font-bold text-ink">+42</span>
+          </div>
+          <p class="mt-3 text-sm text-muted">How likely are you to recommend our product to a friend or colleague?</p>
+          <div class="mt-3 flex gap-1.5">
+            {% for n in "0123456789" %}
+              <span class="flex h-6 w-6 items-center justify-center rounded text-xs font-medium {% if forloop.counter0 == 9 %}bg-brand text-white{% else %}bg-panel text-muted{% endif %}">{{ forloop.counter0 }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

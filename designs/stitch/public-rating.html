@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Star Rating</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Outfit:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            DEFAULT: '#222b27',
+                            muted: '#666666',
+                            light: '#444444'
+                        },
+                        surface: {
+                            DEFAULT: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        }
+                    },
+                    fontFamily: {
+                        headline: ["Outfit", "sans-serif"],
+                        display: ["Outfit", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                        'button': '8px',
+                        'card': '12px',
+                        'large-card': '16px'
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px 0 rgba(34,43,39,0.05)',
+                        'hover': '0 8px 30px 0 rgba(34,43,39,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.surface.DEFAULT');
+            color: theme('colors.ink.DEFAULT');
+        }
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+        }
+        .star-rating label:hover {
+            transform: scale(1.1);
+        }
+        .star-rating input[type="radio"]:checked ~ label span {
+            font-variation-settings: 'FILL' 0;
+            color: theme('colors.ink.muted');
+        }
+        .star-rating label span {
+            font-variation-settings: 'FILL' 1;
+            color: theme('colors.primary.DEFAULT');
+        }
+        /* Keep first 4 filled based on default state logic, CSS sibling selector handles it backwards */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .star-rating > input:checked ~ label span,
+        .star-rating > input:checked ~ label ~ label span {
+            font-variation-settings: 'FILL' 1;
+            color: theme('colors.primary.DEFAULT');
+        }
+        .star-rating > label span {
+             font-variation-settings: 'FILL' 0;
+             color: theme('colors.ink.muted');
+        }
+        .star-rating > input:not(:checked) ~ label:hover span,
+        .star-rating > input:not(:checked) ~ label:hover ~ label span {
+             color: theme('colors.primary.hover');
+             font-variation-settings: 'FILL' 1;
+        }
+
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full flex flex-col font-body antialiased selection:bg-primary selection:text-white">
+<!-- TopAppBar JSON Translation -->
+<header class="bg-[#faf8f7] dark:bg-[#1a1a1a] docked full-width top-0 border-b border-[rgba(34,43,39,0.10)] flat no shadows">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-4xl mx-auto">
+<button aria-label="close" class="text-[#666] font-medium hover:opacity-80 transition-opacity active:scale-[0.98] transition-all duration-150 ease-out flex items-center justify-center p-2 rounded-full hover:bg-surface-panel">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+<div class="text-center">
+<h1 class="font-headline font-bold text-lg text-ink">Question 1 of 10</h1>
+</div>
+<button aria-label="OpenSurvey" class="font-headline font-bold text-sm text-[#444] dark:text-[#faf8f7] hover:opacity-80 transition-opacity active:scale-[0.98] transition-all duration-150 ease-out">
+                OpenSurvey
+            </button>
+</div>
+<!-- Progress Bar (Added for survey context) -->
+<div class="w-full bg-surface-panel h-1">
+<div class="bg-primary h-1 w-[10%] transition-all duration-500 ease-out"></div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto pt-12 pb-32 px-6 flex flex-col items-center justify-center">
+<div class="w-full max-w-2xl mx-auto flex flex-col items-center text-center space-y-12 opacity-0 translate-y-4 animate-[fadeInUp_0.4s_ease-out_forwards]">
+<h2 class="font-headline font-semibold text-3xl md:text-4xl text-ink leading-tight">
+                How would you rate your overall experience?
+            </h2>
+<!-- Star Rating Component -->
+<div class="star-rating bg-white p-8 md:p-12 rounded-large-card shadow-soft hover:shadow-hover transition-shadow duration-300 w-full max-w-md">
+<input id="star5" name="rating" type="radio" value="5"/>
+<label class="p-2" for="star5" title="5 stars">
+<span class="material-symbols-outlined text-5xl md:text-6xl text-ink-muted transition-colors duration-200">star</span>
+</label>
+<input checked="" id="star4" name="rating" type="radio" value="4"/>
+<label class="p-2" for="star4" title="4 stars">
+<span class="material-symbols-outlined text-5xl md:text-6xl text-primary transition-colors duration-200" style="font-variation-settings: 'FILL' 1;">star</span>
+</label>
+<input id="star3" name="rating" type="radio" value="3"/>
+<label class="p-2" for="star3" title="3 stars">
+<span class="material-symbols-outlined text-5xl md:text-6xl text-primary transition-colors duration-200" style="font-variation-settings: 'FILL' 1;">star</span>
+</label>
+<input id="star2" name="rating" type="radio" value="2"/>
+<label class="p-2" for="star2" title="2 stars">
+<span class="material-symbols-outlined text-5xl md:text-6xl text-primary transition-colors duration-200" style="font-variation-settings: 'FILL' 1;">star</span>
+</label>
+<input id="star1" name="rating" type="radio" value="1"/>
+<label class="p-2" for="star1" title="1 star">
+<span class="material-symbols-outlined text-5xl md:text-6xl text-primary transition-colors duration-200" style="font-variation-settings: 'FILL' 1;">star</span>
+</label>
+</div>
+<p class="font-label text-ink-muted text-sm max-w-md mx-auto">
+                Your feedback helps us improve our services and deliver better experiences.
+            </p>
+</div>
+</main>
+<!-- BottomNavBar JSON Translation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white dark:bg-[#222b27] docked full-width bottom-0 rounded-t-xl shadow-[0_-4px_20px_0_rgba(34,43,39,0.05)] shadow-lg max-w-4xl mx-auto inset-x-0">
+<!-- Back Button (Inactive state style) -->
+<button aria-label="Back" class="flex items-center gap-2 text-[#444] dark:text-[#faf8f7] px-4 py-2 hover:bg-[#f2f4ef] rounded-lg font-label font-semibold text-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+<span>Back</span>
+</button>
+<!-- Next Button (Active state style for CTA) -->
+<button aria-label="Next" class="bg-gradient-to-r from-[#0d9488] to-[#0f766e] text-white rounded-lg px-8 py-3 flex items-center gap-2 shadow-md font-label font-semibold text-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 transition-transform duration-150">
+<span>Next</span>
+<span class="material-symbols-outlined text-xl">arrow_forward</span>
+</button>
+</nav>
+<style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body></html>

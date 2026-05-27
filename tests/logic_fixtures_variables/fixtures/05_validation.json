@@ -1,0 +1,370 @@
+[
+  {
+    "name": "validation — calculate targets an unknown variable",
+    "description": "variableId 'ghost' is not declared -> unknown_variable",
+    "expectValid": false,
+    "expectedErrorCode": "unknown_variable",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "ghost",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation — concat on a NUMBER variable is an invalid op",
+    "description": "concat is a text-only op; on a number variable -> invalid_calc_op",
+    "expectValid": false,
+    "expectedErrorCode": "invalid_calc_op",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "concat",
+                "value": {
+                  "type": "literal",
+                  "value": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation — multiply on a TEXT variable is an invalid op",
+    "description": "multiply is number-only; on a text variable -> invalid_calc_op",
+    "expectValid": false,
+    "expectedErrorCode": "invalid_calc_op",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "label",
+          "name": "Label",
+          "type": "text",
+          "initialValue": ""
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "label",
+                "operation": "multiply",
+                "value": {
+                  "type": "literal",
+                  "value": "2"
+                }
+              }
+            }
+          ],
+          "config": {}
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation — calculate value ref to an unknown id",
+    "description": "ref 'nope' is not a question/variable/hidden-field id -> unknown_calc_ref",
+    "expectValid": false,
+    "expectedErrorCode": "unknown_calc_ref",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "ref",
+                  "ref": "nope"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation — variable id collides with a question id (duplicate_id)",
+    "description": "a variable named 'q1' collides with question q1 -> duplicate_id",
+    "expectValid": false,
+    "expectedErrorCode": "duplicate_id",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "q1",
+          "name": "Clash",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation — a number-op operator on a TEXT variable condition is invalid",
+    "description": "greaterThan on a text variable ref -> invalid_operator",
+    "expectValid": false,
+    "expectedErrorCode": "invalid_operator",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "tier",
+          "name": "Tier",
+          "type": "text",
+          "initialValue": ""
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "n"
+          },
+          "config": {}
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "tier",
+                "operator": "greaterThan",
+                "value": 1
+              },
+              "action": {
+                "type": "jumpTo",
+                "target": "q3"
+              }
+            }
+          ],
+          "config": {}
+        },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": {
+            "default": "b"
+          },
+          "config": {}
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation — a valid variables+calculate survey passes",
+    "description": "well-formed: a number variable, a type-valid add, a variable condition jump",
+    "expectValid": true,
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "ref",
+                  "ref": "q1"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "headline": {
+            "default": "a"
+          },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": {
+                "leftQuestionId": "score",
+                "operator": "greaterThanOrEqual",
+                "value": 5
+              },
+              "action": {
+                "type": "jumpTo",
+                "target": "q3"
+              }
+            }
+          ],
+          "config": {}
+        },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": {
+            "default": "b"
+          },
+          "config": {}
+        }
+      ]
+    }
+  }
+]

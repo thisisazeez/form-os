@@ -1,0 +1,141 @@
+[
+  {
+    "name": "required — static required questions only",
+    "description": "No require rules; expected_required = the statically required questions.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Name (required)" }, "required": true, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "Nick (optional)" }, "required": false, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "Email (required)" }, "required": true, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "Ada" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" },
+    "expected_required": ["q1", "q3"]
+  },
+
+  {
+    "name": "required — logic require adds a target when condition holds",
+    "description": "q1==yes makes q3 required-by-logic; combined with static q1.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Need follow-up?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "rq", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "require", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "required": false, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "Details" }, "required": false, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" },
+    "expected_required": ["q1", "q3"]
+  },
+
+  {
+    "name": "required — logic require does NOT add target when condition is false",
+    "description": "q1==no -> require rule does not fire; q3 stays optional.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Need follow-up?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "rq", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "require", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "required": false, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "Details" }, "required": false, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "no" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" },
+    "expected_required": ["q1"]
+  },
+
+  {
+    "name": "required — require on a not-yet-answered host does not apply",
+    "description": "FROZEN drift-guard: the require(q3) rule lives on q2, whose condition (q1==yes) is true, BUT q2 has not been answered yet (we are still on q1). Per the 'applied during answering' rule, q3 is NOT required until q2 is reached. Only q1 (static) is required here.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Need follow-up?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": []
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "Anything else?" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "rq2", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "require", "target": "q3" } }
+          ]
+        },
+        { "id": "q3", "type": "openText", "headline": { "default": "Details" }, "required": false, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" },
+    "expected_required": ["q1"]
+  },
+
+  {
+    "name": "required — require applies once its host question IS answered",
+    "description": "Complement of the previous case: the SAME survey, but now q2 has been answered, so its require(q3) rule (condition q1==yes, true) takes effect -> q3 is required alongside static q1.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Need follow-up?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": []
+        },
+        {
+          "id": "q2",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "Anything else?" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "rq2", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "yes" }, "action": { "type": "require", "target": "q3" } }
+          ]
+        },
+        { "id": "q3", "type": "openText", "headline": { "default": "Details" }, "required": false, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "yes", "q2": "more info" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "question", "id": "q3" },
+    "expected_required": ["q1", "q3"]
+  }
+]

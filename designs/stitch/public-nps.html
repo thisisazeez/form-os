@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>OpenSurvey - Question 3</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@600;700&amp;family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: {
+                            DEFAULT: '#3d63dc'
+                        },
+                        success: {
+                            DEFAULT: '#8ac449'
+                        },
+                        ink: {
+                            main: '#222b27',
+                            muted: '#666666',
+                            light: '#444444'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)'
+                        }
+                    },
+                    fontFamily: {
+                        headline: ["Outfit", "sans-serif"],
+                        display: ["Outfit", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", // 8px
+                        "lg": "0.75rem",    // 12px
+                        "xl": "1rem",       // 16px
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px 0 rgba(34,43,39,0.05)',
+                        'hover': '0 8px 30px 0 rgba(34,43,39,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #faf8f7;
+            font-family: 'Inter', sans-serif;
+            color: #222b27;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .progress-bar-fill {
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .nps-pill {
+            transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .nps-pill:hover:not(.selected) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34,43,39,0.08);
+            background-color: #ffffff;
+            border-color: #0d9488;
+            color: #0d9488;
+        }
+        
+        .nps-pill.selected {
+            background-color: #0d9488;
+            border-color: #0d9488;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(230,73,24,0.3);
+        }
+        
+        .nps-pill:active {
+            transform: scale(0.95);
+        }
+        
+        .primary-btn {
+            transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(230,73,24,0.25);
+            opacity: 0.95;
+        }
+        
+        .primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        
+        /* Focus ring for accessibility */
+        *:focus-visible {
+            outline: 2px solid #0d9488;
+            outline-offset: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="safe-area-pt safe-area-pb">
+<!-- TopAppBar -->
+<header class="w-full bg-[#faf8f7] border-b border-[rgba(34,43,39,0.10)] sticky top-0 z-50">
+<!-- Progress Bar (Slim) -->
+<div class="w-full h-1 bg-[#f2f4ef] absolute top-0 left-0">
+<div class="progress-bar-fill h-full bg-[#0d9488]" style="width: 37.5%;"></div> <!-- 3 of 8 = 37.5% -->
+</div>
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-4xl mx-auto">
+<div class="flex items-center gap-3">
+<button aria-label="Close survey" class="text-[#666] hover:opacity-80 transition-opacity p-1 -ml-1 rounded-full hover:bg-[#f2f4ef] active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">close</span>
+</button>
+<span class="font-label text-xs uppercase tracking-widest text-[#666] font-semibold">Question 3 of 8</span>
+</div>
+<div class="font-headline font-bold text-sm text-[#444] hidden sm:block opacity-70">
+                Powered by OpenSurvey
+            </div>
+<div class="font-headline font-bold text-xs text-[#444] sm:hidden opacity-70">
+                OpenSurvey
+            </div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col justify-center items-center px-6 py-12 max-w-4xl mx-auto w-full relative z-10">
+<!-- Question Container -->
+<div class="w-full max-w-2xl text-center mb-12 fade-in-up stagger-1">
+<h1 class="font-headline text-3xl md:text-4xl lg:text-5xl font-bold text-ink-main leading-tight tracking-tight">
+                How likely are you to recommend us to a friend?
+            </h1>
+<p class="font-body text-ink-muted mt-4 text-sm md:text-base max-w-lg mx-auto">
+                Your feedback helps us improve our service. Please rate your likelihood on a scale from 0 to 10.
+            </p>
+</div>
+<!-- NPS Scale Interactive Area -->
+<div class="w-full max-w-3xl fade-in-up stagger-2 bg-surface-card rounded-xl shadow-soft p-6 md:p-8 border border-border">
+<!-- Scale Grid/Row -->
+<div class="flex flex-wrap sm:flex-nowrap justify-center sm:justify-between gap-2 sm:gap-1 md:gap-2 mb-4">
+<!-- Pills 0-10 -->
+<button aria-label="Rate 0" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">0</button>
+<button aria-label="Rate 1" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">1</button>
+<button aria-label="Rate 2" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">2</button>
+<button aria-label="Rate 3" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">3</button>
+<button aria-label="Rate 4" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">4</button>
+<button aria-label="Rate 5" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">5</button>
+<button aria-label="Rate 6" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">6</button>
+<button aria-label="Rate 7" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">7</button>
+<!-- Selected Pill -->
+<button aria-label="Rate 8, currently selected" class="nps-pill selected w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border flex items-center justify-center font-label font-semibold text-lg">8</button>
+<button aria-label="Rate 9" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">9</button>
+<button aria-label="Rate 10" class="nps-pill w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-DEFAULT border border-border bg-surface-panel flex items-center justify-center font-label font-medium text-ink-main text-lg">10</button>
+</div>
+<!-- Scale Labels -->
+<div class="flex justify-between items-center w-full px-2 mt-4 text-xs md:text-sm font-label font-medium text-ink-muted uppercase tracking-wider">
+<span>Not likely</span>
+<span>Very likely</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar / Footer Action -->
+<footer class="w-full bg-[#faf8f7] pb-[env(safe-area-inset-bottom)] pt-4 fade-in-up stagger-3 z-50">
+<div class="max-w-4xl mx-auto w-full px-6 flex justify-between items-center mb-6">
+<!-- Back Action -->
+<button aria-label="Go Back" class="flex items-center gap-2 text-[#444] px-4 py-3 hover:bg-[#f2f4ef] rounded-lg transition-all duration-200 font-label font-semibold text-sm group">
+<span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">chevron_left</span>
+<span class="hidden sm:inline">Back</span>
+</button>
+<!-- Next Action Container -->
+<div class="flex items-center gap-4">
+<span class="hidden md:inline font-label text-xs text-ink-muted">press <strong class="font-bold text-ink-light">Enter ↵</strong></span>
+<button aria-label="Next Question" class="primary-btn bg-gradient-to-r from-[#0d9488] to-[#0f766e] text-white rounded-lg px-8 py-3 flex items-center gap-2 shadow-md font-label font-semibold text-sm">
+<span>Next</span>
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+</div>
+</div>
+</footer>
+<!-- Keyboard interaction script -->
+<script>
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                // Find next button and trigger click animation visually
+                const nextBtn = document.querySelector('.primary-btn');
+                if(nextBtn) {
+                    nextBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        nextBtn.style.transform = '';
+                        // Usually this would navigate to next page
+                        console.log('Navigating to next question');
+                    }, 150);
+                }
+            }
+        });
+        
+        // Add click interactivity to pills for demo purposes
+        const pills = document.querySelectorAll('.nps-pill');
+        pills.forEach(pill => {
+            pill.addEventListener('click', function() {
+                // Remove selected from all
+                pills.forEach(p => {
+                    p.classList.remove('selected');
+                    // Reset styling added by inline styles if any
+                    p.style = '';
+                });
+                
+                // Add selected to clicked
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body></html>

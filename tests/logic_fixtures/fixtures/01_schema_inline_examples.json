@@ -1,0 +1,357 @@
+[
+  {
+    "name": "schema example 1 — single-question NPS, answered, end of survey -> first ending",
+    "description": "survey-schema.json examples[0]. One required NPS question, one ending. Answering it falls off the end -> first ending.",
+    "survey": {
+      "name": "Product NPS",
+      "status": "published",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "styling": { "brandColor": "#0F62FE", "hideProgressBar": true },
+      "questions": [
+        {
+          "id": "nps1",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?", "en": "How likely are you to recommend us?" },
+          "config": {
+            "lowerLabel": { "default": "Not at all likely", "en": "Not at all likely" },
+            "upperLabel": { "default": "Extremely likely", "en": "Extremely likely" }
+          },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thank you!", "en": "Thank you!" } }]
+    },
+    "answers": { "nps1": 9 },
+    "currentQuestionId": "nps1",
+    "expected_next": { "type": "ending", "id": "end1" },
+    "expected_required": ["nps1"]
+  },
+
+  {
+    "name": "schema example 1 — start of survey returns first question",
+    "description": "currentQuestionId=null -> first question to show.",
+    "survey": {
+      "name": "Product NPS",
+      "status": "published",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "nps1",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?" },
+          "config": {},
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thank you!" } }]
+    },
+    "answers": {},
+    "currentQuestionId": null,
+    "expected_next": { "type": "question", "id": "nps1" }
+  },
+
+  {
+    "name": "schema example 2 — detractor (NPS<=6) jumps to reason",
+    "description": "survey-schema.json examples[1]. NPS 3 is a detractor -> rule r1 fires -> jumpTo reason.",
+    "survey": {
+      "name": "Post-purchase feedback",
+      "status": "published",
+      "languages": [
+        { "code": "en", "label": "English", "default": true },
+        { "code": "es", "label": "Español", "default": false }
+      ],
+      "questions": [
+        {
+          "id": "nps",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?", "en": "How likely are you to recommend us?", "es": "¿Qué tan probable es que nos recomiende?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": { "leftQuestionId": "nps", "operator": "lessThanOrEqual", "value": 6 },
+              "action": { "type": "jumpTo", "target": "reason" }
+            }
+          ]
+        },
+        {
+          "id": "rating",
+          "type": "rating",
+          "required": false,
+          "headline": { "default": "How was the checkout experience?", "en": "How was the checkout experience?", "es": "¿Cómo fue la experiencia de pago?" },
+          "config": { "range": 5, "scale": "star" },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": { "leftQuestionId": "rating", "operator": "isSubmitted" },
+              "action": { "type": "jumpTo", "target": "end1" }
+            }
+          ]
+        },
+        {
+          "id": "reason",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "What could we do better?", "en": "What could we do better?", "es": "¿Qué podríamos mejorar?" },
+          "config": { "inputType": "long", "maxLength": 2000 },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thanks for your feedback!", "en": "Thanks for your feedback!", "es": "¡Gracias por sus comentarios!" } }]
+    },
+    "answers": { "nps": 3 },
+    "currentQuestionId": "nps",
+    "expected_next": { "type": "question", "id": "reason" }
+  },
+
+  {
+    "name": "schema example 2 — promoter (NPS>6) falls through to linear next (rating)",
+    "description": "NPS 9: r1 condition false -> no nav rule matches -> linear next is rating.",
+    "survey": {
+      "name": "Post-purchase feedback",
+      "status": "published",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "nps",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": { "leftQuestionId": "nps", "operator": "lessThanOrEqual", "value": 6 },
+              "action": { "type": "jumpTo", "target": "reason" }
+            }
+          ]
+        },
+        {
+          "id": "rating",
+          "type": "rating",
+          "required": false,
+          "headline": { "default": "How was the checkout experience?" },
+          "config": { "range": 5, "scale": "star" },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": { "leftQuestionId": "rating", "operator": "isSubmitted" },
+              "action": { "type": "jumpTo", "target": "end1" }
+            }
+          ]
+        },
+        {
+          "id": "reason",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "What could we do better?" },
+          "config": { "inputType": "long", "maxLength": 2000 },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thanks for your feedback!" } }]
+    },
+    "answers": { "nps": 9 },
+    "currentQuestionId": "nps",
+    "expected_next": { "type": "question", "id": "rating" }
+  },
+
+  {
+    "name": "schema example 2 — rating answered jumps to ending id",
+    "description": "On rating, r2 (isSubmitted) fires -> jumpTo end1 -> ending.",
+    "survey": {
+      "name": "Post-purchase feedback",
+      "status": "published",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "nps",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": { "leftQuestionId": "nps", "operator": "lessThanOrEqual", "value": 6 },
+              "action": { "type": "jumpTo", "target": "reason" }
+            }
+          ]
+        },
+        {
+          "id": "rating",
+          "type": "rating",
+          "required": false,
+          "headline": { "default": "How was the checkout experience?" },
+          "config": { "range": 5, "scale": "star" },
+          "logic": [
+            {
+              "id": "r2",
+              "condition": { "leftQuestionId": "rating", "operator": "isSubmitted" },
+              "action": { "type": "jumpTo", "target": "end1" }
+            }
+          ]
+        },
+        {
+          "id": "reason",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "What could we do better?" },
+          "config": { "inputType": "long", "maxLength": 2000 },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thanks for your feedback!" } }]
+    },
+    "answers": { "nps": 9, "rating": 4 },
+    "currentQuestionId": "rating",
+    "expected_next": { "type": "ending", "id": "end1" }
+  },
+
+  {
+    "name": "schema example 2 — reason answered, last question, falls off end -> first ending",
+    "description": "After the detractor jump, reason is the last question; no rule -> end of survey -> first ending.",
+    "survey": {
+      "name": "Post-purchase feedback",
+      "status": "published",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "nps",
+          "type": "nps",
+          "required": true,
+          "headline": { "default": "How likely are you to recommend us?" },
+          "config": {},
+          "logic": [
+            {
+              "id": "r1",
+              "condition": { "leftQuestionId": "nps", "operator": "lessThanOrEqual", "value": 6 },
+              "action": { "type": "jumpTo", "target": "reason" }
+            }
+          ]
+        },
+        {
+          "id": "rating",
+          "type": "rating",
+          "required": false,
+          "headline": { "default": "How was the checkout experience?" },
+          "config": { "range": 5, "scale": "star" },
+          "logic": []
+        },
+        {
+          "id": "reason",
+          "type": "openText",
+          "required": false,
+          "headline": { "default": "What could we do better?" },
+          "config": { "inputType": "long", "maxLength": 2000 },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thanks for your feedback!" } }]
+    },
+    "answers": { "nps": 3, "reason": "Slow shipping" },
+    "currentQuestionId": "reason",
+    "expected_next": { "type": "ending", "id": "end1" }
+  },
+
+  {
+    "name": "schema example 3 — singleSelect 'no' skips email",
+    "description": "survey-schema.json examples[2]. 'no' -> g1 skip(email) fires first -> advance past email -> end -> first ending.",
+    "survey": {
+      "name": "Feature interest",
+      "status": "draft",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "interested",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Are you interested in a demo?" },
+          "config": {
+            "choices": [
+              { "id": "yes", "label": { "default": "Yes" } },
+              { "id": "no", "label": { "default": "No" } }
+            ]
+          },
+          "logic": [
+            {
+              "id": "g1",
+              "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "no" },
+              "action": { "type": "skip", "target": "email" }
+            },
+            {
+              "id": "g2",
+              "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "yes" },
+              "action": { "type": "require", "target": "email" }
+            }
+          ]
+        },
+        {
+          "id": "email",
+          "type": "contactInfo",
+          "required": false,
+          "headline": { "default": "Where should we reach you?" },
+          "config": { "fields": { "email": { "show": true, "required": true } } },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thanks!" } }]
+    },
+    "answers": { "interested": "no" },
+    "currentQuestionId": "interested",
+    "expected_next": { "type": "ending", "id": "end1" },
+    "expected_required": ["interested"]
+  },
+
+  {
+    "name": "schema example 3 — singleSelect 'yes' requires email and advances to it",
+    "description": "'yes' -> g1 (skip) condition false, g2 (require email) fires but is NOT navigation -> linear next is email; email is required-by-logic.",
+    "survey": {
+      "name": "Feature interest",
+      "status": "draft",
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "interested",
+          "type": "singleSelect",
+          "required": true,
+          "headline": { "default": "Are you interested in a demo?" },
+          "config": {
+            "choices": [
+              { "id": "yes", "label": { "default": "Yes" } },
+              { "id": "no", "label": { "default": "No" } }
+            ]
+          },
+          "logic": [
+            {
+              "id": "g1",
+              "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "no" },
+              "action": { "type": "skip", "target": "email" }
+            },
+            {
+              "id": "g2",
+              "condition": { "leftQuestionId": "interested", "operator": "equals", "value": "yes" },
+              "action": { "type": "require", "target": "email" }
+            }
+          ]
+        },
+        {
+          "id": "email",
+          "type": "contactInfo",
+          "required": false,
+          "headline": { "default": "Where should we reach you?" },
+          "config": { "fields": { "email": { "show": true, "required": true } } },
+          "logic": []
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Thanks!" } }]
+    },
+    "answers": { "interested": "yes" },
+    "currentQuestionId": "interested",
+    "expected_next": { "type": "question", "id": "email" },
+    "expected_required": ["interested", "email"]
+  }
+]

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Survey Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            heading: '#222b27',
+                            body: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: 'rgba(34,43,39,0.10)'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(34, 43, 39, 0.05)',
+                        'hover': '0 6px 24px -2px rgba(34, 43, 39, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf8f7; color: #444444; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Outfit', sans-serif; color: #222b27; }
+        
+        /* Shared Components Styles Mapping */
+        .top-nav { @apply bg-white dark:bg-neutral-900 border-b border-black/10 dark:border-white/10 shadow-sm flex justify-between items-center w-full px-6 h-16 docked full-width top-0 z-50 fixed; }
+        .top-nav-logo { @apply font-headline text-xl font-bold text-[#222b27] dark:text-white; }
+        .top-nav-active { @apply text-[#0d9488] border-b-2 border-[#0d9488] pb-1 font-headline text-lg font-semibold; }
+        .top-nav-inactive { @apply text-[#444444] dark:text-neutral-400 hover:text-[#0d9488] hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-headline text-lg font-semibold px-3 py-2 rounded-md; }
+        
+        .side-nav { @apply bg-[#f2f4ef] dark:bg-neutral-800 border-r border-black/5 flex flex-col h-screen p-4 gap-2 docked left-0 w-64 fixed top-16 z-40; }
+        .side-nav-active { @apply bg-white dark:bg-neutral-700 text-[#0d9488] shadow-sm rounded-lg flex items-center p-2 font-body text-sm; }
+        .side-nav-inactive { @apply text-[#666666] dark:text-neutral-400 hover:bg-black/5 hover:translate-x-1 transition-transform flex items-center p-2 rounded-lg font-body text-sm; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col pt-16">
+<!-- TopNavBar (Shared Component) -->
+<nav class="top-nav">
+<div class="flex items-center gap-4">
+<button aria-label="Back" class="text-ink-muted hover:text-ink-heading transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="top-nav-logo">OpenSurvey</div>
+<div class="h-6 w-px bg-border mx-2"></div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline font-semibold text-lg">Customer Satisfaction Q4</h1>
+<span class="bg-surface-panel text-ink-muted text-xs font-semibold px-2 py-1 rounded-full uppercase tracking-wider">Draft</span>
+</div>
+</div>
+<div class="hidden md:flex gap-6 items-end h-full pt-4">
+<a class="top-nav-active h-full flex items-center mb-0" href="#">Build</a>
+<a class="top-nav-inactive" href="#">Logic</a>
+<a class="top-nav-inactive" href="#">Settings</a>
+<a class="top-nav-inactive" href="#">Share</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 text-success text-sm font-medium mr-2">
+<span class="material-symbols-outlined text-sm">check</span> Saved
+            </div>
+<button class="text-secondary font-medium px-4 py-2 hover:bg-secondary/5 rounded-lg transition-colors">Preview</button>
+<button class="bg-primary hover:bg-primary-hover text-white font-semibold px-5 py-2 rounded-lg transition-all duration-150 transform hover:scale-[0.98] shadow-sm">Publish</button>
+</div>
+</nav>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar (Shared Component - Left Pane) -->
+<aside class="side-nav overflow-y-auto pb-24">
+<div class="mb-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm">search</span>
+<input class="w-full bg-white border border-border rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-primary focus:border-primary" placeholder="Search blocks..." type="text"/>
+</div>
+</div>
+<div class="text-xs font-bold text-ink-muted uppercase tracking-wider mt-2 mb-2 px-2">Question Palette</div>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">text_fields</span>
+<span class="flex-1 text-left">Short Text</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">notes</span>
+<span class="flex-1 text-left">Long Text</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">radio_button_checked</span>
+<span class="flex-1 text-left">Single Select</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<button class="side-nav-active group">
+<span class="material-symbols-outlined mr-3 text-primary">check_box</span>
+<span class="flex-1 text-left font-semibold">Multi Select</span>
+<span class="material-symbols-outlined text-border opacity-50 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">star</span>
+<span class="flex-1 text-left">Rating</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">speed</span>
+<span class="flex-1 text-left">NPS</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<div class="text-xs font-bold text-ink-muted uppercase tracking-wider mt-6 mb-2 px-2">Structure</div>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">waving_hand</span>
+<span class="flex-1 text-left">Welcome Card</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+<button class="side-nav-inactive group">
+<span class="material-symbols-outlined mr-3 text-ink-muted group-hover:text-primary transition-colors">flag</span>
+<span class="flex-1 text-left">Ending</span>
+<span class="material-symbols-outlined text-border opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+</button>
+</aside>
+<!-- Center Canvas -->
+<main class="flex-1 ml-64 mr-[360px] p-8 overflow-y-auto relative h-[calc(100vh-4rem)]">
+<div class="max-w-2xl mx-auto pb-32">
+<!-- Welcome Card (Collapsed) -->
+<div class="bg-white rounded-xl shadow-soft p-4 flex items-center gap-4 mb-4 border border-transparent hover:border-border transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-border group-hover:text-ink-muted cursor-grab">drag_indicator</span>
+<div class="bg-surface-panel p-2 rounded-lg text-ink-muted">
+<span class="material-symbols-outlined text-sm">waving_hand</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-ink-heading">Welcome to our Q4 Survey</h3>
+<p class="text-xs text-ink-muted truncate">Help us improve by sharing your thoughts...</p>
+</div>
+<span class="text-xs text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity">Welcome</span>
+</div>
+<div class="h-8 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer group mb-4">
+<div class="w-full border-t border-dashed border-primary relative flex items-center justify-center">
+<span class="bg-surface-page text-primary text-xs font-medium px-2 py-1 absolute rounded-full border border-primary bg-white group-hover:scale-105 transition-transform">+ Add question</span>
+</div>
+</div>
+<!-- Selected/Expanded Question Card -->
+<div class="bg-white rounded-xl shadow-hover p-6 mb-4 border-2 border-primary relative transform transition-all">
+<div class="absolute -left-3 top-1/2 -translate-y-1/2 bg-white rounded-full shadow-md p-1 cursor-grab text-ink-muted hover:text-ink-heading">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<div class="bg-primary/10 text-primary p-2 rounded-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_box</span>
+</div>
+<span class="text-xs font-bold text-ink-muted uppercase tracking-wider">Q1 • Multi Select</span>
+</div>
+<div class="flex items-center gap-2">
+<label class="flex items-center cursor-pointer">
+<span class="text-xs font-medium text-ink-muted mr-2">Required</span>
+<div class="relative">
+<input checked="" class="sr-only" type="checkbox"/>
+<div class="block bg-primary w-8 h-5 rounded-full"></div>
+<div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition transform translate-x-3"></div>
+</div>
+</label>
+<div class="w-px h-4 bg-border mx-2"></div>
+<button class="text-ink-muted hover:text-ink-heading"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+<button class="text-ink-muted hover:text-red-500"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</div>
+<div class="space-y-4">
+<div>
+<input class="w-full text-xl font-headline font-semibold text-ink-heading border-0 border-b border-transparent hover:border-border focus:border-primary focus:ring-0 px-0 pb-1 bg-transparent transition-colors" type="text" value="Which features did you use the most?"/>
+</div>
+<div>
+<input class="w-full text-sm text-ink-body border-0 border-b border-transparent hover:border-border focus:border-primary focus:ring-0 px-0 pb-1 bg-transparent transition-colors" placeholder="Add a description (optional)" type="text" value="Select all that apply."/>
+</div>
+<div class="pt-4 space-y-2">
+<!-- Options -->
+<div class="flex items-center gap-3 group">
+<span class="material-symbols-outlined text-border cursor-grab opacity-0 group-hover:opacity-100">drag_indicator</span>
+<div class="w-4 h-4 border-2 border-border rounded"></div>
+<input class="flex-1 text-sm border border-transparent hover:border-border focus:border-primary focus:ring-0 rounded px-2 py-1 transition-colors" type="text" value="Analytics Dashboard"/>
+<button class="text-ink-muted opacity-0 group-hover:opacity-100 hover:text-red-500"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="flex items-center gap-3 group">
+<span class="material-symbols-outlined text-border cursor-grab opacity-0 group-hover:opacity-100">drag_indicator</span>
+<div class="w-4 h-4 border-2 border-border rounded"></div>
+<input class="flex-1 text-sm border border-transparent hover:border-border focus:border-primary focus:ring-0 rounded px-2 py-1 transition-colors" type="text" value="Form Builder"/>
+<button class="text-ink-muted opacity-0 group-hover:opacity-100 hover:text-red-500"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="flex items-center gap-3 group">
+<span class="material-symbols-outlined text-border cursor-grab opacity-0 group-hover:opacity-100">drag_indicator</span>
+<div class="w-4 h-4 border-2 border-border rounded"></div>
+<input class="flex-1 text-sm border border-transparent hover:border-border focus:border-primary focus:ring-0 rounded px-2 py-1 transition-colors" type="text" value="Team Collaboration"/>
+<button class="text-ink-muted opacity-0 group-hover:opacity-100 hover:text-red-500"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="flex items-center gap-3 pl-9">
+<button class="text-sm text-primary font-medium hover:underline">+ Add option</button>
+<span class="text-ink-muted text-xs">or</span>
+<button class="text-sm text-secondary font-medium hover:underline">Add "Other"</button>
+</div>
+</div>
+</div>
+</div>
+<div class="h-8 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer group mb-4">
+<div class="w-full border-t border-dashed border-primary relative flex items-center justify-center">
+<span class="bg-surface-page text-primary text-xs font-medium px-2 py-1 absolute rounded-full border border-primary bg-white group-hover:scale-105 transition-transform">+ Add question</span>
+</div>
+</div>
+<!-- Collapsed Question Card -->
+<div class="bg-white rounded-xl shadow-soft p-4 flex items-center gap-4 mb-4 border border-transparent hover:border-border transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-border group-hover:text-ink-muted cursor-grab">drag_indicator</span>
+<div class="bg-surface-panel p-2 rounded-lg text-ink-muted">
+<span class="material-symbols-outlined text-sm">star</span>
+</div>
+<div class="flex-1 flex items-center justify-between">
+<div>
+<h3 class="font-headline font-semibold text-ink-heading text-sm">How would you rate your overall experience?</h3>
+</div>
+<span class="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ml-2">*</span>
+</div>
+<span class="text-xs text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity">Rating</span>
+</div>
+<div class="bg-white rounded-xl shadow-soft p-4 flex items-center gap-4 mb-4 border border-transparent hover:border-border transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-border group-hover:text-ink-muted cursor-grab">drag_indicator</span>
+<div class="bg-surface-panel p-2 rounded-lg text-ink-muted">
+<span class="material-symbols-outlined text-sm">notes</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-ink-heading text-sm">Any additional feedback?</h3>
+</div>
+<span class="text-xs text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity">Long Text</span>
+</div>
+</div>
+</main>
+<!-- Right Pane (Settings & Preview) -->
+<aside class="w-[360px] bg-white border-l border-border fixed right-0 top-16 h-[calc(100vh-4rem)] flex flex-col z-40 shadow-[-4px_0_20px_-4px_rgba(34,43,39,0.05)]">
+<!-- Preview Toggle -->
+<div class="p-4 border-b border-border flex justify-center">
+<div class="bg-surface-panel p-1 rounded-lg flex inline-flex">
+<button class="px-3 py-1.5 text-sm font-medium rounded-md text-ink-muted hover:text-ink-heading transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">desktop_windows</span>
+</button>
+<button class="px-3 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">smartphone</span>
+</button>
+</div>
+</div>
+<!-- Live Preview Container -->
+<div class="flex-1 bg-surface-page p-6 overflow-y-auto flex items-center justify-center relative">
+<!-- Mobile Frame Mockup -->
+<div class="w-[280px] h-[580px] bg-white rounded-[2rem] shadow-xl border-8 border-[#222b27] overflow-hidden relative flex flex-col transform scale-95 origin-top">
+<!-- Notch -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#222b27] rounded-b-xl z-20"></div>
+<!-- Content inside frame -->
+<div class="flex-1 flex flex-col p-5 pt-10 overflow-y-auto">
+<!-- Progress -->
+<div class="w-full bg-surface-panel h-1 rounded-full mb-6 mt-4">
+<div class="bg-primary h-1 rounded-full w-[33%]"></div>
+</div>
+<!-- Question -->
+<div class="mb-6">
+<h2 class="font-headline font-semibold text-lg text-ink-heading leading-tight mb-2">Which features did you use the most?</h2>
+<p class="text-xs text-ink-muted">Select all that apply.</p>
+</div>
+<!-- Options -->
+<div class="space-y-3 flex-1">
+<label class="flex items-start gap-3 p-3 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors bg-surface-page/50">
+<div class="w-5 h-5 border-2 border-border rounded mt-0.5 flex-shrink-0 bg-white"></div>
+<span class="text-sm text-ink-heading">Analytics Dashboard</span>
+</label>
+<label class="flex items-start gap-3 p-3 border-2 border-primary bg-primary/5 rounded-lg cursor-pointer transition-colors">
+<div class="w-5 h-5 bg-primary rounded mt-0.5 flex-shrink-0 flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-sm text-ink-heading font-medium">Form Builder</span>
+</label>
+<label class="flex items-start gap-3 p-3 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors bg-surface-page/50">
+<div class="w-5 h-5 border-2 border-border rounded mt-0.5 flex-shrink-0 bg-white"></div>
+<span class="text-sm text-ink-heading">Team Collaboration</span>
+</label>
+</div>
+<div class="pt-6 mt-auto">
+<button class="w-full bg-primary text-white font-semibold py-3 rounded-lg text-sm shadow-sm">Next</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Settings Panel -->
+<div class="border-t border-border bg-white p-5 flex-shrink-0 max-h-[30%] overflow-y-auto">
+<h3 class="text-xs font-bold text-ink-muted uppercase tracking-wider mb-4">Question Settings</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label class="text-sm font-medium text-ink-heading">Randomize Options</label>
+<div class="relative">
+<input class="sr-only" type="checkbox"/>
+<div class="block bg-surface-panel border border-border w-8 h-5 rounded-full"></div>
+<div class="dot absolute left-1 top-1 bg-ink-muted w-3 h-3 rounded-full transition transform"></div>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-medium text-ink-heading block">Selection Limits</label>
+<div class="flex gap-3">
+<div class="flex-1">
+<span class="text-xs text-ink-muted block mb-1">Min</span>
+<input class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:ring-primary focus:border-primary" placeholder="0" type="number"/>
+</div>
+<div class="flex-1">
+<span class="text-xs text-ink-muted block mb-1">Max</span>
+<input class="w-full border border-border rounded-md px-3 py-1.5 text-sm focus:ring-primary focus:border-primary" placeholder="No limit" type="number"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</body></html>

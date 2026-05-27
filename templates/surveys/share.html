@@ -1,0 +1,335 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Survey share (/<org_slug>/surveys/<id>/share) — every affordance is functional (WS-7):
+    - Public link: the open runtime URL /<org_slug>/s/<survey.id> (ADR-009) + copy button.
+    - Web embed: a copy-ready <iframe> snippet pointing at the real absolute public_url. The
+      public runtime page carries @xframe_options_exempt so it actually renders when framed.
+    - QR code: <img> from the server QR endpoint (segno) + PNG/SVG download buttons.
+    - Email share: copyable subject + HTML body (button → public_url). Sending is out of scope.
+    - Social & links: real share-intent links (X, LinkedIn, Facebook, WhatsApp, email).
+    - Personalized links: mint per-contact SurveyLink rows (segment or all contacts), list them,
+      copy each, and download CSV (name,email,personal_url). Tokens resolve via the runtime path.
+  Brand tokens only (STYLE_GUIDE) — no indigo, no raw hex.
+{% endcomment %}
+
+{% block title %}Share {{ survey.name }} — OpenSurvey{% endblock %}
+{% block nav_surveys %}is-active{% endblock %}
+{% block topbar_title %}Share survey{% endblock %}
+
+{% block content %}
+  <div class="mb-6 flex items-center gap-3">
+    <a href="/{{ org_slug }}/surveys" class="text-muted hover:text-ink" aria-label="Back to surveys">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    {% include "_components/page_header.html" with title="Share survey" subtitle=survey.name %}
+    <span class="ml-2">{% include "_components/status_pill.html" with status=survey_display_status %}</span>
+  </div>
+
+  {% if not is_published %}
+    <div class="mb-6 rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-muted">visibility_off</span>
+      This survey isn't live yet. The public link will only collect responses once the survey is
+      published.
+    </div>
+  {% endif %}
+
+  {% if single_use %}
+    <div class="mb-6 rounded-lg border border-hairline bg-panel/60 px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-brand">key</span>
+      This survey is <strong>single-use</strong>: the plain public link won't open on its own.
+      Generate <strong>personalized links</strong> below and send each respondent their own.
+    </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    {% comment %}Main column{% endcomment %}
+    <div class="space-y-6 lg:col-span-2">
+
+      {% comment %}---- Public link ----{% endcomment %}
+      <div x-data="{ copied: false }" class="rounded-xl border border-hairline bg-white p-6{% if single_use %} opacity-70{% endif %}">
+        <div class="mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand">link</span>
+          <h2 class="font-display text-lg font-semibold text-ink">Public link</h2>
+          {% if single_use %}<span class="rounded-full bg-panel px-2 py-0.5 text-xs font-medium text-muted">Needs a personal link</span>{% endif %}
+        </div>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <input type="text" readonly x-ref="publicUrl" value="{{ public_url }}"
+                 class="block w-full rounded-lg border border-hairline bg-panel/40 px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+          <button type="button"
+            @click="navigator.clipboard.writeText($refs.publicUrl.value); copied = true; setTimeout(() => copied = false, 1800)"
+            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+            <span class="material-symbols-outlined text-[18px]" x-text="copied ? 'check' : 'content_copy'"></span>
+            <span x-text="copied ? 'Copied' : 'Copy'"></span>
+          </button>
+        </div>
+        <div class="mt-3 flex items-center gap-4 text-sm">
+          <a href="{{ public_url }}" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-1 font-medium text-brand hover:text-brand-hover">
+            <span class="material-symbols-outlined text-[16px]">open_in_new</span> Open link
+          </a>
+        </div>
+      </div>
+
+      {% comment %}---- Web embed ----{% endcomment %}
+      <div x-data="{ copied: false, snippet: `<iframe src=&quot;{{ public_url }}&quot; width=&quot;100%&quot; height=&quot;700&quot; style=&quot;border:0&quot; loading=&quot;lazy&quot; title=&quot;{{ survey.name|escapejs }}&quot;></iframe>` }"
+           class="rounded-xl border border-hairline bg-white p-6">
+        <div class="mb-2 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand">code</span>
+          <h2 class="font-display text-lg font-semibold text-ink">Embed on your website</h2>
+        </div>
+        <p class="mb-4 text-sm text-muted">Paste this snippet where you want the survey to appear. It renders the live survey inside your page.</p>
+        <pre class="overflow-x-auto rounded-lg bg-panel/50 px-3 py-3 font-mono text-xs text-ink"><code x-text="snippet"></code></pre>
+        <button type="button"
+          @click="navigator.clipboard.writeText(snippet); copied = true; setTimeout(() => copied = false, 1800)"
+          class="mt-3 inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+          <span class="material-symbols-outlined text-[18px]" x-text="copied ? 'check' : 'content_copy'"></span>
+          <span x-text="copied ? 'Copied' : 'Copy embed code'"></span>
+        </button>
+      </div>
+
+      {% comment %}---- Email share ----{% endcomment %}
+      <div x-data="{
+              copied: '',
+              subject: `{{ survey.name|escapejs }} — we'd love your feedback`,
+              body: `<p>Hi there,</p>\n<p>We'd really value your input on a quick survey. It only takes a couple of minutes.</p>\n<p><a href=&quot;{{ public_url }}&quot; style=&quot;display:inline-block;padding:10px 18px;background:#0d9488;color:#ffffff;border-radius:8px;text-decoration:none;font-weight:600&quot;>Take the survey</a></p>\n<p>Or paste this link into your browser:<br>{{ public_url }}</p>\n<p>Thank you!</p>`
+           }"
+           class="rounded-xl border border-hairline bg-white p-6">
+        <div class="mb-2 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand">mail</span>
+          <h2 class="font-display text-lg font-semibold text-ink">Email share</h2>
+        </div>
+        <p class="mb-4 text-sm text-muted">Copy a ready-to-send subject line and HTML body into your email tool. The button links straight to the survey.</p>
+
+        <label class="mb-1 block text-sm font-medium text-ink">Subject</label>
+        <div class="flex gap-2">
+          <input type="text" readonly :value="subject"
+                 class="block w-full rounded-lg border border-hairline bg-panel/40 px-3 py-2 text-sm text-ink" />
+          <button type="button"
+            @click="navigator.clipboard.writeText(subject); copied = 'subject'; setTimeout(() => copied = '', 1800)"
+            class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[18px]" x-text="copied === 'subject' ? 'check' : 'content_copy'"></span>
+          </button>
+        </div>
+
+        <label class="mb-1 mt-4 block text-sm font-medium text-ink">HTML body</label>
+        <pre class="overflow-x-auto rounded-lg bg-panel/50 px-3 py-3 font-mono text-xs text-ink"><code x-text="body"></code></pre>
+        <button type="button"
+          @click="navigator.clipboard.writeText(body); copied = 'body'; setTimeout(() => copied = '', 1800)"
+          class="mt-3 inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+          <span class="material-symbols-outlined text-[18px]" x-text="copied === 'body' ? 'check' : 'content_copy'"></span>
+          <span x-text="copied === 'body' ? 'Copied' : 'Copy email body'"></span>
+        </button>
+        <p class="mt-3 text-xs text-muted">Tip: open your mail client with this link prefilled —
+          <a class="font-medium text-brand hover:text-brand-hover"
+             :href="`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent('{{ public_url }}')}`">compose email</a>.
+        </p>
+      </div>
+
+      {% comment %}---- Social & links (real share-intent URLs) ----{% endcomment %}
+      <div class="rounded-xl border border-hairline bg-white p-6">
+        <div class="mb-2 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand">share</span>
+          <h2 class="font-display text-lg font-semibold text-ink">Social &amp; links</h2>
+        </div>
+        <p class="mb-4 text-sm text-muted">Share the public link on social platforms in one click.</p>
+        <div class="flex flex-wrap gap-2">
+          <a target="_blank" rel="noopener"
+             href="https://twitter.com/intent/tweet?text={{ survey.name|urlencode }}&url={{ public_url|urlencode }}"
+             class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[18px]">tag</span> Post on X
+          </a>
+          <a target="_blank" rel="noopener"
+             href="https://www.linkedin.com/sharing/share-offsite/?url={{ public_url|urlencode }}"
+             class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[18px]">work</span> LinkedIn
+          </a>
+          <a target="_blank" rel="noopener"
+             href="https://www.facebook.com/sharer/sharer.php?u={{ public_url|urlencode }}"
+             class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[18px]">groups</span> Facebook
+          </a>
+          <a target="_blank" rel="noopener"
+             href="https://wa.me/?text={{ public_url|urlencode }}"
+             class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[18px]">chat</span> WhatsApp
+          </a>
+        </div>
+      </div>
+
+      {% comment %}---- Personalized links (real SurveyLink rows) ----{% endcomment %}
+      <div class="rounded-xl border border-hairline bg-white p-6">
+        <div class="mb-2 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand">key</span>
+          <h2 class="font-display text-lg font-semibold text-ink">Personalized links</h2>
+        </div>
+        <p class="mb-4 text-sm text-muted">
+          Generate a unique, trackable link per contact. Each link prefills the contact and
+          {% if single_use %}can only be used once.{% else %}records who responded.{% endif %}
+        </p>
+
+        {% if can_mint %}
+          <form method="post" action="/{{ org_slug }}/surveys/{{ survey.id }}/share/links"
+                x-data="{ target: 'all' }" class="mb-5 rounded-lg border border-hairline bg-panel/30 p-4">
+            {% csrf_token %}
+            <fieldset class="space-y-2 text-sm">
+              <label class="flex items-center gap-2">
+                <input type="radio" name="target" value="all" x-model="target" class="accent-brand" />
+                <span class="text-ink">All contacts in this environment</span>
+              </label>
+              <label class="flex items-center gap-2 {% if not segments %}opacity-50{% endif %}">
+                <input type="radio" name="target" value="segment" x-model="target"
+                       {% if not segments %}disabled{% endif %} class="accent-brand" />
+                <span class="text-ink">Contacts in segment</span>
+                <select name="segment" x-bind:disabled="target !== 'segment'"
+                        class="ml-1 rounded-lg border border-hairline bg-white px-2 py-1 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                  {% for seg in segments %}
+                    <option value="{{ seg.id }}">{{ seg.title }}</option>
+                  {% empty %}
+                    <option value="">No segments yet</option>
+                  {% endfor %}
+                </select>
+              </label>
+            </fieldset>
+            <div class="mt-4 flex items-center gap-3">
+              <button type="submit"
+                      class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+                <span class="material-symbols-outlined text-[18px]">add_link</span> Generate links
+              </button>
+              <span class="text-xs text-muted">Contacts that already have a live link are skipped.</span>
+            </div>
+          </form>
+        {% else %}
+          <p class="mb-5 rounded-lg border border-hairline bg-panel/30 px-3 py-2 text-xs text-muted">
+            You need edit access on this survey's workspace to generate links.
+          </p>
+        {% endif %}
+
+        {% if personal_links %}
+          <div class="mb-3 flex items-center justify-between">
+            <h3 class="text-sm font-medium text-ink">
+              Existing links
+              <span class="text-muted">({{ personal_links_total }})</span>
+            </h3>
+            <a href="/{{ org_slug }}/surveys/{{ survey.id }}/share/links.csv"
+               class="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-hover">
+              <span class="material-symbols-outlined text-[16px]">download</span> Download CSV
+            </a>
+          </div>
+          <div class="overflow-hidden rounded-xl border border-hairline">
+            <table class="min-w-full divide-y divide-hairline text-sm">
+              <thead class="bg-panel/50 text-left">
+                <tr>
+                  <th class="px-3 py-2 font-medium text-muted">Contact</th>
+                  <th class="px-3 py-2 font-medium text-muted">Status</th>
+                  <th class="px-3 py-2 font-medium text-muted">Link</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-hairline">
+                {% for row in personal_links %}
+                  <tr x-data="{ copied: false }" class="transition-colors hover:bg-panel/30">
+                    <td class="px-3 py-2">
+                      <div class="font-medium text-ink">{{ row.name }}</div>
+                      {% if row.email %}<div class="text-xs text-muted">{{ row.email }}</div>{% endif %}
+                    </td>
+                    <td class="px-3 py-2">
+                      {% if row.consumed %}
+                        <span class="inline-flex items-center gap-1 rounded-full bg-panel px-2 py-0.5 text-xs font-medium text-muted">Used</span>
+                      {% else %}
+                        <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">Active</span>
+                      {% endif %}
+                    </td>
+                    <td class="px-3 py-2">
+                      <div class="flex items-center gap-2">
+                        <input type="text" readonly value="{{ row.personal_url }}" x-ref="u"
+                               class="block w-full min-w-0 max-w-md rounded-lg border border-hairline bg-panel/40 px-2 py-1 font-mono text-xs text-ink" />
+                        <button type="button"
+                          @click="navigator.clipboard.writeText($refs.u.value); copied = true; setTimeout(() => copied = false, 1500)"
+                          class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-hairline bg-white px-2 py-1 text-xs font-medium text-ink transition-colors hover:bg-panel">
+                          <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'"></span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if personal_links_truncated %}
+            <p class="mt-2 text-xs text-muted">
+              Showing the {{ personal_links_preview }} most recent links of {{ personal_links_total }}.
+              Download the CSV for the full list.
+            </p>
+          {% endif %}
+        {% else %}
+          <p class="text-sm text-muted">No personalized links yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% comment %}Right column: QR + access controls{% endcomment %}
+    <div class="space-y-6">
+
+      {% comment %}---- QR code ----{% endcomment %}
+      <div class="rounded-xl border border-hairline bg-white p-6">
+        <div class="mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand">qr_code_2</span>
+          <h2 class="font-display text-lg font-semibold text-ink">QR code</h2>
+        </div>
+        <div class="flex flex-col items-center">
+          <img src="/{{ org_slug }}/surveys/{{ survey.id }}/share/qr"
+               alt="QR code linking to the survey"
+               class="h-44 w-44 rounded-lg border border-hairline bg-white p-2" />
+          <p class="mt-3 text-center text-xs text-muted">Scan to open the survey on a phone.</p>
+          <div class="mt-4 flex gap-2">
+            <a download href="/{{ org_slug }}/surveys/{{ survey.id }}/share/qr?format=png"
+               class="inline-flex items-center gap-1 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+              <span class="material-symbols-outlined text-[18px]">download</span> PNG
+            </a>
+            <a download href="/{{ org_slug }}/surveys/{{ survey.id }}/share/qr?format=svg"
+               class="inline-flex items-center gap-1 rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">
+              <span class="material-symbols-outlined text-[18px]">download</span> SVG
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {% comment %}---- Access & controls ----{% endcomment %}
+      <div class="rounded-xl border border-hairline bg-white p-6">
+        <div class="mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-muted">tune</span>
+          <h2 class="font-display text-lg font-semibold text-ink">Access &amp; controls</h2>
+        </div>
+
+        <dl class="space-y-4 text-sm">
+          <div>
+            <dt class="font-medium text-ink">Response limit</dt>
+            <dd class="mt-1 text-muted">
+              {% if close_on.by_response_cap %}{{ close_on.by_response_cap }} responses{% else %}Unlimited{% endif %}
+            </dd>
+          </div>
+          <div>
+            <dt class="font-medium text-ink">Close date</dt>
+            <dd class="mt-1 text-muted">
+              {% if close_on.by_date %}{{ close_on.by_date }}{% else %}No automatic close{% endif %}
+            </dd>
+          </div>
+          <div class="flex items-center justify-between">
+            <dt class="font-medium text-ink">One response per link</dt>
+            <dd>
+              {% if single_use %}
+                <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">On</span>
+              {% else %}
+                <span class="inline-flex items-center gap-1 rounded-full bg-panel px-2 py-0.5 text-xs font-medium text-muted">Off</span>
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
+
+        <p class="mt-6 border-t border-hairline pt-4 text-xs text-muted">
+          Distribution settings (limits, close date, single-use) are configured in the survey
+          builder.
+        </p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

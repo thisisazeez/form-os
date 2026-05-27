@@ -1,0 +1,72 @@
+{% load static %}
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}OpenSurvey{% endblock %}</title>
+
+    {% comment %}
+       Frontend base (PLAN §13): Tailwind + HTMX + Alpine for the server-rendered
+       admin/dashboards shell. Loaded via CDN in the Phase-0 scaffold so the HTMX
+       surface renders without a Node build (only the React ISLANDS need Vite).
+       A production build would vendor these or compile Tailwind; flagged for Wave 1+.
+
+       Brand: OpenSurvey. The Tailwind config below registers
+       the brand TOKEN classes (brand / ink / muted / surface / panel / hairline + the
+       Poppins/Inter font families) — every admin/auth template uses ONLY these brand-token
+       classes (no raw hex, no default Tailwind color scales). The config <script> MUST come
+       right after the Tailwind CDN and BEFORE HTMX/Alpine so the utilities exist at parse time.
+    {% endcomment %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { theme: { extend: { colors: { brand:'#0d9488','brand-hover':'#0f766e', secondary:'#3d63dc', success:'#8ac449', ink:'#222b27', muted:'#666666', surface:'#faf8f7', panel:'#f2f4ef', hairline:'rgba(34,43,39,0.10)' }, fontFamily: { display:['Poppins','sans-serif'], body:['Inter','sans-serif'] } } } }
+    </script>
+    <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    {% comment %}Google Fonts: Poppins (display/headings), Inter (body), Material Symbols (icons).{% endcomment %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
+      rel="stylesheet"
+    />
+
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body class="h-full bg-surface text-ink antialiased font-body">
+    {% comment %}
+       {% block body %} is the FULL page chrome and is overridable. The DEFAULT body
+       (below) is the public/centered layout that all existing public + auth pages rely
+       on (header wordmark + centered <main> + footer). The authenticated admin shell
+       (templates/_layouts/app_shell.html) OVERRIDES this whole block with the sidebar
+       layout. Inner blocks `nav`, `content`, `body_extra` are preserved so nothing that
+       extends base.html directly has to change.
+    {% endcomment %}
+    {% block body %}
+      <header class="border-b border-hairline bg-white">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <a href="/" class="font-display text-lg font-bold tracking-tight">
+            Open<span class="text-brand">Survey</span>
+          </a>
+          <nav class="text-sm text-muted">{% block nav %}{% endblock %}</nav>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-5xl px-4 py-10">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="mx-auto max-w-5xl px-4 py-8 text-xs text-muted">
+        OpenSurvey · survey &amp; experience management.
+      </footer>
+    {% endblock %}
+
+    {% block body_extra %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,187 @@
+[
+  {
+    "name": "jumpTo — skips an intermediate question",
+    "description": "On q1, jumpTo q4 -> q2/q3 are bypassed for this respondent.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Path?" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }] },
+          "logic": [
+            { "id": "j1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "a" }, "action": { "type": "jumpTo", "target": "q4" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q4", "type": "openText", "headline": { "default": "q4" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "a" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q4" }
+  },
+
+  {
+    "name": "jumpTo — directly to an ending id",
+    "description": "On q1, jumpTo end_early -> ending screen (target matches an ending id).",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Continue?" },
+          "config": { "choices": [{ "id": "yes", "label": { "default": "Yes" } }, { "id": "no", "label": { "default": "No" } }] },
+          "logic": [
+            { "id": "j1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "no" }, "action": { "type": "jumpTo", "target": "end_early" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [
+        { "id": "end_main", "type": "endScreen", "headline": { "default": "Thanks!" } },
+        { "id": "end_early", "type": "endScreen", "headline": { "default": "No problem, goodbye." } }
+      ]
+    },
+    "answers": { "q1": "no" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "ending", "id": "end_early" }
+  },
+
+  {
+    "name": "endSurvey — with explicit endingId",
+    "description": "endSurvey action carrying endingId -> that specific ending.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "consent",
+          "headline": { "default": "Do you consent?" },
+          "config": { "label": { "default": "I agree" } },
+          "logic": [
+            { "id": "e1", "condition": { "leftQuestionId": "q1", "operator": "isNotAccepted" }, "action": { "type": "endSurvey", "endingId": "declined" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [
+        { "id": "completed", "type": "endScreen", "headline": { "default": "All done" } },
+        { "id": "declined", "type": "endScreen", "headline": { "default": "You declined." } }
+      ]
+    },
+    "answers": { "q1": false },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "ending", "id": "declined" }
+  },
+
+  {
+    "name": "endSurvey — without endingId defaults to first ending",
+    "description": "endSurvey with no endingId -> survey.endings[0].",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": { "default": "Age?" },
+          "config": {},
+          "logic": [
+            { "id": "e1", "condition": { "leftQuestionId": "q1", "operator": "lessThan", "value": 18 }, "action": { "type": "endSurvey" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [
+        { "id": "first_ending", "type": "endScreen", "headline": { "default": "Thank you" } },
+        { "id": "second_ending", "type": "endScreen", "headline": { "default": "Other" } }
+      ]
+    },
+    "answers": { "q1": 15 },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "ending", "id": "first_ending" }
+  },
+
+  {
+    "name": "endSurvey — without endingId and no endings -> end-of-survey",
+    "description": "endSurvey with no endingId and an empty endings array -> {type:end}.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": { "default": "Age?" },
+          "config": {},
+          "logic": [
+            { "id": "e1", "condition": { "leftQuestionId": "q1", "operator": "lessThan", "value": 18 }, "action": { "type": "endSurvey" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": []
+    },
+    "answers": { "q1": 15 },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "end" }
+  },
+
+  {
+    "name": "first matching rule wins — earlier rule short-circuits a later one",
+    "description": "Both r1 (jumpTo q3) and r2 (jumpTo q4) would match; r1 is first in array order -> q3.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": { "default": "Score?" },
+          "config": {},
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "q1", "operator": "greaterThan", "value": 5 }, "action": { "type": "jumpTo", "target": "q3" } },
+            { "id": "r2", "condition": { "leftQuestionId": "q1", "operator": "greaterThan", "value": 3 }, "action": { "type": "jumpTo", "target": "q4" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q4", "type": "openText", "headline": { "default": "q4" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": 9 },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q3" }
+  },
+
+  {
+    "name": "require before jumpTo on same question — require ignored for navigation, jumpTo wins",
+    "description": "r1 is require(q3) [non-navigation], r2 is jumpTo q4. nextStep skips r1 and returns q4; q3 is also required.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "singleSelect",
+          "headline": { "default": "Pick" },
+          "config": { "choices": [{ "id": "x", "label": { "default": "X" } }, { "id": "y", "label": { "default": "Y" } }] },
+          "logic": [
+            { "id": "r1", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "x" }, "action": { "type": "require", "target": "q3" } },
+            { "id": "r2", "condition": { "leftQuestionId": "q1", "operator": "equals", "value": "x" }, "action": { "type": "jumpTo", "target": "q4" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q4", "type": "openText", "headline": { "default": "q4" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "x" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q4" },
+    "expected_required": ["q3"]
+  }
+]

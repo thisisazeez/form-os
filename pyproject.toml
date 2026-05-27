@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opensurvey"
+version = "0.1.0"
+description = "Self-hosted, multi-tenant survey & experience-management platform built with Django and React."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+classifiers = ["License :: OSI Approved :: MIT License"]
+# Runtime dependencies are pinned in requirements/*.txt (the source of truth for installs).
+# This [project] table exists so the repo is a valid package and tooling (ruff/pytest) can be configured here.
+
+[tool.setuptools]
+# We ship Django apps under apps/ and project config under config/; not a distributable wheel in v1.
+packages = []
+
+# ---------------------------------------------------------------------------
+# pytest / pytest-django
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+testpaths = ["tests", "apps"]
+# --reuse-db speeds up local re-runs; --create-db forces a fresh test DB when schema changes.
+# django-tenants needs Postgres; see README "Running tests".
+addopts = "-ra -q"
+filterwarnings = [
+    "ignore::DeprecationWarning:django_tenants.*",
+]
+
+# ---------------------------------------------------------------------------
+# ruff (lint + format) — optional dev tooling, not required to run the app
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["migrations", "node_modules", "frontend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ"]
+ignore = [
+    "E501",   # line length handled by formatter
+    "DJ001",  # null=True on string fields — we use it deliberately for nullable user_id-style cols
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/settings/*.py" = ["F403", "F405"]  # settings split uses star-imports intentionally

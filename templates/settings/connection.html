@@ -1,0 +1,80 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Settings → Website & App Connection (FEATURE_PARITY WS-11). `/<org_slug>/settings/connection` —
+  apps.actions.views_settings.connection_page. Read-only: shows the current workspace environment's
+  id + a copy-able embed snippet (THE SHARED widget contract) + setup steps + a JS usage note.
+  Workspace-scoped read RBAC (any member with workspace access). No mutation.
+
+  Context: org, section ("connection"), environment, env_id, app_origin, embed_snippet, no_workspace.
+{% endcomment %}
+
+{% block title %}Website & App Connection — {{ org.name }}{% endblock %}
+{% block nav_settings %}is-active{% endblock %}
+{% block topbar_title %}Website & App Connection{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Website & App Connection" subtitle="Connect the OpenSurvey widget to your website or app." %}
+
+  <div class="mt-6 max-w-4xl">
+    {% include "settings/_org_subnav.html" with org=org section=section %}
+
+    {% if no_workspace %}
+      <div class="rounded-xl border border-hairline bg-white p-8 text-center shadow-sm">
+        <span class="material-symbols-outlined text-[32px] text-muted">link</span>
+        <p class="mt-2 text-sm text-muted">Create a workspace first — the widget connects to a workspace environment.</p>
+      </div>
+    {% else %}
+
+      {% comment %} environment id {% endcomment %}
+      <section class="mb-6 rounded-xl border border-hairline bg-white p-6 shadow-sm">
+        <h2 class="font-display text-lg font-semibold text-ink">Environment ID</h2>
+        <p class="mt-1 text-sm text-muted">The <span class="font-medium text-ink">{{ environment.type }}</span> environment the widget connects to.</p>
+        <div class="mt-3 flex items-center gap-2" x-data="{ copied: false }">
+          <code data-testid="env-id" class="flex-1 truncate rounded-lg border border-hairline bg-white px-3 py-2 font-mono text-sm text-ink">{{ env_id }}</code>
+          <button type="button"
+            @click="navigator.clipboard.writeText('{{ env_id }}'); copied = true; setTimeout(() => copied = false, 1500)"
+            class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'"></span>
+            <span x-text="copied ? 'Copied' : 'Copy'"></span>
+          </button>
+        </div>
+      </section>
+
+      {% comment %} embed snippet (THE SHARED CONTRACT) {% endcomment %}
+      <section class="mb-6 rounded-xl border border-hairline bg-white p-6 shadow-sm">
+        <h2 class="font-display text-lg font-semibold text-ink">1. Add the snippet</h2>
+        <p class="mt-1 text-sm text-muted">Paste this into the <code class="font-mono text-xs">&lt;head&gt;</code> of every page where surveys should appear.</p>
+        <div class="mt-3" x-data="{ copied: false }">
+          <div class="flex items-start gap-2">
+            <pre class="flex-1 overflow-x-auto rounded-lg border border-hairline bg-ink/[0.03] px-3 py-3 font-mono text-xs leading-relaxed text-ink"><code data-testid="embed-snippet" x-ref="snippet">{{ embed_snippet }}</code></pre>
+            <button type="button"
+              @click="navigator.clipboard.writeText($refs.snippet.textContent); copied = true; setTimeout(() => copied = false, 1500)"
+              class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+              <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'"></span>
+              <span x-text="copied ? 'Copied' : 'Copy'"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {% comment %} setup steps {% endcomment %}
+      <section class="mb-6 rounded-xl border border-hairline bg-white p-6 shadow-sm">
+        <h2 class="font-display text-lg font-semibold text-ink">2. Identify your users (optional)</h2>
+        <p class="mt-1 text-sm text-muted">Tell the widget who the current user is so responses are attributed and recontact limits apply per person.</p>
+        <pre class="mt-3 overflow-x-auto rounded-lg border border-hairline bg-ink/[0.03] px-3 py-3 font-mono text-xs leading-relaxed text-ink"><code>window.openSurvey.setUserId("user-123");</code></pre>
+      </section>
+
+      <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+        <h2 class="font-display text-lg font-semibold text-ink">3. Track actions</h2>
+        <p class="mt-1 text-sm text-muted">
+          Fire a tracked action from your code to show app surveys triggered by it. Define actions on the
+          <a href="/{{ org.slug }}/settings/actions" class="font-medium text-brand hover:underline">Actions</a> page,
+          then call <code class="font-mono text-xs">track</code> with the action's name (or its track key).
+        </p>
+        <pre class="mt-3 overflow-x-auto rounded-lg border border-hairline bg-ink/[0.03] px-3 py-3 font-mono text-xs leading-relaxed text-ink"><code>window.openSurvey.track("checkout_started");</code></pre>
+        <p class="mt-3 text-xs text-muted">Page-view and click actions fire automatically once the snippet loads — no code needed.</p>
+      </section>
+
+    {% endif %}
+  </div>
+{% endblock %}

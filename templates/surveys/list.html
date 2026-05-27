@@ -1,0 +1,103 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Surveys list (/<org_slug>/surveys) — grid of the org's surveys (scoped to readable
+  workspaces) with status pills, response counts, last-edited, and status filter chips.
+  The "+ New survey" button links to the survey template gallery (/<org_slug>/surveys/new,
+  WS-14), which replaced the old name-it modal as the create entry point. Mirrors
+  designs/stitch/surveys-list.png; brand tokens only.
+{% endcomment %}
+
+{% block title %}Surveys — OpenSurvey{% endblock %}
+{% block nav_surveys %}is-active{% endblock %}
+{% block topbar_title %}Surveys{% endblock %}
+
+{% block content %}
+<div>
+
+  {% comment %} Header + New survey CTA (→ template gallery) {% endcomment %}
+  <div class="mb-6 flex items-end justify-between">
+    {% include "_components/page_header.html" with title="Surveys" subtitle="Manage your forms, track responses, and analyze feedback." %}
+    {% if can_create %}
+      <a href="/{{ org_slug }}/surveys/new"
+         class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+        <span class="material-symbols-outlined text-[18px]">add</span> New survey
+      </a>
+    {% endif %}
+  </div>
+
+  {% if create_error %}
+    <div class="mb-6 rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-muted">info</span>{{ create_error }}
+    </div>
+  {% endif %}
+
+  {# Status filter chips #}
+  <div class="mb-6 flex flex-wrap items-center gap-2">
+    {% with base="/"|add:org_slug|add:"/surveys" %}
+    <a href="{{ base }}"
+       class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors {% if active_chip == 'all' %}border-brand bg-brand/5 text-brand{% else %}border-hairline bg-white text-muted hover:bg-panel{% endif %}">
+      All <span class="ml-1 text-xs">{{ count_all }}</span>
+    </a>
+    <a href="{{ base }}?status=live"
+       class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors {% if active_chip == 'live' %}border-brand bg-brand/5 text-brand{% else %}border-hairline bg-white text-muted hover:bg-panel{% endif %}">
+      Live <span class="ml-1 text-xs">{{ count_live }}</span>
+    </a>
+    <a href="{{ base }}?status=draft"
+       class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors {% if active_chip == 'draft' %}border-brand bg-brand/5 text-brand{% else %}border-hairline bg-white text-muted hover:bg-panel{% endif %}">
+      Draft <span class="ml-1 text-xs">{{ count_draft }}</span>
+    </a>
+    <a href="{{ base }}?status=closed"
+       class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors {% if active_chip == 'closed' %}border-brand bg-brand/5 text-brand{% else %}border-hairline bg-white text-muted hover:bg-panel{% endif %}">
+      Closed <span class="ml-1 text-xs">{{ count_closed }}</span>
+    </a>
+    {% endwith %}
+  </div>
+
+  {# Survey grid #}
+  {% if surveys %}
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {% for s in surveys %}
+        <div class="flex flex-col overflow-hidden rounded-xl border border-hairline bg-white shadow-sm transition-shadow hover:shadow-md">
+          {# Card head: status pill on a panel band #}
+          <div class="flex items-start justify-between bg-panel/40 px-5 py-4">
+            <span class="material-symbols-outlined text-muted">description</span>
+            {% include "_components/status_pill.html" with status=s.display_status %}
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <a href="/{{ org_slug }}/surveys/{{ s.id }}/results" class="font-display text-lg font-semibold text-ink hover:text-brand">{{ s.name }}</a>
+
+            <div class="mt-auto flex items-center justify-between border-t border-hairline pt-4 text-sm text-muted">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-brand">forum</span>
+                {{ s.response_count }}
+              </span>
+              <span>{{ s.updated_at|date:"M j, Y" }}</span>
+            </div>
+
+            {# Quick actions #}
+            <div class="mt-4 flex items-center gap-2">
+              <a href="/{{ org_slug }}/surveys/{{ s.id }}/edit"
+                 class="flex-1 rounded-lg border border-hairline bg-white px-3 py-1.5 text-center text-xs font-medium text-ink transition-colors hover:bg-panel">Edit</a>
+              <a href="/{{ org_slug }}/surveys/{{ s.id }}/responses"
+                 class="flex-1 rounded-lg border border-hairline bg-white px-3 py-1.5 text-center text-xs font-medium text-ink transition-colors hover:bg-panel">Responses</a>
+              <a href="/{{ org_slug }}/surveys/{{ s.id }}/share"
+                 class="flex-1 rounded-lg border border-hairline bg-white px-3 py-1.5 text-center text-xs font-medium text-ink transition-colors hover:bg-panel">Share</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% if active_chip == 'all' %}
+      {% if can_create %}
+        {% include "_components/empty_state.html" with icon="ballot" title="No surveys yet" message="Create your first survey to start collecting responses." %}
+      {% else %}
+        {% include "_components/empty_state.html" with icon="ballot" title="No surveys yet" message="Surveys you have access to will appear here." %}
+      {% endif %}
+    {% else %}
+      {% include "_components/empty_state.html" with icon="filter_alt" title="No surveys match this filter" message="Try a different status filter to see more surveys." %}
+    {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Standalone CSV import page — /<org_slug>/contacts/import (GET).
+  The list page imports via an Alpine modal; this page is the direct-link / fallback surface.
+  Brand tokens only. POSTs to the same endpoint, which renders contacts/import_results.html.
+{% endcomment %}
+
+{% block title %}Import contacts — OpenSurvey{% endblock %}
+{% block nav_contacts %}is-active{% endblock %}
+{% block topbar_title %}Contacts{% endblock %}
+
+{% block content %}
+<div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <nav class="mb-1 flex items-center gap-1.5 text-sm text-muted">
+    <a href="../contacts" class="transition-colors hover:text-brand">Contacts</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <span class="text-ink">Import</span>
+  </nav>
+  {% include "_components/page_header.html" with title="Import contacts" subtitle="Upload a CSV. The header row's column names become attributes; an email column de-duplicates." %}
+
+  <div class="mt-6 max-w-lg rounded-xl border border-hairline bg-white p-6 shadow-sm">
+    <form method="post" action="../contacts/import" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="csv-file" class="mb-1 block text-sm font-medium text-ink">CSV file</label>
+      <input id="csv-file" name="file" type="file" accept=".csv,text/csv" required
+             class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm file:mr-3 file:rounded-md file:border-0 file:bg-panel file:px-3 file:py-1 file:text-sm file:font-medium file:text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+      <p class="mt-2 text-xs text-muted">Example header: <code class="rounded bg-panel px-1">email,name,plan,company</code></p>
+      <div class="mt-6 flex justify-end gap-3">
+        <a href="../contacts"
+           class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+          <span class="material-symbols-outlined text-[18px]">upload_file</span> Upload &amp; import
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

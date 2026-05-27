@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Survey Screen - Short Text Field</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {},
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "display": ["Public Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Floating label styles */
+        .floating-input:focus-within label,
+        .floating-input input:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: #0d9488;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full bg-[#faf8f7] font-body text-[#444] antialiased flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 py-4 max-w-4xl mx-auto border-b border-[rgba(34,43,39,0.10)] bg-[#faf8f7]">
+<button aria-label="Close survey" class="text-[#666] hover:opacity-80 transition-opacity" type="button">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<div class="text-center flex-1">
+<span class="font-headline font-bold text-lg text-[#222b27]">Question 1 of 10</span>
+</div>
+<div class="font-headline font-bold text-sm text-[#0d9488]">
+            OpenSurvey
+        </div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-2xl mx-auto px-6 py-12 flex flex-col justify-center pb-32">
+<div class="space-y-8 fade-in-up">
+<!-- Question Headline -->
+<h1 class="font-headline font-bold text-3xl md:text-4xl text-[#222b27] leading-tight text-center md:text-left">
+                Anything else you'd like to share?
+            </h1>
+<!-- Input Area -->
+<div class="pt-8">
+<div class="floating-input relative bg-white rounded-t-lg px-4 pt-6 pb-2 border-b-2 border-[#222b27] border-opacity-20 hover:border-opacity-40 focus-within:border-[#0d9488] focus-within:border-opacity-100 transition-colors shadow-sm">
+<input autocomplete="off" class="w-full bg-transparent border-none p-0 focus:ring-0 text-[#222b27] font-body text-lg placeholder-transparent peer" id="feedbackInput" placeholder=" " type="text"/>
+<label class="absolute left-4 top-4 text-[#666] font-body text-lg cursor-text transition-all duration-200 origin-left" for="feedbackInput">
+                        Your feedback
+                    </label>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white shadow-[0_-4px_20px_0_rgba(34,43,39,0.05)] rounded-t-xl max-w-4xl mx-auto right-0">
+<button class="flex items-center gap-2 text-[#444] px-4 py-2 hover:bg-[#f2f4ef] rounded-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 font-label font-semibold text-sm" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_left">chevron_left</span>
+            Back
+        </button>
+<button class="bg-gradient-to-r from-[#0d9488] to-[#0f766e] text-white rounded-lg px-8 py-3 flex items-center gap-2 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 font-label font-semibold text-sm active:scale-95" type="button">
+            Next
+            <span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</footer>
+<script>
+        // Simple entry animation
+        document.addEventListener("DOMContentLoaded", () => {
+            const mainContent = document.querySelector('.fade-in-up');
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(20px)';
+            mainContent.style.transition = 'opacity 400ms ease-out, transform 400ms ease-out';
+            
+            setTimeout(() => {
+                mainContent.style.opacity = '1';
+                mainContent.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body></html>

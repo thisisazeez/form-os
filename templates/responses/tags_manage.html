@@ -1,0 +1,104 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Tag management (/<org_slug>/tags) — the tenant-global response-tag vocabulary: every tag, its
+  response count, and rename / delete / merge affordances. Owner/admin only (RBAC resolved in the
+  view via the org-role gate — see apps/responses/views_htmx.py "TAG MANAGEMENT RBAC"). Brand
+  tokens only; Alpine drives the inline rename + merge editors.
+{% endcomment %}
+
+{% block title %}Tags — OpenSurvey{% endblock %}
+{% block nav_results %}is-active{% endblock %}
+{% block topbar_title %}Tags{% endblock %}
+
+{% block content %}
+  <div class="mb-6">
+    <h1 class="font-display text-2xl font-bold tracking-tight text-ink">Response tags</h1>
+    <p class="mt-1 text-sm text-muted">Rename, delete, or merge the tags used to label responses across this organization.</p>
+  </div>
+
+  {% if error %}
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px]">error</span>{{ error }}
+    </div>
+  {% endif %}
+  {% if notice %}
+    <div class="mb-4 rounded-lg border border-hairline bg-panel/50 px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-muted">check_circle</span>{{ notice }}
+    </div>
+  {% endif %}
+
+  {% if tags %}
+    <div class="overflow-hidden rounded-xl border border-hairline bg-white">
+      <table class="min-w-full divide-y divide-hairline text-sm">
+        <thead class="bg-panel/50 text-left">
+          <tr>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Tag</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Responses</th>
+            <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {% for row in tags %}
+            <tr class="transition-colors hover:bg-panel/30"
+                x-data="{ renaming: false, merging: false }">
+              <td class="px-6 py-4">
+                <div x-show="!renaming" class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[16px] text-muted">label</span>
+                  <span class="font-medium text-ink">{{ row.tag.name }}</span>
+                </div>
+                {% comment %} Inline rename editor {% endcomment %}
+                <form x-show="renaming" x-cloak method="post"
+                      action="/{{ org_slug }}/tags/{{ row.tag.id }}/rename" class="flex items-center gap-2">
+                  {% csrf_token %}
+                  <input type="text" name="name" value="{{ row.tag.name }}" required
+                         class="rounded-lg border border-hairline px-2 py-1.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                  <button type="submit" class="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-hover">Save</button>
+                  <button type="button" @click="renaming = false" class="text-xs text-muted hover:text-ink">Cancel</button>
+                </form>
+              </td>
+              <td class="px-6 py-4 text-muted">{{ row.count }}</td>
+              <td class="px-6 py-4">
+                <div class="flex items-center justify-end gap-3">
+                  <button type="button" @click="renaming = !renaming; merging = false"
+                          class="inline-flex items-center gap-1 text-sm font-medium text-muted transition-colors hover:text-ink">
+                    <span class="material-symbols-outlined text-[16px]">edit</span> Rename
+                  </button>
+                  <button type="button" @click="merging = !merging; renaming = false"
+                          class="inline-flex items-center gap-1 text-sm font-medium text-muted transition-colors hover:text-ink">
+                    <span class="material-symbols-outlined text-[16px]">merge</span> Merge
+                  </button>
+                  <form method="post" action="/{{ org_slug }}/tags/{{ row.tag.id }}/delete"
+                        onsubmit="return confirm('Delete the tag “{{ row.tag.name|escapejs }}”? It will be removed from {{ row.count }} response(s); the responses themselves are untouched.');">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center gap-1 text-sm font-medium text-red-600 transition-colors hover:text-red-700">
+                      <span class="material-symbols-outlined text-[16px]">delete</span> Delete
+                    </button>
+                  </form>
+                </div>
+                {% comment %} Inline merge editor — pick a target to merge THIS tag into {% endcomment %}
+                <form x-show="merging" x-cloak method="post"
+                      action="/{{ org_slug }}/tags/{{ row.tag.id }}/merge" class="mt-2 flex items-center justify-end gap-2">
+                  {% csrf_token %}
+                  <span class="text-xs text-muted">Merge into</span>
+                  <select name="target" required
+                          class="rounded-lg border border-hairline px-2 py-1.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                    <option value="">Choose a tag…</option>
+                    {% for other in tags %}
+                      {% if other.tag.id != row.tag.id %}
+                        <option value="{{ other.tag.id }}">{{ other.tag.name }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-hover">Merge</button>
+                  <button type="button" @click="merging = false" class="text-xs text-muted hover:text-ink">Cancel</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "_components/empty_state.html" with icon="label_off" title="No tags yet" message="Tags appear here once you tag responses. Add a tag from any response to get started." %}
+  {% endif %}
+{% endblock %}

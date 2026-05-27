@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% comment %}
+  Authenticated survey-builder host page (Wave 3b).
+
+  Served at /{org_slug}/surveys/{survey_id}/edit (the slug is stripped by TenantSlugMiddleware
+  before the tenant urlconf matches surveys/<uuid:survey_id>/edit). Authenticated + RBAC-gated
+  in apps/surveys/builder_views.py::survey_builder_host (login_required; view_survey → 404,
+  edit_survey → 403). It is a MINIMAL host: it renders the mount point for the React builder
+  island (frontend/src/islands/builder/main.tsx) and injects — per the PRE-AGREED MOUNT
+  CONTRACT (fixed; the frontend builds to exactly this) — these dataset attrs on
+  #opensurvey-builder:
+    - data-survey-id      the survey UUID
+    - data-org-slug       the routed org slug
+    - data-api-base       the AUTHENTICATED Survey CRUD base /api/v1/{org_slug} (NOT /public)
+    - data-initial-survey the survey's full definition JSON (openapi Survey shape) so the
+                          island hydrates without a GET round-trip.
+
+  Mirrors templates/public/runtime.html: django-vite HMR/refresh + the vite_asset bundle are
+  gated on vite_built (manifest present), so the page renders cleanly before `npm run build`.
+{% endcomment %}
+
+{% block title %}Edit — {{ survey_name|default:"Survey" }}{% endblock %}
+
+{% block head_extra %}
+  {# django-vite HMR client + React Fast Refresh (only in dev mode). #}
+  {% if vite_built %}
+    {% vite_hmr_client %}
+    {% vite_react_refresh %}
+  {% endif %}
+{% endblock %}
+
+{% comment %}
+  The builder is a full-bleed workspace UI, NOT a reading column — so it OVERRIDES the default
+  centered `max-w-5xl` body from base.html and uses (nearly) the full viewport width. Keeps the
+  OpenSurvey wordmark header for context.
+{% endcomment %}
+{% block body %}
+  <header class="border-b border-hairline bg-white">
+    <div class="flex items-center px-4 py-3 sm:px-6 lg:px-8">
+      <a href="/" class="font-display text-lg font-bold tracking-tight">Open<span class="text-brand">Survey</span></a>
+    </div>
+  </header>
+
+  <main class="px-4 py-6 sm:px-6 lg:px-8">
+    {% comment %}Mount point read by frontend/src/islands/builder/main.tsx. The island reads these
+       dataset attrs: data-survey-id, data-org-slug, data-api-base, and data-initial-survey
+       (the full survey definition JSON, parsed via JSON.parse(el.dataset.initialSurvey)).
+       Django's attribute auto-escaping is the correct escaping for the embedded JSON.{% endcomment %}
+    <div
+      id="opensurvey-builder"
+      data-survey-id="{{ survey_id }}"
+      data-org-slug="{{ org_slug }}"
+      data-api-base="{{ api_base }}"
+      data-initial-survey="{{ initial_survey_json }}"
+      data-project-theme="{{ project_theme_json }}"
+      data-action-classes="{{ action_classes_json }}"
+    ></div>
+
+    {% if not vite_built %}
+      <p class="mt-6 rounded-lg border border-hairline bg-panel px-4 py-3 text-sm text-muted">
+        Survey builder bundle not built yet. Run
+        <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code>
+        (or set <code>DJANGO_VITE_DEV_MODE=True</code> and <code>npm run dev</code>) to load
+        the builder island.
+      </p>
+    {% endif %}
+  </main>
+{% endblock %}
+
+{% block body_extra %}
+  {% if vite_built %}
+    {# django-vite injects the hashed builder bundle from the manifest. #}
+    {% vite_asset "src/islands/builder/main.tsx" %}
+  {% endif %}
+{% endblock %}

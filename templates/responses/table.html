@@ -1,0 +1,369 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Responses table (/<org_slug>/surveys/<id>/responses) — real Response rows with one column per
+  question (NPS chip, rating stars, text), completion status, page-number pagination, plus:
+    - a filter bar (tags / status / date range / answer-to-a-question) with removable active chips,
+    - per-row tag chips with add/remove (gated by ``can_tag`` = workspace write),
+    - an Export button (CSV) honoring the active filters (gated by ``can_export``).
+  All RBAC + PII is resolved in the view; this template only renders. Mirrors
+  designs/stitch/responses-table.png; brand tokens only.
+{% endcomment %}
+
+{% block title %}Responses · {{ survey.name }} — OpenSurvey{% endblock %}
+{% block nav_results %}is-active{% endblock %}
+{% block topbar_title %}Responses{% endblock %}
+
+{% block content %}
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <a href="/{{ org_slug }}/surveys/{{ survey.id }}/results" class="text-muted hover:text-ink" aria-label="Back to results">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-muted">{{ survey.name }}</p>
+        <h1 class="font-display text-2xl font-bold tracking-tight text-ink">
+          {{ total }} response{{ total|pluralize }}{% if filter_state.has_filters %} <span class="text-base font-normal text-muted">of {{ total_unfiltered }}</span>{% endif %}
+        </h1>
+      </div>
+    </div>
+    <div class="flex items-center gap-2"
+         x-data="{ filterOpen: false }">
+      <button type="button" @click="filterOpen = true"
+              class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+      </button>
+      {% if can_export %}
+        <a href="/{{ org_slug }}/surveys/{{ survey.id }}/responses.csv{% if filter_qs %}?{{ filter_qs }}{% endif %}"
+           class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+          <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
+        </a>
+      {% endif %}
+      <a href="/{{ org_slug }}/surveys/{{ survey.id }}/results"
+         class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">leaderboard</span> Summary
+      </a>
+
+      {% comment %} ---- Filter modal (Alpine) — builds a querystring of tag/status/from/to/answer ---- {% endcomment %}
+      {{ all_tags_json|json_script:"rf-tags" }}
+      {{ questions_json|json_script:"rf-questions" }}
+      {{ answer_operators|json_script:"rf-ops" }}
+      {{ filter_state.tag_ids|json_script:"rf-selected" }}
+      <div x-show="filterOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 text-left"
+           x-data="responseFilter()" x-init="init()">
+        <div @click="filterOpen = false" class="absolute inset-0 bg-ink/40"></div>
+        <div class="relative w-full max-w-lg rounded-xl border border-hairline bg-white p-6 shadow-lg">
+          <div class="mb-4 flex items-start justify-between">
+            <div>
+              <h2 class="font-display text-xl font-bold text-ink">Filter responses</h2>
+              <p class="mt-1 text-sm text-muted">Narrow by tag, completion, date, or an answer to a question.</p>
+            </div>
+            <button @click="filterOpen = false" class="text-muted hover:text-ink" aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <div class="space-y-4">
+            <div x-show="tags.length > 0">
+              <label class="mb-1 block text-sm font-medium text-ink">Tags <span class="text-xs font-normal text-muted">(match all)</span></label>
+              <div class="flex flex-wrap gap-2">
+                <template x-for="t in tags" :key="t.id">
+                  <button type="button" @click="toggleTag(t.id)"
+                          class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+                          :class="selectedTags.includes(t.id) ? 'border-brand bg-brand text-white' : 'border-hairline bg-white text-ink hover:bg-panel'"
+                          x-text="t.name"></button>
+                </template>
+              </div>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-ink">Completion</label>
+              <select x-model="status"
+                      class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                <option value="">Any</option>
+                <option value="completed">Completed</option>
+                <option value="partial">Partial</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-ink">From</label>
+                <input type="date" x-model="dateFrom"
+                       class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-ink">To</label>
+                <input type="date" x-model="dateTo"
+                       class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+            <div x-show="questions.length > 0" class="border-t border-hairline pt-4">
+              <label class="mb-1 block text-sm font-medium text-ink">Answer to a question</label>
+              <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <select x-model="answerQid"
+                        class="rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                  <option value="">Question…</option>
+                  <template x-for="q in questions" :key="q.id">
+                    <option :value="q.id" x-text="q.headline"></option>
+                  </template>
+                </select>
+                <select x-model="answerOp"
+                        class="rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                  <template x-for="o in operators" :key="o">
+                    <option :value="o" x-text="o"></option>
+                  </template>
+                </select>
+                <input type="text" x-model="answerValue" placeholder="Value"
+                       class="rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end gap-3">
+            <a href="/{{ org_slug }}/surveys/{{ survey.id }}/responses"
+               class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Clear all</a>
+            <button type="button" @click="apply()"
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+              <span class="material-symbols-outlined text-[18px]">filter_list</span> Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% comment %} ---- Active filter chips (removable) ---- {% endcomment %}
+  {% if filter_state.has_filters %}
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      <span class="text-xs font-semibold uppercase tracking-wider text-muted">Filters</span>
+      {% for t in filter_state.tags %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+          <span class="material-symbols-outlined text-[14px]">label</span>{{ t.name }}
+        </span>
+      {% endfor %}
+      {% if filter_state.status %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{{ filter_state.status|capfirst }}</span>
+      {% endif %}
+      {% if filter_state.from %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">From {{ filter_state.from }}</span>
+      {% endif %}
+      {% if filter_state.to %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">To {{ filter_state.to }}</span>
+      {% endif %}
+      {% for a in filter_state.answers %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+          {{ a.headline }} {{ a.op }}{% if a.value %} “{{ a.value }}”{% endif %}
+        </span>
+      {% endfor %}
+      <a href="/{{ org_slug }}/surveys/{{ survey.id }}/responses"
+         class="text-xs font-medium text-muted underline transition-colors hover:text-ink">Clear all</a>
+    </div>
+  {% endif %}
+
+  {% if rows %}
+    <div class="overflow-x-auto rounded-xl border border-hairline bg-white">
+      <table class="min-w-full divide-y divide-hairline text-sm">
+        <thead class="bg-panel/50 text-left">
+          <tr>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Respondent</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Submitted</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Status</th>
+            {% for col in columns %}
+              <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">{{ col.headline }}</th>
+            {% endfor %}
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Tags</th>
+            <th class="px-6 py-4"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {% for row in rows %}
+            <tr class="transition-colors hover:bg-panel/30">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="flex h-7 w-7 items-center justify-center rounded-full bg-panel text-muted">
+                    <span class="material-symbols-outlined text-[16px]">{% if row.contact_id %}person{% else %}person_outline{% endif %}</span>
+                  </span>
+                  <span class="text-ink">{% if row.contact_id %}Contact{% else %}Anonymous{% endif %}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-muted">{{ row.created_at|date:"M j, Y · g:i A" }}</td>
+              <td class="px-6 py-4">
+                {% if row.finished %}
+                  <span class="inline-flex items-center gap-1 text-success" title="Completed">
+                    <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1 text-muted" title="Partial">
+                    <span class="material-symbols-outlined text-[18px]">pending</span>
+                  </span>
+                {% endif %}
+              </td>
+              {% for cell in row.cells %}
+                <td class="px-6 py-4">
+                  {% if cell.kind == "nps" %}
+                    {% if cell.band == "promoter" %}
+                      <span class="inline-flex items-center rounded-md bg-success/15 px-2 py-1 text-xs font-medium text-success">{{ cell.value }} · Promoter</span>
+                    {% elif cell.band == "passive" %}
+                      <span class="inline-flex items-center rounded-md bg-panel px-2 py-1 text-xs font-medium text-ink">{{ cell.value }} · Passive</span>
+                    {% else %}
+                      <span class="inline-flex items-center rounded-md bg-brand/10 px-2 py-1 text-xs font-medium text-brand">{{ cell.value }} · Detractor</span>
+                    {% endif %}
+                  {% elif cell.kind == "rating" %}
+                    <span class="inline-flex items-center gap-0.5 text-brand">
+                      {% for filled in cell.stars %}
+                        {% if filled %}
+                          <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                        {% else %}
+                          <span class="material-symbols-outlined text-[16px] text-muted">star</span>
+                        {% endif %}
+                      {% endfor %}
+                    </span>
+                  {% else %}
+                    <span class="{% if cell.skipped %}italic text-muted{% else %}text-ink{% endif %}">{{ cell.text|truncatechars:48 }}</span>
+                  {% endif %}
+                </td>
+              {% endfor %}
+
+              {% comment %} ---- Tag chips + inline add (only when ``can_tag``) ---- {% endcomment %}
+              <td class="px-6 py-4">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  {% for t in row.tags %}
+                    <span class="inline-flex items-center gap-1 rounded-full bg-panel px-2 py-0.5 text-xs font-medium text-ink">
+                      <span class="material-symbols-outlined text-[12px] text-muted">label</span>{{ t.name }}
+                      {% if can_tag %}
+                        <form method="post" action="/{{ org_slug }}/surveys/{{ survey.id }}/responses/{{ row.id }}/tags/{{ t.id }}/remove" class="inline">
+                          {% csrf_token %}
+                          <input type="hidden" name="back" value="table" />
+                          <input type="hidden" name="filter_qs" value="{{ filter_qs }}" />
+                          <button type="submit" class="text-muted hover:text-ink" aria-label="Remove tag">
+                            <span class="material-symbols-outlined text-[12px]">close</span>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </span>
+                  {% empty %}
+                    {% if not can_tag %}<span class="text-xs text-muted">—</span>{% endif %}
+                  {% endfor %}
+                  {% if can_tag %}
+                    <div x-data="{ open: false }" class="relative inline-block">
+                      <button type="button" @click="open = !open"
+                              class="inline-flex items-center gap-0.5 rounded-full border border-dashed border-hairline px-2 py-0.5 text-xs font-medium text-muted transition-colors hover:border-brand hover:text-brand">
+                        <span class="material-symbols-outlined text-[12px]">add</span> Tag
+                      </button>
+                      <div x-show="open" @click.outside="open = false" x-cloak
+                           class="absolute right-0 z-20 mt-1 w-56 rounded-lg border border-hairline bg-white p-3 text-left shadow-lg">
+                        <form method="post" action="/{{ org_slug }}/surveys/{{ survey.id }}/responses/{{ row.id }}/tags">
+                          {% csrf_token %}
+                          <input type="hidden" name="back" value="table" />
+                          <input type="hidden" name="filter_qs" value="{{ filter_qs }}" />
+                          {% if all_tags %}
+                            <select name="tag_id"
+                                    class="mb-2 block w-full rounded-lg border border-hairline px-2 py-1.5 text-xs text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                              <option value="">Existing tag…</option>
+                              {% for t in all_tags %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+                            </select>
+                          {% endif %}
+                          <input type="text" name="tag_name" placeholder="Or new tag…"
+                                 class="mb-2 block w-full rounded-lg border border-hairline px-2 py-1.5 text-xs text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                          <button type="submit"
+                                  class="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-brand px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
+                            <span class="material-symbols-outlined text-[14px]">label</span> Add tag
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <a href="/{{ org_slug }}/surveys/{{ survey.id }}/responses/{{ row.id }}"
+                   class="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-hover">
+                  View <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% comment %} Pagination (preserves the active filters via ``filter_qs``) {% endcomment %}
+    <div class="mt-4 flex items-center justify-between text-sm text-muted">
+      <span>Showing {{ row_start }}–{{ row_end }} of {{ total }}</span>
+      <div class="flex items-center gap-2">
+        {% if has_prev %}
+          <a href="?page={{ prev_page }}{% if filter_qs %}&{{ filter_qs }}{% endif %}"
+             class="inline-flex items-center gap-1 rounded-lg border border-hairline bg-white px-3 py-1.5 font-medium text-ink transition-colors hover:bg-panel">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span> Previous
+          </a>
+        {% else %}
+          <span class="inline-flex items-center gap-1 rounded-lg border border-hairline bg-panel/40 px-3 py-1.5 font-medium text-muted">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span> Previous
+          </span>
+        {% endif %}
+        <span class="px-2">Page {{ page }} of {{ total_pages }}</span>
+        {% if has_next %}
+          <a href="?page={{ next_page }}{% if filter_qs %}&{{ filter_qs }}{% endif %}"
+             class="inline-flex items-center gap-1 rounded-lg border border-hairline bg-white px-3 py-1.5 font-medium text-ink transition-colors hover:bg-panel">
+            Next <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          </a>
+        {% else %}
+          <span class="inline-flex items-center gap-1 rounded-lg border border-hairline bg-panel/40 px-3 py-1.5 font-medium text-muted">
+            Next <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    {% if filter_state.has_filters %}
+      {% include "_components/empty_state.html" with icon="filter_list_off" title="No matching responses" message="No responses match the active filters." action_label="Clear filters" action_href="responses" %}
+    {% else %}
+      {% include "_components/empty_state.html" with icon="forum" title="No responses yet" message="Responses will appear here once people start completing your survey." %}
+    {% endif %}
+  {% endif %}
+
+{% comment %}Alpine factory for the response filter panel — assembles a querystring of
+   tag/status/from/to/answer params and navigates. Data (tags, questions, operators) is read
+   from json_script blocks (safe JSON-in-HTML — a tag/question label with an apostrophe can't
+   break the markup). Mirrors the contacts list's filterPanel() hydration pattern.{% endcomment %}
+<script>
+  function responseFilter() {
+    return {
+      tags: [],
+      questions: [],
+      operators: [],
+      selectedTags: [],
+      status: '{{ filter_state.status|escapejs }}',
+      dateFrom: '{{ filter_state.from|escapejs }}',
+      dateTo: '{{ filter_state.to|escapejs }}',
+      answerQid: '',
+      answerOp: 'equals',
+      answerValue: '',
+      init() {
+        const tagsEl = document.getElementById('rf-tags');
+        const qEl = document.getElementById('rf-questions');
+        const opsEl = document.getElementById('rf-ops');
+        const selEl = document.getElementById('rf-selected');
+        this.tags = tagsEl ? JSON.parse(tagsEl.textContent) : [];
+        this.questions = qEl ? JSON.parse(qEl.textContent) : [];
+        this.operators = opsEl ? JSON.parse(opsEl.textContent) : [];
+        this.selectedTags = selEl ? JSON.parse(selEl.textContent) : [];
+      },
+      toggleTag(id) {
+        const i = this.selectedTags.indexOf(id);
+        if (i === -1) { this.selectedTags.push(id); } else { this.selectedTags.splice(i, 1); }
+      },
+      apply() {
+        const params = new URLSearchParams();
+        this.selectedTags.forEach(id => params.append('tag', id));
+        if (this.status) { params.set('status', this.status); }
+        if (this.dateFrom) { params.set('from', this.dateFrom); }
+        if (this.dateTo) { params.set('to', this.dateTo); }
+        if (this.answerQid && this.answerOp && this.answerValue !== '') {
+          params.append('answer', this.answerQid + ':' + this.answerOp + ':' + this.answerValue);
+        }
+        const qs = params.toString();
+        window.location = '/{{ org_slug }}/surveys/{{ survey.id }}/responses' + (qs ? '?' + qs : '');
+      },
+    };
+  }
+</script>
+{% endblock %}
+

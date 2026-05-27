@@ -1,0 +1,55 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Segments list — /<org_slug>/segments (apps.segments.views_htmx.segments_page).
+  The saved segments + their matching counts, with "New segment" opening the builder. Brand
+  tokens only; consumes the shared _components/ partials.
+{% endcomment %}
+
+{% block title %}Segments — OpenSurvey{% endblock %}
+{% block nav_segments %}is-active{% endblock %}
+{% block topbar_title %}Segments{% endblock %}
+
+{% block content %}
+  <div class="mb-6 flex items-end justify-between gap-4">
+    {% include "_components/page_header.html" with title="Segments" subtitle="Reusable, dynamic filters over your contacts." %}
+    {% if environment %}
+      <a href="segments/new"
+         class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+        <span class="material-symbols-outlined text-[18px]">add</span> New segment
+      </a>
+    {% endif %}
+  </div>
+
+  {% if not environment %}
+    {% include "_components/empty_state.html" with icon="segment" title="No segments yet" message="Segments appear here once a workspace environment exists. Create one to group contacts dynamically." %}
+  {% elif segments %}
+    <div class="overflow-hidden rounded-xl border border-hairline bg-white">
+      <table class="min-w-full divide-y divide-hairline text-sm">
+        <thead class="bg-panel/50 text-left">
+          <tr>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Segment</th>
+            <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted">Matching contacts</th>
+            <th class="w-24 px-6 py-4"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {% for seg in segments %}
+            <tr class="transition-colors hover:bg-panel/30">
+              <td class="px-6 py-4">
+                <a href="segments/{{ seg.id }}" class="flex items-center gap-2 font-medium text-ink hover:text-brand">
+                  <span class="material-symbols-outlined text-[18px] text-brand">segment</span>{{ seg.title }}
+                </a>
+              </td>
+              <td class="px-6 py-4 text-right text-ink">{{ seg.count }}{% if seg.count_capped %}+{% endif %}</td>
+              <td class="px-6 py-4 text-right">
+                <a href="segments/{{ seg.id }}" class="text-sm font-medium text-brand hover:text-brand-hover">Edit</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "_components/empty_state.html" with icon="segment" title="No segments yet" message="Create your first segment to group contacts by attributes and behavior." action_label="New segment" action_href="segments/new" %}
+  {% endif %}
+{% endblock %}

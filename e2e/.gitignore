@@ -1,0 +1,7 @@
+# Playwright / Node — never commit installed deps, run artifacts, or the minted session.
+node_modules/
+.auth/
+test-results/
+playwright-report/
+blob-report/
+.cache/

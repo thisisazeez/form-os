@@ -1,0 +1,46 @@
+{% comment %}
+  Org-settings horizontal sub-nav (Settings → …). Used by the org settings/billing pages and the
+  platform Settings tabs (API keys, Webhooks, Audit log). Renders ONLY tabs that route somewhere
+  real (no dead 404 links). The `section` var marks the active tab; "members" is a sibling page.
+
+  PARAMS:
+    org      (required) — the routed organization (for slug-based hrefs).
+    section  (optional) — "general" | "billing" | "api-keys" | "webhooks" | "integrations" |
+                          "actions" | "connection" | "audit-log".
+{% endcomment %}
+<nav class="mb-6 border-b border-hairline">
+  <ul class="-mb-px flex flex-wrap gap-6 text-sm font-medium">
+    <li>
+      <a href="/{{ org.slug }}/settings"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'general' or section == 'billing' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">Plan &amp; billing</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/members"
+         class="inline-block border-b-2 border-transparent px-1 py-3 text-muted transition-colors hover:text-ink">Members</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/settings/api-keys"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'api-keys' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">API keys</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/settings/webhooks"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'webhooks' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">Webhooks</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/settings/integrations"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'integrations' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">Integrations</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/settings/actions"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'actions' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">Actions</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/settings/connection"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'connection' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">Website &amp; App</a>
+    </li>
+    <li>
+      <a href="/{{ org.slug }}/settings/audit-log"
+         class="inline-block border-b-2 px-1 py-3 transition-colors {% if section == 'audit-log' %}border-brand text-brand{% else %}border-transparent text-muted hover:text-ink{% endif %}">Audit log</a>
+    </li>
+  </ul>
+</nav>

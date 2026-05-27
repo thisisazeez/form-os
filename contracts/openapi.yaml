@@ -1,0 +1,1506 @@
+openapi: 3.1.0
+
+# =============================================================================
+# OpenSurvey API — FROZEN Wave-0 contract.
+# Two APIs in one document:
+#   (A) Builder/Admin API   — authenticated (session cookie OR API key); RBAC-gated.
+#   (B) Public Survey API   — unauthenticated or single-use token; RATE-LIMITED.
+#
+# Consistency anchors (do not drift):
+#   - Models/fields/enums         -> contracts/models.md (PART C enums are authoritative)
+#   - Survey body (questions/etc) -> contracts/survey-schema.json  (authoritative shapes;
+#       NOT $ref'd here — survey/logic/segment objects are carried as open objects
+#       (additionalProperties:true) and validated against that JSON Schema at the app layer,
+#       since OpenAPI 3.1 and JSON-Schema-draft-2020-12 tooling don't share a $ref target.)
+#   - Authorization actions       -> contracts/rbac.md  (x-required-permission per op)
+#   - Tenancy routing             -> PATH-BASED  /{org_slug}/...   (ADR-001)
+#
+# PK strategy: all ids are UUIDv4 strings (format: uuid). Timestamps are RFC3339.
+# =============================================================================
+
+info:
+  title: OpenSurvey API
+  version: "1.0.0-wave0"
+  description: |
+    Survey/experience-management platform API.
+
+    **Tenancy (ADR-001 — path-based):** every tenant-scoped path is prefixed with the
+    organization slug: `/api/v1/{org_slug}/...`. Middleware resolves the `Organization`
+    from `{org_slug}` and activates its Postgres schema (django-tenants) *before*
+    authentication/authorization run. A request whose authenticated user has no active
+    `Membership` in `{org_slug}` is rejected `403`. The public runtime uses the same
+    prefix: `/{org_slug}/s/{survey_id}` (HTML) and `/api/v1/{org_slug}/public/...` (JSON).
+
+    **Public/pre-tenant namespace (ADR-011):** the FIRST `/api/v1/` segment is treated as
+    an org slug *unless* it is the single reserved word `auth`. All public/cross-tenant/
+    pre-tenant endpoints therefore live under `/api/v1/auth/*` (`signup`, `verify-email`,
+    `login`, `logout`, `password-reset`, plus `me`, `organizations` [create], and
+    `invitations/accept`). The corresponding server-rendered HTMX pages live under
+    `/auth/*` for the same routing reason. `auth` is a RESERVED org slug (models.md §1.2)
+    so no org can shadow this prefix.
+
+    **Auth (Builder/Admin API):** session cookie (HTMX/browser) **or**
+    `Authorization: ApiKey <raw_key>` (machine). API-key requests are pinned to the
+    key's Environment and cannot perform org-level actions (see contracts/rbac.md §9).
+
+    **Authorization:** each protected operation declares `x-required-permission`, the
+    `can(user, action, obj)` action from contracts/rbac.md. List endpoints FILTER to the
+    caller's readable workspaces rather than 403-per-row.
+
+    **Public API:** unauthenticated (open links) or a single-use `link_token`. All public
+    write endpoints are **rate-limited** (per IP + per survey) — see the `429` responses
+    and `x-rate-limit` hints. Bodies are validated against contracts/survey-schema.json.
+  license:
+    name: Proprietary (OpenSurvey)
+
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: app.opensurvey.example.com
+
+tags:
+  - name: Auth
+    description: >
+      Signup, verification, login, password reset, and current-user (`/me`) — all under the
+      reserved `/api/v1/auth/*` public prefix (public schema; ADR-011).
+  - name: Organizations
+    description: >
+      Org create, settings, members, invitations (public schema; org-level RBAC). Pre-tenant
+      org endpoints (create org, accept invite) live under `/api/v1/auth/*` (ADR-011); the
+      per-org endpoints are tenant-prefixed `/api/v1/{org_slug}/...`.
+  - name: Workspaces
+    description: Workspaces & environments (tenant schema).
+  - name: Teams
+    description: Teams, team membership, workspace access grants (tenant schema).
+  - name: Surveys
+    description: Survey CRUD + lifecycle (tenant schema).
+  - name: Responses
+    description: Read responses, tagging, export (tenant schema).
+  - name: Analytics
+    description: Per-question summaries, funnel, NPS (tenant schema).
+  - name: Contacts
+    description: Contacts & attributes (tenant schema; PII).
+  - name: Segments
+    description: Reusable contact filters (tenant schema).
+  - name: Integrations
+    description: >
+      API keys (tenant schema; org-admin only). Webhook OPERATIONS are NOT in this v1 spec
+      — the Webhook model is frozen (models.md §2.14) but its endpoints (and the
+      `manage_webhook` action in rbac.md §6) are deferred to Phase 7. Likewise `delete_org`
+      (org deletion) and `grant_ownership` are defined in rbac.md but have no dedicated v1
+      endpoint: org deletion is a console/admin-only operation, and ownership is granted via
+      `PATCH /members/{id}` (change_member_role to owner, owner-only). `manage_environment`
+      is reserved (environments are auto-created with the workspace; no edit endpoint in v1).
+  - name: Public Survey
+    description: Unauthenticated/token survey runtime (rate-limited).
+
+# =============================================================================
+# SECURITY
+# =============================================================================
+security:
+  - sessionAuth: []
+  - apiKeyAuth: []
+
+paths:
+
+  # ---------------------------------------------------------------------------
+  # AUTH (public schema; not tenant-prefixed)
+  # ---------------------------------------------------------------------------
+  /api/v1/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Register a new user (email/password). Sends verification email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SignupRequest" }
+      responses:
+        "201": { description: Created; verification email sent., content: { application/json: { schema: { $ref: "#/components/schemas/UserBrief" } } } }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "409": { description: Email already registered. }
+
+  /api/v1/auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Verify email using the emailed token. Sets is_verified=true.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+      responses:
+        "200": { description: Verified. }
+        "400": { description: Invalid or expired token. }
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Session login (sets session cookie). Requires is_verified=true.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        "200": { description: Logged in; session cookie set., content: { application/json: { schema: { $ref: "#/components/schemas/UserBrief" } } } }
+        "401": { description: Invalid credentials or unverified email. }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalidate the session.
+      responses:
+        "204": { description: Logged out. }
+
+  /api/v1/auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Request a password-reset email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        "202": { description: "If the email exists, a reset link was sent. (Always 202 — no account enumeration.)" }
+
+  /api/v1/auth/password-reset/confirm:
+    post:
+      tags: [Auth]
+      summary: Set a new password using a reset token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, format: password }
+      responses:
+        "200": { description: Password updated. }
+        "400": { description: Invalid or expired token. }
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user + their org memberships (drives the org switcher).
+      description: >
+        Cross-tenant, session-authenticated. Lives under the reserved `/api/v1/auth/*`
+        public prefix (ADR-011) because it is pre-tenant: the org switcher must be
+        readable before any org slug is in the path.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/UserBrief" }
+                  memberships:
+                    type: array
+                    items: { $ref: "#/components/schemas/MembershipBrief" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/auth/organizations:
+    post:
+      tags: [Organizations]
+      summary: Create a new organization (provisions its tenant schema). Caller becomes the first owner.
+      description: >
+        Pre-tenant, session-authenticated org creation. Lives under the reserved
+        `/api/v1/auth/*` public prefix (ADR-011) because no org slug exists yet and the
+        caller has no `Membership` to authorize against. Any verified, logged-in user may
+        create an org (the verified-user gate is enforced at the auth layer, not in
+        `can()` — there is no RBAC object yet). On success a `Membership` with role `owner`
+        is created for the caller (the org's ≥1-owner invariant, models.md §1.4) and the
+        org's Postgres schema is provisioned (django-tenants `auto_create_schema`). `slug`
+        is immutable after creation (ADR-001) and is rejected if reserved (models.md §1.2
+        RESERVED_SLUGS, which includes `auth`) or already taken.
+      # API keys are environment-scoped and cannot perform org-level actions (rbac.md §9),
+      # so this operation is session-only — override the global apiKeyAuth alternative.
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug]
+              properties:
+                name: { type: string }
+                slug: { type: string, description: "URL-safe org identifier; immutable, routing key (ADR-001)." }
+      responses:
+        "201": { description: Created — tenant schema provisioned; caller is owner., content: { application/json: { schema: { $ref: "#/components/schemas/Organization" } } } }
+        "400": { description: "Validation error — slug is reserved or already taken (or invalid name/slug)." }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/auth/invitations/accept:
+    post:
+      tags: [Organizations]
+      summary: Accept an invitation by token (creates Membership). Caller must be logged in as the invited email (or signs up first).
+      description: >
+        Cross-tenant, session-authenticated. Lives under the reserved `/api/v1/auth/*`
+        public prefix (ADR-011): acceptance is keyed by the emailed token and happens
+        before the caller has any org slug or membership, so it cannot sit under a tenant
+        path. The token identifies the target org; on success a `Membership` is created
+        and the invitation is marked accepted (models.md §1.5).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [token], properties: { token: { type: string } } } } }
+      responses:
+        "200": { description: Membership created, content: { application/json: { schema: { $ref: "#/components/schemas/Membership" } } } }
+        "400": { description: "Invalid/expired/already-accepted token, or email mismatch." }
+
+  # ---------------------------------------------------------------------------
+  # ORGANIZATIONS / MEMBERS / INVITATIONS  (public schema; org-level RBAC)
+  # These operate on a SPECIFIC existing org, so they are tenant-prefixed
+  # (`/api/v1/{org_slug}/...`). Pre-tenant org endpoints (create org, accept invite,
+  # /me) live under the reserved `/api/v1/auth/*` prefix above — see ADR-011.
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/org:
+    parameters: [ { $ref: "#/components/parameters/OrgSlug" } ]
+    get:
+      tags: [Organizations]
+      summary: Get org settings.
+      x-required-permission: view_org
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Organization" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      tags: [Organizations]
+      summary: Update org settings (name). slug is immutable.
+      x-required-permission: edit_org
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, properties: { name: { type: string } } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Organization" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/members:
+    parameters: [ { $ref: "#/components/parameters/OrgSlug" } ]
+    get:
+      tags: [Organizations]
+      summary: List org members (hydrated users).
+      x-required-permission: view_members
+      parameters: [ { $ref: "#/components/parameters/Page" }, { $ref: "#/components/parameters/PageSize" } ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Paginated"
+                  - type: object
+                    properties:
+                      results: { type: array, items: { $ref: "#/components/schemas/Membership" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/members/{membership_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/MembershipId" }
+    patch:
+      tags: [Organizations]
+      summary: Change a member's org role. Cannot demote the last owner; only owners grant ownership.
+      x-required-permission: change_member_role
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [role], properties: { role: { $ref: "#/components/schemas/OrgRole" } } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Membership" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: Would remove the last owner / illegal ownership grant. }
+    delete:
+      tags: [Organizations]
+      summary: Remove a member. Cannot remove the last owner.
+      x-required-permission: remove_member
+      responses:
+        "204": { description: Removed. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: Would remove the last owner. }
+
+  /api/v1/{org_slug}/invitations:
+    parameters: [ { $ref: "#/components/parameters/OrgSlug" } ]
+    get:
+      tags: [Organizations]
+      summary: List invitations.
+      x-required-permission: view_members
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Invitation" } } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Organizations]
+      summary: Invite a member by email + role. Sends tokenized email. Re-inviting a pending email supersedes the prior invite.
+      description: >
+        Re-inviting an email that already has a PENDING invitation **supersedes** it: the
+        prior pending invitation is revoked and a fresh one is created (new token + expiry)
+        → `201`. This matches the DB partial-unique constraint
+        `uniq_pending_invite_per_email_org` (models.md §1.5, "re-inviting supersedes"),
+        which permits at most one *pending* invite per (org, email) but does not block
+        re-invitation. `409` is reserved for inviting an email that is **already an active
+        member** of this org (nothing to invite).
+      x-required-permission: invite_member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role: { $ref: "#/components/schemas/OrgRole" }
+      responses:
+        "201": { description: "Invitation created (or superseded) + email sent.", content: { application/json: { schema: { $ref: "#/components/schemas/Invitation" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: The email is already an active member of this org. }
+
+  /api/v1/{org_slug}/invitations/{invitation_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: invitation_id, in: path, required: true, schema: { type: string, format: uuid } }
+    delete:
+      tags: [Organizations]
+      summary: Revoke a pending invitation.
+      x-required-permission: revoke_invitation
+      responses:
+        "204": { description: Revoked. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # WORKSPACES & ENVIRONMENTS (tenant schema)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/workspaces:
+    parameters: [ { $ref: "#/components/parameters/OrgSlug" } ]
+    get:
+      tags: [Workspaces]
+      summary: List workspaces the caller can read (filtered by effective access).
+      x-required-permission: view_workspace
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Workspace" } } } } }
+    post:
+      tags: [Workspaces]
+      summary: Create a workspace (auto-creates production + development environments).
+      x-required-permission: create_workspace
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [name], properties: { name: { type: string }, slug: { type: string } } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Workspace" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/workspaces/{workspace_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/WorkspaceId" }
+    get:
+      tags: [Workspaces]
+      summary: Get a workspace.
+      x-required-permission: view_workspace
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Workspace" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Workspaces]
+      summary: Update workspace settings.
+      x-required-permission: manage_workspace
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { name: { type: string } } } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Workspace" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Workspaces]
+      summary: Delete a workspace (org owner/admin only).
+      x-required-permission: delete_workspace
+      responses:
+        "204": { description: Deleted. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/workspaces/{workspace_id}/environments:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/WorkspaceId" }
+    get:
+      tags: [Workspaces]
+      summary: List the workspace's environments (production, development).
+      x-required-permission: view_workspace
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Environment" } } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # TEAMS (tenant schema)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/teams:
+    parameters: [ { $ref: "#/components/parameters/OrgSlug" } ]
+    get:
+      tags: [Teams]
+      summary: List teams.
+      x-required-permission: view_team
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Team" } } } } }
+    post:
+      tags: [Teams]
+      summary: Create a team.
+      x-required-permission: create_team
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [name], properties: { name: { type: string } } } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Team" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/teams/{team_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/TeamId" }
+    get:
+      tags: [Teams]
+      summary: Get a team (with hydrated members).
+      x-required-permission: view_team
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/TeamDetail" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      tags: [Teams]
+      summary: Rename a team.
+      x-required-permission: edit_team
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { name: { type: string } } } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Team" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Teams]
+      summary: Delete a team.
+      x-required-permission: delete_team
+      responses:
+        "204": { description: Deleted. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/teams/{team_id}/members:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/TeamId" }
+    post:
+      tags: [Teams]
+      summary: Add a user to the team (by public user_id). Org admin/owner or team-admin.
+      x-required-permission: manage_team_membership
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { type: string, format: uuid, description: "Public User PK (cross-schema reference stored as plain column)." }
+                team_role: { $ref: "#/components/schemas/TeamRole" }
+      responses:
+        "201": { description: Added, content: { application/json: { schema: { $ref: "#/components/schemas/TeamMembership" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: User already a member or not in this org. }
+
+  /api/v1/{org_slug}/teams/{team_id}/members/{user_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/TeamId" }
+      - { name: user_id, in: path, required: true, schema: { type: string, format: uuid } }
+    delete:
+      tags: [Teams]
+      summary: Remove a user from the team.
+      x-required-permission: manage_team_membership
+      responses:
+        "204": { description: Removed. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/teams/{team_id}/workspace-access:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/TeamId" }
+    post:
+      tags: [Teams]
+      summary: Grant or update this team's access to a workspace (read/write/manage).
+      x-required-permission: grant_workspace_access
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workspace_id, access]
+              properties:
+                workspace_id: { type: string, format: uuid }
+                access: { $ref: "#/components/schemas/WorkspaceAccess" }
+      responses:
+        "200": { description: Access set, content: { application/json: { schema: { $ref: "#/components/schemas/WorkspaceTeam" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # SURVEYS (tenant schema)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/environments/{environment_id}/surveys:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/EnvironmentId" }
+    get:
+      tags: [Surveys]
+      summary: List surveys in an environment (filtered to readable workspaces).
+      x-required-permission: view_survey
+      parameters:
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/SurveyStatus" } }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/PageSize" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Paginated"
+                  - type: object
+                    properties:
+                      results: { type: array, items: { $ref: "#/components/schemas/SurveySummary" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Surveys]
+      summary: Create a survey. Body validated against survey-schema.json.
+      x-required-permission: create_survey
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/SurveyWrite" } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Survey" } } } }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/surveys/{survey_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    get:
+      tags: [Surveys]
+      summary: Get a survey (full definition).
+      x-required-permission: view_survey
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Survey" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Surveys]
+      summary: Replace a survey definition (questions/logic/styling/languages). Validated against survey-schema.json.
+      x-required-permission: edit_survey
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/SurveyWrite" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Survey" } } } }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Surveys]
+      summary: Delete a survey (workspace manage).
+      x-required-permission: delete_survey
+      responses:
+        "204": { description: Deleted. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/surveys/{survey_id}/status:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    post:
+      tags: [Surveys]
+      summary: Transition survey status (publish/pause/close). Enforces valid transitions.
+      x-required-permission: publish_survey
+      x-permission-note: >
+        Permission is dispatched on the TARGET status: status=published -> publish_survey,
+        status=paused -> pause_survey, status=closed -> close_survey. All three are the
+        same workspace `write` level in rbac.md §6, so `publish_survey` is listed here as
+        the representative; can() evaluates the action matching the requested status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: "#/components/schemas/SurveyStatus" }
+      responses:
+        "200": { description: Transitioned, content: { application/json: { schema: { $ref: "#/components/schemas/Survey" } } } }
+        "400": { description: "Invalid transition (e.g. closed -> published)." }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # RESPONSES (tenant schema) — read + tag + export
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/surveys/{survey_id}/responses:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    get:
+      tags: [Responses]
+      summary: List responses for a survey (read).
+      x-required-permission: view_response
+      parameters:
+        - { name: finished, in: query, schema: { type: boolean } }
+        - { name: segment_id, in: query, schema: { type: string, format: uuid } }
+        - { name: created_after, in: query, schema: { type: string, format: date-time } }
+        - { name: created_before, in: query, schema: { type: string, format: date-time } }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/PageSize" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Paginated"
+                  - type: object
+                    properties:
+                      results: { type: array, items: { $ref: "#/components/schemas/Response" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/responses/{response_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: response_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Responses]
+      summary: Get a single response.
+      x-required-permission: view_response
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Response" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Responses]
+      summary: Delete a response (workspace write).
+      x-required-permission: delete_response
+      responses:
+        "204": { description: Deleted. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/responses/{response_id}/tags:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: response_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Responses]
+      summary: Attach a tag to a response (creates the tag if name given).
+      x-required-permission: tag_response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tag_id: { type: string, format: uuid }
+                name: { type: string, description: "If provided and tag_id omitted, find-or-create by name." }
+      responses:
+        "201": { description: Tagged, content: { application/json: { schema: { $ref: "#/components/schemas/ResponseTag" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/surveys/{survey_id}/responses/export:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    post:
+      tags: [Responses]
+      summary: Start a CSV/XLSX export (async via Celery for large sets). Returns a job handle.
+      x-required-permission: export_responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format: { type: string, enum: [csv, xlsx], default: csv }
+                segment_id: { type: string, format: uuid }
+      responses:
+        "202": { description: Export queued, content: { application/json: { schema: { type: object, properties: { job_id: { type: string, format: uuid }, status_url: { type: string } } } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # ANALYTICS (tenant schema)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/surveys/{survey_id}/analytics/summary:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    get:
+      tags: [Analytics]
+      summary: Per-question summaries (choice counts, rating distributions, NPS, averages, completion funnel).
+      x-required-permission: view_analytics
+      parameters:
+        - { name: segment_id, in: query, schema: { type: string, format: uuid } }
+        - { name: created_after, in: query, schema: { type: string, format: date-time } }
+        - { name: created_before, in: query, schema: { type: string, format: date-time } }
+        - { name: cross_tab_question_id, in: query, schema: { type: string }, description: "If set, returns answers cross-tabulated by this question's answer." }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/AnalyticsSummary" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # CONTACTS (tenant schema; PII)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/environments/{environment_id}/contacts:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/EnvironmentId" }
+    get:
+      tags: [Contacts]
+      summary: List contacts (read). PII fields honor is_pii redaction for non-privileged callers.
+      x-required-permission: view_contact
+      parameters: [ { $ref: "#/components/parameters/Page" }, { $ref: "#/components/parameters/PageSize" } ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Paginated"
+                  - type: object
+                    properties:
+                      results: { type: array, items: { $ref: "#/components/schemas/Contact" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Contacts]
+      summary: Create a contact with attributes.
+      x-required-permission: create_contact
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ContactWrite" } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Contact" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/contacts/{contact_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: contact_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Contacts]
+      summary: Get a contact + attributes.
+      x-required-permission: view_contact
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Contact" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      tags: [Contacts]
+      summary: Update contact attributes.
+      x-required-permission: edit_contact
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ContactWrite" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Contact" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Contacts]
+      summary: Delete a contact (GDPR erasure). Responses are anonymized (contact_id nulled), not deleted.
+      x-required-permission: delete_contact
+      responses:
+        "204": { description: Deleted/anonymized. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # SEGMENTS (tenant schema)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/environments/{environment_id}/segments:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/EnvironmentId" }
+    get:
+      tags: [Segments]
+      summary: List segments.
+      x-required-permission: view_segment
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Segment" } } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Segments]
+      summary: Create a segment. filter validated against survey-schema.json#/$defs/segmentFilter.
+      x-required-permission: create_segment
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/SegmentWrite" } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Segment" } } } }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/segments/{segment_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: segment_id, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      tags: [Segments]
+      summary: Replace a segment definition.
+      x-required-permission: edit_segment
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/SegmentWrite" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Segment" } } } }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Segments]
+      summary: Delete a segment.
+      x-required-permission: delete_segment
+      responses:
+        "204": { description: Deleted. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # INTEGRATIONS — API KEYS (tenant schema; org admin/owner)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/environments/{environment_id}/api-keys:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/EnvironmentId" }
+    get:
+      tags: [Integrations]
+      summary: List API keys (prefixes only; never the raw key).
+      x-required-permission: view_apikey
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/ApiKey" } } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Integrations]
+      summary: Create an API key. Returns the RAW key ONCE; only the hash is stored.
+      x-required-permission: create_apikey
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [label], properties: { label: { type: string } } } } } }
+      responses:
+        "201": { description: Created — raw key returned once, content: { application/json: { schema: { $ref: "#/components/schemas/ApiKeyCreated" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/{org_slug}/api-keys/{api_key_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: api_key_id, in: path, required: true, schema: { type: string, format: uuid } }
+    delete:
+      tags: [Integrations]
+      summary: Revoke an API key.
+      x-required-permission: revoke_apikey
+      responses:
+        "204": { description: Revoked. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ---------------------------------------------------------------------------
+  # PUBLIC SURVEY API (unauthenticated or single-use token; RATE-LIMITED)
+  # ---------------------------------------------------------------------------
+  /api/v1/{org_slug}/public/surveys/{survey_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+      - { name: link_token, in: query, required: false, schema: { type: string }, description: "Single-use or per-contact link token. Required if the survey is single_use." }
+    get:
+      tags: [Public Survey]
+      summary: Get the published survey definition for the runtime. Returns 404 unless status=published (no leak of draft/paused/closed).
+      security: []
+      x-rate-limit: "per-IP, per-survey (e.g. 60/min/IP)"
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/PublicSurvey" } } } }
+        "404": { description: Not found or not published. }
+        "410": { description: Single-use link already consumed / expired. }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /api/v1/{org_slug}/public/surveys/{survey_id}/responses:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    post:
+      tags: [Public Survey]
+      summary: Create a (partial) response. Returns a response id + a short-lived edit token for subsequent PATCH/finalize.
+      security: []
+      x-rate-limit: "per-IP, per-survey (strict; e.g. 20/min/IP)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PublicResponseCreate" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/PublicResponseHandle" } } } }
+        "400": { description: Answer payload fails validation against the survey schema/types. }
+        "404": { description: Survey not found or not published. }
+        "410": { description: "Single-use link consumed/expired, or survey closed (cap/date)." }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /api/v1/{org_slug}/public/responses/{response_id}:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: response_id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: edit_token, in: query, required: true, schema: { type: string }, description: "The short-lived token returned at create; authorizes PATCH/finalize for this response only." }
+    patch:
+      tags: [Public Survey]
+      summary: Partial-update answers as the respondent progresses. Idempotent per question key.
+      security: []
+      x-rate-limit: "per-IP, per-response (e.g. 120/min)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [data]
+              properties:
+                data:
+                  type: object
+                  additionalProperties: true
+                  description: "Partial answer map (questionId -> answer). Merged into Response.data. Validated per question type."
+                language: { type: string }
+      responses:
+        "200": { description: Merged, content: { application/json: { schema: { $ref: "#/components/schemas/PublicResponseHandle" } } } }
+        "400": { description: Validation error. }
+        "403": { description: Bad/expired edit token. }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /api/v1/{org_slug}/public/responses/{response_id}/finalize:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { name: response_id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: edit_token, in: query, required: true, schema: { type: string } }
+    post:
+      tags: [Public Survey]
+      summary: Mark the response finished. Validates required answers (incl. logic-required) and consumes any single-use link.
+      security: []
+      x-rate-limit: "per-IP, per-response"
+      responses:
+        "200": { description: Finalized, content: { application/json: { schema: { $ref: "#/components/schemas/PublicResponseHandle" } } } }
+        "400": { description: Missing required answers / logic-required gaps. }
+        "403": { description: Bad/expired edit token. }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /api/v1/{org_slug}/public/surveys/{survey_id}/upload-url:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+      - { name: edit_token, in: query, required: true, schema: { type: string } }
+    post:
+      tags: [Public Survey]
+      summary: Get a presigned URL for direct-to-storage file upload (fileUpload questions). Server enforces type/size from question config.
+      security: []
+      x-rate-limit: "per-IP, per-response (e.g. 30/min)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question_id, filename, content_type, size_bytes]
+              properties:
+                question_id: { type: string }
+                filename: { type: string }
+                content_type: { type: string }
+                size_bytes: { type: integer }
+      responses:
+        "200":
+          description: Presigned upload URL + the final file URL to store in the answer.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upload_url: { type: string, format: uri }
+                  method: { type: string, enum: [PUT, POST] }
+                  fields: { type: object, additionalProperties: { type: string }, description: "Form fields for POST-style presigned uploads (S3/Azure)." }
+                  file_url: { type: string, format: uri, description: "Store this in Response.data[question_id]." }
+                  expires_at: { type: string, format: date-time }
+        "400": { description: File violates question config (size/type/count). }
+        "403": { description: Bad/expired edit token. }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /api/v1/{org_slug}/public/surveys/{survey_id}/displays:
+    parameters:
+      - { $ref: "#/components/parameters/OrgSlug" }
+      - { $ref: "#/components/parameters/SurveyId" }
+    post:
+      tags: [Public Survey]
+      summary: Record a display/impression (powers the view->start->finish funnel).
+      security: []
+      x-rate-limit: "per-IP, per-survey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                link_token:
+                  type: string
+                  description: >
+                    Per-contact/single-use link token. If present and valid, the display is
+                    associated with the token's SurveyLink.contact_id (server-derived). This
+                    is the ONLY trusted way to tie a public display to a contact.
+      responses:
+        "201": { description: Recorded, content: { application/json: { schema: { type: object, properties: { display_id: { type: string, format: uuid } } } } } }
+        "404": { description: Not published. }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+# =============================================================================
+# COMPONENTS
+# =============================================================================
+components:
+
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+      description: Django session cookie (HTMX/browser clients). CSRF token required on unsafe methods.
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        `Authorization: ApiKey <raw_key>`. The server hashes the presented key and looks
+        up `ApiKey.hashed_key`; the matched key pins the tenant + environment. API-key
+        requests cannot perform org-level actions (contracts/rbac.md §9).
+
+  parameters:
+    OrgSlug:
+      name: org_slug
+      in: path
+      required: true
+      schema: { type: string }
+      description: Organization slug. Resolves + activates the tenant schema (ADR-001 path-based routing).
+    WorkspaceId: { name: workspace_id, in: path, required: true, schema: { type: string, format: uuid } }
+    EnvironmentId: { name: environment_id, in: path, required: true, schema: { type: string, format: uuid } }
+    TeamId: { name: team_id, in: path, required: true, schema: { type: string, format: uuid } }
+    SurveyId: { name: survey_id, in: path, required: true, schema: { type: string, format: uuid } }
+    MembershipId: { name: membership_id, in: path, required: true, schema: { type: string, format: uuid } }
+    Page: { name: page, in: query, required: false, schema: { type: integer, minimum: 1, default: 1 } }
+    PageSize: { name: page_size, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+
+  responses:
+    Unauthorized:
+      description: Not authenticated.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Forbidden:
+      description: Authenticated but not permitted (RBAC — see x-required-permission / contracts/rbac.md).
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: Resource not found (or not visible to the caller).
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    ValidationError:
+      description: Request body failed validation (incl. survey-schema.json validation).
+      content: { application/json: { schema: { $ref: "#/components/schemas/ValidationErrorBody" } } }
+    RateLimited:
+      description: Too many requests (public endpoints are rate-limited per IP + per survey/response).
+      headers:
+        Retry-After: { schema: { type: integer }, description: Seconds to wait. }
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  schemas:
+
+    # --- enums (MUST match models.md PART C and survey-schema.json) ---
+    OrgRole: { type: string, enum: [owner, admin, member] }
+    MembershipStatus: { type: string, enum: [active, suspended] }
+    InviteStatus: { type: string, enum: [pending, accepted, revoked, expired] }
+    EnvType: { type: string, enum: [production, development] }
+    TeamRole: { type: string, enum: [admin, member] }
+    WorkspaceAccess: { type: string, enum: [read, write, manage] }
+    SurveyStatus: { type: string, enum: [draft, published, paused, closed] }
+    AttrType: { type: string, enum: [string, number, boolean, date] }
+    WebhookEvent: { type: string, enum: [response.created, response.finished, survey.published, survey.closed] }
+
+    # --- shared ---
+    Error:
+      type: object
+      properties:
+        detail: { type: string }
+        code: { type: string }
+    ValidationErrorBody:
+      type: object
+      description: DRF-style field errors. For survey/segment bodies, `schema_errors` carries jsonschema messages.
+      properties:
+        detail: { type: string }
+        errors: { type: object, additionalProperties: true }
+        schema_errors: { type: array, items: { type: string } }
+    Paginated:
+      type: object
+      properties:
+        count: { type: integer }
+        page: { type: integer }
+        page_size: { type: integer }
+        results: { type: array, items: {} }
+
+    UserBrief:
+      type: object
+      description: Public-shape of a hydrated User (the only User shape returned in tenant responses; produced via hydrate_users()).
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+
+    # --- public schema ---
+    SignupRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        name: { type: string }
+
+    Organization:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        created_at: { type: string, format: date-time }
+
+    MembershipBrief:
+      type: object
+      description: A user's membership as seen in /me (org id/slug + their role).
+      properties:
+        organization_id: { type: string, format: uuid }
+        organization_slug: { type: string }
+        organization_name: { type: string }
+        role: { $ref: "#/components/schemas/OrgRole" }
+        status: { $ref: "#/components/schemas/MembershipStatus" }
+
+    Membership:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user: { $ref: "#/components/schemas/UserBrief" }
+        role: { $ref: "#/components/schemas/OrgRole" }
+        status: { $ref: "#/components/schemas/MembershipStatus" }
+        created_at: { type: string, format: date-time }
+
+    Invitation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        role: { $ref: "#/components/schemas/OrgRole" }
+        status: { $ref: "#/components/schemas/InviteStatus" }
+        expires_at: { type: string, format: date-time }
+        accepted_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+      # NOTE: token is NEVER returned in API responses (only emailed).
+
+    # --- tenant schema ---
+    Workspace:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        effective_access:
+          $ref: "#/components/schemas/WorkspaceAccess"
+          description: The CALLER's effective access on this workspace (computed per contracts/rbac.md §4). Convenience field for UI gating.
+        created_at: { type: string, format: date-time }
+
+    Environment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        workspace_id: { type: string, format: uuid }
+        type: { $ref: "#/components/schemas/EnvType" }
+        created_at: { type: string, format: date-time }
+
+    Team:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        member_count: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    TeamMembership:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user: { $ref: "#/components/schemas/UserBrief" }
+        team_role: { $ref: "#/components/schemas/TeamRole" }
+        created_at: { type: string, format: date-time }
+
+    TeamDetail:
+      allOf:
+        - $ref: "#/components/schemas/Team"
+        - type: object
+          properties:
+            members: { type: array, items: { $ref: "#/components/schemas/TeamMembership" } }
+            workspace_access: { type: array, items: { $ref: "#/components/schemas/WorkspaceTeam" } }
+
+    WorkspaceTeam:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        team_id: { type: string, format: uuid }
+        workspace_id: { type: string, format: uuid }
+        access: { $ref: "#/components/schemas/WorkspaceAccess" }
+
+    SurveySummary:
+      type: object
+      description: Lightweight survey listing item (omits the heavy questions/logic blobs).
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        status: { $ref: "#/components/schemas/SurveyStatus" }
+        environment_id: { type: string, format: uuid }
+        response_count: { type: integer }
+        published_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Survey:
+      type: object
+      description: |
+        Full survey. `questions`, `logic`, `languages`, `styling`, `welcome_card`,
+        `endings`, `close_on` are validated against contracts/survey-schema.json (the
+        single source of truth). They are passed through opaquely here; see that schema
+        for shapes.
+      properties:
+        id: { type: string, format: uuid }
+        environment_id: { type: string, format: uuid }
+        name: { type: string }
+        status: { $ref: "#/components/schemas/SurveyStatus" }
+        single_use: { type: boolean }
+        questions: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/questions" }
+        logic: { type: array, items: { type: object, additionalProperties: true }, description: "Reserved survey-level logic (per-question logic lives in questions[].logic)." }
+        languages: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/surveyLanguages" }
+        styling: { type: object, additionalProperties: true, description: "Per survey-schema.json#/$defs/styling" }
+        welcome_card: { type: object, additionalProperties: true, nullable: true, description: "Per survey-schema.json#/$defs/welcomeCard. null = no welcome card." }
+        endings: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/ending. Logic jumpTo/endSurvey targets may reference an ending id (ADR-004)." }
+        close_on: { type: object, additionalProperties: true, nullable: true, description: "Per survey-schema.json#/$defs/closeConditions" }
+        hidden_fields: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/hiddenFields. Survey-level hidden fields [{id, name?}] captured from the URL into the response (recall + logic source)." }
+        blocks: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/block. ADDITIVE question-grouping overlay [{id, title?, questionIds, randomize?}]; [] (default) == flat behavior. The flat questions[] stays the flow/logic source of truth; blocks add display grouping + within-block presentation randomization only." }
+        variables: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/variable. ADDITIVE author-defined variables [{id, name, type:number|text, initialValue}]; [] (default) == behavior unchanged. A `calculate` logic action mutates them; recall + conditions read them. Live values are NOT persisted into Response.data (recomputed by replaying calculate actions)." }
+        quotas: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/quota. ADDITIVE response quotas [{id, name, limit, condition, endingId?}]; [] (default) == no enforcement. At finalize, the (limit+1)th response matching a quota's condition is marked over-quota and routed to its endingId (or a built-in screen). SERVER-ONLY: NOT exposed on PublicSurvey (conditions are never leaked to respondents)." }
+        published_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    SurveyWrite:
+      type: object
+      required: [name, environment_id, questions, languages]
+      description: >
+        Write payload. Server validates questions/logic/languages/styling/welcome_card/endings/close_on
+        against survey-schema.json AND asserts unique question ids, no backward jumps, and that every
+        jumpTo/endSurvey target resolves to a later question id or a declared endings[].id (REVIEW.md).
+      properties:
+        name: { type: string }
+        environment_id: { type: string, format: uuid }
+        single_use: { type: boolean, default: false }
+        questions: { type: array, items: { type: object, additionalProperties: true } }
+        logic: { type: array, items: { type: object, additionalProperties: true } }
+        languages: { type: array, items: { type: object, additionalProperties: true } }
+        styling: { type: object, additionalProperties: true }
+        welcome_card: { type: object, additionalProperties: true, nullable: true, description: "Per survey-schema.json#/$defs/welcomeCard" }
+        endings: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/ending" }
+        close_on: { type: object, additionalProperties: true, nullable: true }
+        hidden_fields: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/hiddenFields" }
+        blocks: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/block. ADDITIVE question-grouping overlay [{id, title?, questionIds, randomize?}]; default []. Validated downstream (questionIds resolve, no question in two blocks, unique block ids)." }
+        variables: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/variable. ADDITIVE [{id, name, type:number|text, initialValue}]; default []. Validated downstream (unique ids across the shared namespace; calculate.variableId resolves; type-compatible operation; ref values resolve)." }
+        quotas: { type: array, items: { type: object, additionalProperties: true }, description: "Per survey-schema.json#/$defs/quota. ADDITIVE response quotas [{id, name, limit, condition, endingId?}]; default []. Validated downstream (unique quota ids; endingId resolves to a declared ending; condition refs resolve with a type-valid operator)." }
+
+    Response:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        survey_id: { type: string, format: uuid }
+        data: { type: object, additionalProperties: true, description: "questionId -> answer; answer shapes per survey-schema.json#/$defs/answerShapes" }
+        finished: { type: boolean }
+        contact_id: { type: string, format: uuid, nullable: true }
+        language: { type: string }
+        meta: { type: object, additionalProperties: true, description: "{url, source, userAgent, deviceType, country}. IP redacted for non-privileged callers." }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time }
+        tags: { type: array, items: { $ref: "#/components/schemas/Tag" } }
+
+    Tag:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        color: { type: string }
+
+    ResponseTag:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        response_id: { type: string, format: uuid }
+        tag: { $ref: "#/components/schemas/Tag" }
+
+    AnalyticsSummary:
+      type: object
+      properties:
+        survey_id: { type: string, format: uuid }
+        total_responses: { type: integer }
+        finished_responses: { type: integer }
+        completion_rate: { type: number, description: "finished / started" }
+        funnel:
+          type: array
+          description: Per-question reach/answer/drop-off in linear order.
+          items:
+            type: object
+            properties:
+              question_id: { type: string }
+              reached: { type: integer }
+              answered: { type: integer }
+              dropoff: { type: integer }
+        questions:
+          type: array
+          description: Per-question summary; shape varies by question type.
+          items:
+            type: object
+            properties:
+              question_id: { type: string }
+              type: { type: string }
+              # choice counts / rating distribution / nps breakdown / averages / word list
+              summary: { type: object, additionalProperties: true }
+        nps:
+          type: object
+          nullable: true
+          description: Present if the survey has an NPS question.
+          properties:
+            question_id: { type: string }
+            score: { type: number, description: "%promoters - %detractors, range -100..100" }
+            promoters: { type: integer }
+            passives: { type: integer }
+            detractors: { type: integer }
+
+    Contact:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        environment_id: { type: string, format: uuid }
+        external_id: { type: string, nullable: true }
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              value: { type: string, description: "Redacted/masked if the attribute key is_pii and caller lacks privilege." }
+              data_type: { $ref: "#/components/schemas/AttrType" }
+              is_pii: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    ContactWrite:
+      type: object
+      properties:
+        external_id: { type: string, nullable: true }
+        attributes:
+          type: array
+          items:
+            type: object
+            required: [key, value]
+            properties:
+              key: { type: string }
+              value: { type: string }
+
+    Segment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        environment_id: { type: string, format: uuid }
+        title: { type: string }
+        filter: { type: object, additionalProperties: true, description: "Per survey-schema.json#/$defs/segmentFilter" }
+        created_at: { type: string, format: date-time }
+
+    SegmentWrite:
+      type: object
+      required: [title, filter, environment_id]
+      properties:
+        title: { type: string }
+        environment_id: { type: string, format: uuid }
+        filter: { type: object, additionalProperties: true, description: "Validated against survey-schema.json#/$defs/segmentFilter" }
+
+    ApiKey:
+      type: object
+      description: Listing shape — never includes the raw or hashed key.
+      properties:
+        id: { type: string, format: uuid }
+        label: { type: string }
+        prefix: { type: string }
+        environment_id: { type: string, format: uuid }
+        last_used_at: { type: string, format: date-time, nullable: true }
+        revoked_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    ApiKeyCreated:
+      allOf:
+        - $ref: "#/components/schemas/ApiKey"
+        - type: object
+          properties:
+            raw_key: { type: string, description: "Shown ONCE. Store it now; only the hash is persisted." }
+
+    # --- public runtime shapes ---
+    PublicSurvey:
+      type: object
+      description: The published survey definition the runtime renders. No internal/admin fields.
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        questions: { type: array, items: { type: object, additionalProperties: true } }
+        languages: { type: array, items: { type: object, additionalProperties: true } }
+        styling: { type: object, additionalProperties: true }
+        welcomeCard: { type: object, additionalProperties: true, nullable: true }
+        endings: { type: array, items: { type: object, additionalProperties: true } }
+        hiddenFields: { type: array, items: { type: object, additionalProperties: true }, description: "Survey-level hidden fields [{id, name?}] (survey-schema.json#/$defs/hiddenFields). The runtime captures matching ?param= values into the response." }
+        blocks: { type: array, items: { type: object, additionalProperties: true }, description: "Question-grouping overlay [{id, title?, questionIds, randomize?}] (survey-schema.json#/$defs/block). Exposed so the runtime can apply within-block presentation randomization (seeded per-session, back-nav stable). [] == flat behavior." }
+        variables: { type: array, items: { type: object, additionalProperties: true }, description: "Author-defined variables [{id, name, type:number|text, initialValue}] (survey-schema.json#/$defs/variable). Exposed so the runtime can seed + thread variable state (recomputed by replaying calculate actions) for recall + conditions. [] == behavior unchanged." }
+        single_use: { type: boolean }
+
+    PublicResponseCreate:
+      type: object
+      description: >
+        Public, unauthenticated response-create payload. Contact association is NOT taken
+        from a client-supplied contact_id (that would let an anonymous caller probe/confirm
+        contact existence — forbidden by rbac.md §11). The ONLY trusted source of a
+        contact is the link_token: the server resolves SurveyLink.contact_id from a valid
+        token and sets Response.contact_id from it. Any client-supplied contact_id is
+        ignored. See ADR-009.
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: "Initial partial answers (may be empty). questionId -> answer."
+        language: { type: string, default: "default" }
+        link_token:
+          type: string
+          nullable: true
+          description: >
+            Required if survey.single_use. Binds the response to a SurveyLink and is the
+            sole trusted source of contact association (server reads SurveyLink.contact_id).
+        meta:
+          type: object
+          additionalProperties: true
+          description: "{url, source, userAgent}. Server augments with IP/deviceType server-side."
+
+    PublicResponseHandle:
+      type: object
+      description: What the runtime gets back to continue editing/finalizing a response.
+      properties:
+        id: { type: string, format: uuid }
+        finished: { type: boolean }
+        edit_token: { type: string, description: "Short-lived token authorizing PATCH/finalize/upload-url for THIS response only." }
+        expires_at: { type: string, format: date-time }
+        over_quota: { type: boolean, default: false, description: "QUOTAS (additive): set at finalize. When true, this finished response was the (limit+1)th matching one for some survey quota — the runtime OVERRIDES the ending it would otherwise show. Absent/false on create + patch and for surveys with no quotas." }
+        quota_full_ending_id: { type: string, nullable: true, description: "The over-quota ending to route to (a real survey ending id), or null to show the built-in 'quota full' screen. Only meaningful when over_quota is true." }

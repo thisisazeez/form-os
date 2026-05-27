@@ -1,0 +1,204 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Settings → Workspace → Look & Feel. `/<org_slug>/workspaces/<id>/settings/look-and-feel`
+  (or the default-workspace `/<org_slug>/settings/workspace/look-and-feel`) —
+  apps.workspaces.views_htmx.workspace_look_and_feel_page.
+
+  The project-level theme: the DEFAULT styling for every survey in this workspace. It uses the
+  SAME Styling shape a survey uses (#/$defs/styling), so a survey's own styling overrides it
+  key-by-key at serve time (apps.workspaces.theme.merge_styling). Owner/admin (manage_workspace)
+  gated; a viewer-only caller gets 403, a non-viewer gets 404.
+
+  The form POSTs to action="" (the current slug-prefixed URL — request.path is slug-stripped by
+  TenantSlugMiddleware and would 404). A live preview (Alpine) reflects the inputs as you type.
+
+  Context: org, workspace, theme (current #/$defs/styling dict), theme_error, theme_saved.
+{% endcomment %}
+
+{% block title %}Look &amp; Feel — {{ workspace.name }}{% endblock %}
+{% block nav_settings %}is-active{% endblock %}
+{% block topbar_title %}Look &amp; Feel{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Look &amp; Feel" subtitle="The default theme for every survey in this workspace. Each survey can override any of these." %}
+
+  <div
+    x-data="{
+      brandColor: '{{ theme.brandColor|default:'' }}',
+      questionColor: '{{ theme.questionColor|default:'' }}',
+      backgroundColor: '{{ theme.backgroundColor|default:'' }}',
+      buttonColor: '{{ theme.buttonColor|default:'' }}',
+      buttonTextColor: '{{ theme.buttonTextColor|default:'' }}',
+      logoUrl: '{{ theme.logoUrl|default:'' }}',
+      roundness: '{{ theme.roundness|default:'' }}',
+      cardArrangement: '{{ theme.cardArrangement|default:'' }}',
+      hideProgressBar: {% if theme.hideProgressBar %}true{% else %}false{% endif %},
+    }"
+    class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
+
+    {% comment %}---- left: the editable theme controls ----{% endcomment %}
+    <div class="max-w-3xl space-y-6">
+
+      {% if theme_saved %}
+        <div class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">Theme saved. New and existing surveys will inherit it (unless they set their own value).</div>
+      {% endif %}
+      {% if theme_error %}
+        <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ theme_error }}</div>
+      {% endif %}
+
+      <form method="post" action="" class="space-y-6">
+        {% csrf_token %}
+
+        {% comment %}---- Colors ----{% endcomment %}
+        <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+          <h2 class="font-display text-lg font-semibold text-ink">Colors</h2>
+          <p class="mt-1 text-sm text-muted">Leave a field blank to fall back to the runtime default.</p>
+          <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="brandColor">Brand color</label>
+              <div class="flex items-center gap-2">
+                <input type="color" aria-label="Brand color picker" x-model="brandColor"
+                  :value="brandColor || '#2563eb'"
+                  class="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-hairline bg-white p-1" />
+                <input type="text" name="brandColor" id="brandColor" x-model="brandColor" placeholder="#2563eb"
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="questionColor">Question text color</label>
+              <div class="flex items-center gap-2">
+                <input type="color" aria-label="Question color picker" x-model="questionColor"
+                  :value="questionColor || '#1e293b'"
+                  class="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-hairline bg-white p-1" />
+                <input type="text" name="questionColor" id="questionColor" x-model="questionColor" placeholder="#1e293b"
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="backgroundColor">Card background color</label>
+              <div class="flex items-center gap-2">
+                <input type="color" aria-label="Background color picker" x-model="backgroundColor"
+                  :value="backgroundColor || '#ffffff'"
+                  class="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-hairline bg-white p-1" />
+                <input type="text" name="backgroundColor" id="backgroundColor" x-model="backgroundColor" placeholder="#ffffff"
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="buttonColor">Button color</label>
+              <div class="flex items-center gap-2">
+                <input type="color" aria-label="Button color picker" x-model="buttonColor"
+                  :value="buttonColor || '#2563eb'"
+                  class="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-hairline bg-white p-1" />
+                <input type="text" name="buttonColor" id="buttonColor" x-model="buttonColor" placeholder="#2563eb"
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="buttonTextColor">Button text color</label>
+              <div class="flex items-center gap-2">
+                <input type="color" aria-label="Button text color picker" x-model="buttonTextColor"
+                  :value="buttonTextColor || '#ffffff'"
+                  class="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-hairline bg-white p-1" />
+                <input type="text" name="buttonTextColor" id="buttonTextColor" x-model="buttonTextColor" placeholder="#ffffff"
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {% comment %}---- Card & layout ----{% endcomment %}
+        <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+          <h2 class="font-display text-lg font-semibold text-ink">Card &amp; layout</h2>
+          <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="roundness">Corner roundness (px)</label>
+              <input type="number" name="roundness" id="roundness" x-model="roundness" min="0" max="32" step="1" placeholder="8"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              <p class="mt-1 text-xs text-muted">0–32. Blank uses the default.</p>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="cardArrangement">Card arrangement</label>
+              <select name="cardArrangement" id="cardArrangement" x-model="cardArrangement"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                <option value="">Default</option>
+                <option value="straight">Straight</option>
+                <option value="casual">Casual</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="logoUrl">Logo URL</label>
+              <input type="url" name="logoUrl" id="logoUrl" x-model="logoUrl" placeholder="https://example.com/logo.png"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="flex cursor-pointer items-center gap-3 text-sm text-ink">
+                <input type="checkbox" name="hideProgressBar" x-model="hideProgressBar"
+                  class="h-4 w-4 rounded border-hairline text-brand focus:ring-brand" />
+                Hide the progress bar
+              </label>
+            </div>
+          </div>
+        </section>
+
+        {% comment %}---- Background ----{% endcomment %}
+        <section class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+          <h2 class="font-display text-lg font-semibold text-ink">Survey background</h2>
+          <p class="mt-1 text-sm text-muted">The page background behind the survey card.</p>
+          <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="backgroundType">Type</label>
+              <select name="backgroundType" id="backgroundType"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                <option value="" {% if not theme.background.type %}selected{% endif %}>Default</option>
+                <option value="none" {% if theme.background.type == 'none' %}selected{% endif %}>None</option>
+                <option value="color" {% if theme.background.type == 'color' %}selected{% endif %}>Color</option>
+                <option value="image" {% if theme.background.type == 'image' %}selected{% endif %}>Image URL</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="backgroundValue">Value (color / image URL)</label>
+              <input type="text" name="backgroundValue" id="backgroundValue" value="{{ theme.background.value|default:'' }}" placeholder="#f8fafc or https://…"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+            </div>
+          </div>
+        </section>
+
+        <div class="flex justify-end">
+          <button type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
+            <span class="material-symbols-outlined text-[18px]">save</span>Save theme
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {% comment %}---- right: live preview (presentational; reflects the inputs above) ----{% endcomment %}
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Preview</p>
+      <div class="rounded-xl border border-hairline p-5 shadow-sm"
+        :style="`background-color: ${backgroundColor || '#f8fafc'};`">
+        <div class="mx-auto max-w-sm border border-hairline bg-white p-5 shadow-sm"
+          :style="`border-radius: ${(roundness || 8)}px; background-color: ${backgroundColor || '#ffffff'};`">
+          <template x-if="logoUrl">
+            <img :src="logoUrl" alt="Logo" class="mb-4 h-8 w-auto object-contain" />
+          </template>
+          <div class="text-base font-semibold" :style="`color: ${questionColor || '#1e293b'};`">
+            How likely are you to recommend us?
+          </div>
+          <div class="mt-2 text-sm text-muted">A quick example of your survey card.</div>
+          <button type="button" class="mt-5 w-full px-4 py-2 text-sm font-medium"
+            :style="`background-color: ${buttonColor || brandColor || '#2563eb'}; color: ${buttonTextColor || '#ffffff'}; border-radius: ${(roundness || 8)}px;`">
+            Next
+          </button>
+          <template x-if="!hideProgressBar">
+            <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-panel">
+              <div class="h-full w-1/3" :style="`background-color: ${brandColor || '#2563eb'};`"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <p class="mt-3 text-xs text-muted">Surveys inherit this theme by default. A survey's own styling overrides any value it sets.</p>
+    </aside>
+  </div>
+{% endblock %}

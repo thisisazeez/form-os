@@ -1,0 +1,44 @@
+# ============================================================================
+# OpenSurvey — base runtime dependencies (production + dev share these)
+# Stack locked by PLAN.md §13 + contracts/decisions.md ADR-005.
+# Pins use compatible-release ranges; lock exact versions in a lockfile if desired.
+# ============================================================================
+
+# --- Core framework (ADR-005: Django 5.x + DRF) ---
+Django>=5.0,<5.2
+djangorestframework>=3.15,<3.16
+
+# --- Multi-tenancy: schema-per-Organization (PLAN §4, ADR-002) ---
+# django-tenants provides TenantMixin/DomainMixin, schema routing, and migrate_schemas.
+# ADR-001 path routing is done by a custom apps.common.middleware.TenantSlugMiddleware
+# (not django-tenants' TenantSubfolderMiddleware — see that module's docstring for why).
+django-tenants>=3.7,<3.9
+
+# --- Postgres driver (django-tenants requires PostgreSQL) ---
+psycopg[binary]>=3.1,<4.0
+
+# --- Env-based settings config ---
+django-environ>=0.11,<0.13
+
+# --- Redis / Celery (PLAN §13: emails, exports, webhook delivery, rollups) ---
+celery>=5.3,<6.0
+redis>=5.0,<6.0
+
+# --- Vite ↔ Django island pipeline (PLAN §8) ---
+django-vite>=3.0,<4.0
+
+# --- JSON Schema validation for survey/logic/segment JSON (ADR-004) ---
+# Wave 2+ write paths validate against contracts/survey-schema.json (draft 2020-12).
+jsonschema>=4.21,<5.0
+
+# --- QR codes for the survey Share page (WS-7) ---
+# Pure-Python QR encoder — no Pillow / C deps. Emits PNG and SVG directly
+# (segno.make(...).save(buf, kind="png"|"svg")). Used by the share-page QR endpoint.
+segno>=1.6,<2.0
+
+# --- Image handling (account avatar upload) ---
+# Required by Django ImageField (accounts.User.avatar) for image validation.
+Pillow>=10.0,<13.0
+
+# --- WSGI/ASGI server for non-dev runs ---
+gunicorn>=21.2,<23.0

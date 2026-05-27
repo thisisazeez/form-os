@@ -1,0 +1,24 @@
+{% comment %}
+  One filter chip row for the survey-template gallery (Channel / Industry / Role).
+
+  Params (passed via {% include ... with %}):
+    label  — the row label shown on the left ("Channel" / "Industry" / "Role").
+    param  — the query-param name this row controls ("channel" / "industry" / "role").
+    chips  — [{key, label, active}] from views_htmx._chip_options (leading "All" has key "").
+
+  Each chip is a GET <a> that re-requests the gallery with THIS row's param set to the chip key
+  (an empty key clears this row → "All"), while PRESERVING the other two active filters + the
+  search query (read from the page-level active_* / query context). Server-side filtering only —
+  no JS — mirroring the surveys-list status chips. The parent view ignores unknown keys, so a
+  hand-edited param can't blank the gallery.
+{% endcomment %}
+<div class="mb-3 flex flex-wrap items-center gap-2">
+  <span class="mr-1 w-20 shrink-0 text-xs font-semibold uppercase tracking-wide text-muted">{{ label }}</span>
+  {% for chip in chips %}
+    {% comment %} Build the href: this row → chip.key; other rows keep their active value. {% endcomment %}
+    <a href="/{{ org_slug }}/surveys/new?{% if param == 'channel' %}channel={{ chip.key }}{% else %}channel={{ active_channel }}{% endif %}{% if param == 'industry' %}&industry={{ chip.key }}{% else %}&industry={{ active_industry }}{% endif %}{% if param == 'role' %}&role={{ chip.key }}{% else %}&role={{ active_role }}{% endif %}&q={{ query|urlencode }}"
+       class="rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors {% if chip.active %}border-brand bg-brand/5 text-brand{% else %}border-hairline bg-white text-muted hover:bg-panel{% endif %}">
+      {{ chip.label }}
+    </a>
+  {% endfor %}
+</div>

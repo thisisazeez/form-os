@@ -1,0 +1,427 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Contacts list — /<org_slug>/contacts (apps.contacts.views_htmx.contacts_page).
+  Mirrors designs/stitch/contacts-list.png translated to brand tokens (Poppins/Inter, brand
+  orange, surface/panel/hairline). Real Contact rows + attribute columns + response counts +
+  last-seen, a saved-segments rail (real Segments + matching counts), search, a functional
+  "Add filter" (attribute/op/value chips, URL-param driven), "Import CSV" (modal), "Export"
+  (streamed CSV), and a "+ New contact" modal. The bulk-action bar's "Add to segment" and
+  "Export" are wired. All RBAC + masking is resolved in the view; this template only renders.
+{% endcomment %}
+
+{% block title %}Contacts — OpenSurvey{% endblock %}
+{% block nav_contacts %}is-active{% endblock %}
+{% block topbar_title %}Contacts{% endblock %}
+
+{% block content %}
+{% comment %}hx-headers makes every HTMX request inside this page carry the CSRF token (base.html does not
+   set a global header). The token is also emitted in each POST form below. The outer Alpine state
+   drives the New-contact / Import / Add-filter modals.{% endcomment %}
+<div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+     x-data="{ newOpen: {% if show_new_modal %}true{% else %}false{% endif %}, importOpen: false, filterOpen: false }">
+
+  {% comment %} ---- Header row: title + count, and the action affordances ---- {% endcomment %}
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div class="flex items-center gap-3">
+      {% include "_components/page_header.html" with title="Contacts" subtitle="People who can receive your surveys." %}
+      {% if environment %}
+        <span class="mb-0.5 rounded-full bg-panel px-2.5 py-1 text-xs font-medium text-muted">{{ total_count }}</span>
+      {% endif %}
+    </div>
+    {% if environment %}
+    <div class="flex items-center gap-2">
+      <button type="button" @click="filterOpen = true"
+              class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">filter_list</span> Add filter
+      </button>
+      {% if can_edit %}
+      <button type="button" @click="importOpen = true"
+              class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">upload_file</span> Import CSV
+      </button>
+      {% endif %}
+      <a href="contacts/export.csv{% if filter_query %}?{{ filter_query }}{% endif %}"
+         class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+        <span class="material-symbols-outlined text-[18px]">download</span> Export
+      </a>
+      {% if can_edit %}
+      <button type="button" @click="newOpen = true"
+              class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+        <span class="material-symbols-outlined text-[18px]">add</span> New contact
+      </button>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if request.GET.create_error %}
+    <div class="mb-6 rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-muted">info</span>{{ request.GET.create_error }}
+    </div>
+  {% endif %}
+  {% if request.GET.segment_error %}
+    <div class="mb-6 rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink">
+      <span class="material-symbols-outlined mr-1 align-middle text-[18px] text-muted">info</span>{{ request.GET.segment_error }}
+    </div>
+  {% endif %}
+
+  {% if not environment %}
+    {% comment %}No readable environment yet (member with no workspace access / empty org).{% endcomment %}
+    {% include "_components/empty_state.html" with icon="group" title="No contacts yet" message="Contacts appear here once a workspace environment exists and people are added or imported." %}
+  {% else %}
+
+  {% comment %} ---- Active filter chips (removable) + save-as-segment ---- {% endcomment %}
+  {% if active_filters %}
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      <span class="text-xs font-semibold uppercase tracking-wider text-muted">Filters</span>
+      {% for f in active_filters %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+          {{ f.key }} {{ f.operator }}{% if f.value %} “{{ f.value }}”{% endif %}
+          <a href="?{% for g in active_filters %}{% if g.raw != f.raw %}filter={{ g.raw|urlencode }}&{% endif %}{% endfor %}{% if query %}q={{ query|urlencode }}{% endif %}"
+             class="text-brand hover:text-brand-hover" aria-label="Remove filter">
+            <span class="material-symbols-outlined text-[14px]">close</span>
+          </a>
+        </span>
+      {% endfor %}
+      <a href="?{% if query %}q={{ query|urlencode }}{% endif %}"
+         class="text-xs font-medium text-muted underline transition-colors hover:text-ink">Clear all</a>
+      {% if can_edit %}
+      <form method="post" action="contacts/save-as-segment" class="ml-auto">
+        {% csrf_token %}
+        <input type="hidden" name="filter" value="{{ filter_json }}" />
+        <button type="submit"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-panel">
+          <span class="material-symbols-outlined text-[16px]">bookmark_add</span> Save filter as segment
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-6 lg:flex-row">
+
+    {% comment %} ================= Saved-segments rail (left) ================= {% endcomment %}
+    <aside class="w-full shrink-0 lg:w-60">
+      <h2 class="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-muted">Saved segments</h2>
+      <nav class="space-y-1">
+        <a href="?{% if query %}q={{ query|urlencode }}{% endif %}"
+           class="flex items-center justify-between rounded-lg bg-brand/5 px-3 py-2 text-sm font-medium text-brand">
+          <span class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">groups</span> All contacts
+          </span>
+          <span class="text-xs font-semibold">{{ total_count }}</span>
+        </a>
+        {% for seg in segments %}
+          <a href="{{ seg.id }}"
+             class="group flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-panel hover:text-ink"
+             title="{{ seg.title }}">
+            <span class="flex min-w-0 items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-muted group-hover:text-brand">segment</span>
+              <span class="truncate">{{ seg.title }}</span>
+            </span>
+            <span class="text-xs">{{ seg.count }}{% if seg.count_capped %}+{% endif %}</span>
+          </a>
+        {% empty %}
+          <p class="px-3 py-2 text-xs text-muted">No saved segments yet.</p>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    {% comment %} ================= Contacts table (right) ================= {% endcomment %}
+    <div class="min-w-0 flex-1"
+         x-data="{ selected: [], get all() { return {{ contacts|length }} > 0 && this.selected.length === {{ contacts|length }} } }">
+
+      {% comment %}Floating bulk-action bar (Alpine; shown when ≥1 row is selected). "Add to segment"
+         and "Export" both post the SELECTED ids to server endpoints (no inert buttons).{% endcomment %}
+      <div x-show="selected.length > 0" x-cloak
+           class="mb-3 flex flex-wrap items-center gap-4 rounded-xl border border-hairline bg-white px-4 py-3 shadow-sm">
+        <span class="flex items-center gap-2 text-sm font-medium text-ink">
+          <span class="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-1.5 text-xs font-semibold text-white" x-text="selected.length"></span>
+          selected
+        </span>
+        <span class="h-4 w-px bg-hairline"></span>
+        {% if can_edit %}
+        <form method="post" action="contacts/save-as-segment">
+          {% csrf_token %}
+          <input type="hidden" name="contact_ids" :value="selected.join(',')" />
+          <button type="submit" class="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-ink">
+            <span class="material-symbols-outlined text-[18px]">playlist_add</span> Add to segment
+          </button>
+        </form>
+        {% endif %}
+        <a href="#"
+           @click.prevent="window.location = 'contacts/export.csv?ids=' + selected.join(',')"
+           class="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-ink">
+          <span class="material-symbols-outlined text-[18px]">download</span> Export
+        </a>
+        {% if can_edit %}
+        <button type="button"
+                @click="if (confirm('Delete ' + selected.length + ' contact(s)? Their responses are anonymized, not deleted.')) { selected.forEach(id => htmx.ajax('POST', 'contacts/' + id + '/delete', {swap:'none'})); setTimeout(() => window.location.reload(), 300); }"
+                class="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 transition-colors hover:text-red-700">
+          <span class="material-symbols-outlined text-[18px]">delete</span> Delete
+        </button>
+        {% endif %}
+        <button type="button" @click="selected = []" class="ml-auto text-muted transition-colors hover:text-ink" aria-label="Clear selection">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="overflow-hidden rounded-xl border border-hairline bg-white">
+        <table class="min-w-full divide-y divide-hairline text-sm">
+          <thead class="bg-panel/50 text-left">
+            <tr>
+              <th class="w-12 px-4 py-4">
+                <input type="checkbox" aria-label="Select all"
+                       :checked="all"
+                       @change="selected = $event.target.checked ? [{% for c in contacts %}'{{ c.id }}'{% if not forloop.last %},{% endif %}{% endfor %}] : []"
+                       class="h-4 w-4 rounded border-hairline text-brand focus:ring-brand" />
+              </th>
+              <th class="px-4 py-4 text-xs font-semibold uppercase tracking-wider text-muted">Contact</th>
+              {% for col in attribute_columns %}
+                <th class="hidden px-4 py-4 text-xs font-semibold uppercase tracking-wider text-muted md:table-cell">{{ col.label }}</th>
+              {% endfor %}
+              <th class="hidden px-4 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted sm:table-cell">Responses</th>
+              <th class="hidden px-4 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted lg:table-cell">Last seen</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline">
+            {% for c in contacts %}
+              <tr class="transition-colors hover:bg-panel/30"
+                  :class="selected.includes('{{ c.id }}') ? 'bg-brand/5' : ''">
+                <td class="px-4 py-4">
+                  <input type="checkbox" value="{{ c.id }}" x-model="selected"
+                         aria-label="Select {{ c.name }}"
+                         class="h-4 w-4 rounded border-hairline text-brand focus:ring-brand" />
+                </td>
+                <td class="px-4 py-4">
+                  <a href="contacts/{{ c.id }}" class="flex items-center gap-3 group">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-panel font-display text-xs font-semibold text-ink">{{ c.initials }}</span>
+                    <span class="min-w-0">
+                      <span class="block truncate font-medium text-ink group-hover:text-brand">{{ c.name }}</span>
+                      {% if c.email %}<span class="block truncate text-xs text-muted">{{ c.email }}</span>{% endif %}
+                    </span>
+                  </a>
+                </td>
+                {% for value in c.columns %}
+                  <td class="hidden px-4 py-4 text-muted md:table-cell">{{ value|default:"—" }}</td>
+                {% endfor %}
+                <td class="hidden px-4 py-4 text-right text-ink sm:table-cell">{{ c.response_count }}</td>
+                <td class="hidden px-4 py-4 text-right text-muted lg:table-cell">{% if c.last_seen %}{{ c.last_seen|timesince }} ago{% else %}—{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="{{ attribute_columns|length|add:4 }}" class="px-4 py-0">
+                  {% if has_filters %}
+                    <div class="py-16 text-center">
+                      <span class="material-symbols-outlined mb-2 text-4xl text-muted">search_off</span>
+                      <p class="text-sm text-muted">No contacts match the current {% if query %}search{% else %}filters{% endif %}.</p>
+                    </div>
+                  {% else %}
+                    {% include "_components/empty_state.html" with icon="group" title="No contacts yet" message="Import a CSV or add your first contact to start building segments." %}
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if contacts %}
+          <div class="flex items-center justify-between border-t border-hairline px-4 py-3 text-sm text-muted">
+            <span>Showing 1–{{ contacts|length }} of {{ filtered_count }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% comment %} ---- New contact modal (Alpine) ---- {% endcomment %}
+  {% if can_edit %}
+    <div x-show="newOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div @click="newOpen = false" class="absolute inset-0 bg-ink/40"></div>
+      <div class="relative w-full max-w-md rounded-xl border border-hairline bg-white p-6 shadow-lg">
+        <div class="mb-4 flex items-start justify-between">
+          <div>
+            <h2 class="font-display text-xl font-bold text-ink">New contact</h2>
+            <p class="mt-1 text-sm text-muted">Add a person by email and name. A matching email merges into the existing contact.</p>
+          </div>
+          <button @click="newOpen = false" class="text-muted hover:text-ink" aria-label="Close">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form method="post" action="contacts/new" x-data="{ rows: [] }">
+          {% csrf_token %}
+          <label for="nc-email" class="mb-1 block text-sm font-medium text-ink">Email</label>
+          <input id="nc-email" name="email" type="email" autofocus placeholder="person@example.com"
+                 class="mb-3 block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+          <label for="nc-name" class="mb-1 block text-sm font-medium text-ink">Name</label>
+          <input id="nc-name" name="name" type="text" placeholder="Full name"
+                 class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+
+          {% comment %}Optional extra attributes (parallel attr_key[]/attr_value[] arrays).{% endcomment %}
+          <template x-for="(row, i) in rows" :key="i">
+            <div class="mt-3 flex items-center gap-2">
+              <input name="attr_key" type="text" x-model="row.key" placeholder="Attribute"
+                     class="block w-1/3 rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              <input name="attr_value" type="text" x-model="row.value" placeholder="Value"
+                     class="block flex-1 rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              <button type="button" @click="rows.splice(i, 1)" class="text-muted hover:text-ink" aria-label="Remove">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+          </template>
+          <button type="button" @click="rows.push({ key: '', value: '' })"
+                  class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand transition-colors hover:text-brand-hover">
+            <span class="material-symbols-outlined text-[18px]">add</span> Add attribute
+          </button>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button type="button" @click="newOpen = false"
+                    class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</button>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+              <span class="material-symbols-outlined text-[18px]">person_add</span> Create contact
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% comment %} ---- Import CSV modal (Alpine) ---- {% endcomment %}
+    <div x-show="importOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div @click="importOpen = false" class="absolute inset-0 bg-ink/40"></div>
+      <div class="relative w-full max-w-md rounded-xl border border-hairline bg-white p-6 shadow-lg">
+        <div class="mb-4 flex items-start justify-between">
+          <div>
+            <h2 class="font-display text-xl font-bold text-ink">Import contacts</h2>
+            <p class="mt-1 text-sm text-muted">Upload a CSV. The header row's column names become attributes; an <code class="rounded bg-panel px-1 text-xs">email</code> column de-duplicates.</p>
+          </div>
+          <button @click="importOpen = false" class="text-muted hover:text-ink" aria-label="Close">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form method="post" action="contacts/import" enctype="multipart/form-data">
+          {% csrf_token %}
+          <label for="csv-file" class="mb-1 block text-sm font-medium text-ink">CSV file</label>
+          <input id="csv-file" name="file" type="file" accept=".csv,text/csv" required
+                 class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm file:mr-3 file:rounded-md file:border-0 file:bg-panel file:px-3 file:py-1 file:text-sm file:font-medium file:text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+          <div class="mt-6 flex justify-end gap-3">
+            <button type="button" @click="importOpen = false"
+                    class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</button>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+              <span class="material-symbols-outlined text-[18px]">upload_file</span> Upload &amp; import
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  {% comment %} ---- Add filter modal (Alpine; builds a ?filter=key:op:value query) ----
+     Server data is embedded via json_script (safe JSON-in-HTML — no attribute-escape pitfalls;
+     a label with an apostrophe can't break the markup). filterPanel() reads these in init().
+     Mirrors the segments builder's sb-keys / sb-ops hydration pattern. {% endcomment %}
+  {{ filter_keys|json_script:"cf-keys" }}
+  {{ filter_operators|json_script:"cf-ops" }}
+  <div x-show="filterOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       x-data="filterPanel('{{ filter_query|escapejs }}')" x-init="init()">
+    <div @click="filterOpen = false" class="absolute inset-0 bg-ink/40"></div>
+    <div class="relative w-full max-w-md rounded-xl border border-hairline bg-white p-6 shadow-lg">
+      <div class="mb-4 flex items-start justify-between">
+        <div>
+          <h2 class="font-display text-xl font-bold text-ink">Add filter</h2>
+          <p class="mt-1 text-sm text-muted">Narrow the list by an attribute. Filters use the same conditions as segments, so you can save them as one.</p>
+        </div>
+        <button @click="filterOpen = false" class="text-muted hover:text-ink" aria-label="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <template x-if="keys.length === 0">
+        <p class="text-sm text-muted">No attributes are defined yet. Add a contact with attributes first.</p>
+      </template>
+      <template x-if="keys.length > 0">
+        <div class="space-y-3">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-ink">Attribute</label>
+            <select x-model="key" @change="op = ''"
+                    class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+              <template x-for="k in keys" :key="k.key">
+                <option :value="k.key" x-text="k.label"></option>
+              </template>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-ink">Condition</label>
+            <select x-model="op"
+                    class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+              <template x-for="o in opsForKey()" :key="o.op">
+                <option :value="o.op" x-text="o.label"></option>
+              </template>
+            </select>
+          </div>
+          <div x-show="needsValue()">
+            <label class="mb-1 block text-sm font-medium text-ink">Value</label>
+            <input type="text" x-model="value" placeholder="Value"
+                   class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+          </div>
+        </div>
+      </template>
+      <div class="mt-6 flex justify-end gap-3">
+        <button type="button" @click="filterOpen = false"
+                class="rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</button>
+        <button type="button" x-show="keys.length > 0" @click="apply()"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+          <span class="material-symbols-outlined text-[18px]">filter_list</span> Apply filter
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% comment %}Alpine factory for the Add-filter panel — assembles a ?filter=key:op:value query and
+   navigates. Operators come straight from the FROZEN segments operator table (passed by the
+   view), so a contact filter is always a valid segment leaf.{% endcomment %}
+<script>
+  function filterPanel(baseQuery) {
+    return {
+      keys: [],
+      opsByType: {},
+      baseQuery: baseQuery,
+      key: '',
+      op: '',
+      value: '',
+      init() {
+        const keysEl = document.getElementById('cf-keys');
+        const opsEl = document.getElementById('cf-ops');
+        this.keys = keysEl ? JSON.parse(keysEl.textContent) : [];
+        this.opsByType = opsEl ? JSON.parse(opsEl.textContent) : {};
+        this.key = this.keys.length ? this.keys[0].key : '';
+      },
+      _dtype() {
+        const k = this.keys.find(k => k.key === this.key);
+        return k ? k.data_type : 'string';
+      },
+      opsForKey() {
+        return this.opsByType[this._dtype()] || [];
+      },
+      needsValue() {
+        const o = this.opsForKey().find(o => o.op === this.op);
+        return o ? o.needs_value : false;
+      },
+      apply() {
+        if (!this.key || !this.op) { return; }
+        let leaf = this.key + ':' + this.op;
+        if (this.needsValue()) {
+          if (!this.value) { return; }
+          leaf += ':' + this.value;
+        }
+        const params = new URLSearchParams(this.baseQuery || '');
+        params.append('filter', leaf);
+        window.location = '?' + params.toString();
+      },
+    };
+  }
+</script>
+{% endblock %}

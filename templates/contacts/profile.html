@@ -1,0 +1,229 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Contact profile — /<org_slug>/contacts/<id> (apps.contacts.views_htmx.contact_profile_page).
+  Mirrors designs/stitch/contact-profile.png translated to brand tokens. Left identity card
+  (avatar, attributes key→value from the typed-attribute model, segment-membership pills) +
+  right tabbed area (Activity Feed + Survey Responses) driven by Alpine. Real data resolved in
+  the view; PII masking already applied to attribute values.
+{% endcomment %}
+
+{% block title %}{{ name }} — Contacts — OpenSurvey{% endblock %}
+{% block nav_contacts %}is-active{% endblock %}
+{% block topbar_title %}Contacts{% endblock %}
+
+{% block content %}
+<div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+  {# ---- Breadcrumb + title + actions ---- #}
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <nav class="mb-1 flex items-center gap-1.5 text-sm text-muted">
+        <a href="../contacts" class="transition-colors hover:text-brand">Contacts</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-ink">{{ name }}</span>
+      </nav>
+      <h1 class="font-display text-2xl font-bold tracking-tight text-ink">{{ name }}</h1>
+    </div>
+    <div class="flex items-center gap-2" x-data="{ menu: false }">
+      {% if can_edit %}
+      {% comment %}Segments are dynamic (filter-based); "Add to segment" pivots to building a segment
+         from THIS contact's email (operator isOneOf). POSTs to the shared save-as-segment endpoint,
+         which redirects to the segment builder prefilled — the user names + saves it there.{% endcomment %}
+      <form method="post" action="../contacts/save-as-segment">
+        {% csrf_token %}
+        <input type="hidden" name="contact_ids" value="{{ contact.id }}" />
+        <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-panel">
+          <span class="material-symbols-outlined text-[18px]">playlist_add</span> Add to segment
+        </button>
+      </form>
+      {% endif %}
+      <a href="../surveys"
+         class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+        <span class="material-symbols-outlined text-[18px]">send</span> Send survey
+      </a>
+      <div class="relative">
+        <button type="button" @click="menu = !menu"
+                class="rounded-lg border border-hairline bg-white p-2 text-muted transition-colors hover:bg-panel hover:text-ink" aria-label="More actions">
+          <span class="material-symbols-outlined text-[18px]">more_horiz</span>
+        </button>
+        <div x-show="menu" x-cloak @click.outside="menu = false"
+             class="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-hairline bg-white p-1 shadow-lg">
+          {% if can_edit %}
+          <form method="post" action="{{ contact.id }}/delete"
+                onsubmit="return confirm('Delete this contact? Their responses are anonymized, not deleted.');">
+            {% csrf_token %}
+            <button type="submit"
+                    class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-panel hover:text-red-700">
+              <span class="material-symbols-outlined text-[18px]">delete</span> Delete contact
+            </button>
+          </form>
+          {% else %}
+          <span class="block px-3 py-2 text-xs text-muted">View-only access</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-6 lg:flex-row">
+
+    {# ================= Left: identity card ================= #}
+    <aside class="w-full shrink-0 lg:w-80">
+      <div class="rounded-xl border border-hairline bg-white p-5 shadow-sm">
+        {# Avatar + name + email #}
+        <div class="flex flex-col items-center text-center">
+          <span class="flex h-20 w-20 items-center justify-center rounded-full bg-panel font-display text-2xl font-bold text-brand">{{ initials }}</span>
+          <h2 class="mt-3 font-display text-lg font-semibold text-ink">{{ name }}</h2>
+          {% if email %}<p class="text-sm text-muted">{{ email }}</p>{% endif %}
+          {% if contact.external_id %}
+            <p class="mt-1 inline-flex items-center gap-1 text-xs text-muted">
+              <span class="material-symbols-outlined text-[14px]">badge</span> {{ contact.external_id }}
+            </p>
+          {% endif %}
+        </div>
+
+        {% comment %}Attributes (key → value) from the typed-attribute model. "Add attribute" reveals an
+           inline form posting to contacts/<id>/attributes (set/overwrite one key).{% endcomment %}
+        <div class="mt-6 border-t border-hairline pt-5" x-data="{ addOpen: false }">
+          <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Attributes</h3>
+          {% if request.GET.attr_error %}
+            <p class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{{ request.GET.attr_error }}</p>
+          {% endif %}
+          <dl class="space-y-2.5">
+            {% for attr in attributes %}
+              <div class="flex items-start justify-between gap-3 text-sm">
+                <dt class="text-muted">{{ attr.label }}</dt>
+                <dd class="text-right font-medium text-ink">
+                  {% if attr.is_pii and attr.value == "***" %}
+                    <span class="text-muted">•••</span>
+                  {% else %}{{ attr.value|default:"—" }}{% endif %}
+                </dd>
+              </div>
+            {% empty %}
+              <p class="text-sm text-muted">No attributes recorded.</p>
+            {% endfor %}
+          </dl>
+          {% if can_edit %}
+            <button type="button" x-show="!addOpen" @click="addOpen = true"
+                    class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand transition-colors hover:text-brand-hover">
+              <span class="material-symbols-outlined text-[18px]">add</span> Add attribute
+            </button>
+            <form x-show="addOpen" x-cloak method="post" action="{{ contact.id }}/attributes" class="mt-4 space-y-2">
+              {% csrf_token %}
+              <input name="key" type="text" required placeholder="Attribute name (e.g. plan)"
+                     class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              <input name="value" type="text" placeholder="Value"
+                     class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              <div class="flex justify-end gap-2">
+                <button type="button" @click="addOpen = false"
+                        class="rounded-lg border border-hairline bg-white px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-panel">Cancel</button>
+                <button type="submit"
+                        class="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
+                  <span class="material-symbols-outlined text-[18px]">check</span> Save
+                </button>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+
+        {# Segment-membership pills #}
+        <div class="mt-6 border-t border-hairline pt-5">
+          <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Segments</h3>
+          {% if member_segments %}
+            <div class="flex flex-wrap gap-2">
+              {% for seg in member_segments %}
+                <a href="../segments/{{ seg.id }}"
+                   class="inline-flex items-center rounded-full bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand transition-colors hover:bg-brand/15">{{ seg.title }}</a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-sm text-muted">Not in any segment.</p>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
+
+    {# ================= Right: tabbed activity / responses ================= #}
+    <div class="min-w-0 flex-1" x-data="{ tab: 'activity' }">
+      <div class="mb-5 flex items-center gap-6 border-b border-hairline">
+        <button type="button" @click="tab = 'activity'"
+                :class="tab === 'activity' ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'"
+                class="-mb-px border-b-2 pb-3 text-sm font-medium transition-colors">Activity feed</button>
+        <button type="button" @click="tab = 'responses'"
+                :class="tab === 'responses' ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'"
+                class="-mb-px border-b-2 pb-3 text-sm font-medium transition-colors">
+          Survey responses
+          <span class="ml-1 rounded-full bg-panel px-1.5 py-0.5 text-xs text-muted">{{ responses|length }}</span>
+        </button>
+      </div>
+
+      {# --- Activity timeline --- #}
+      <div x-show="tab === 'activity'">
+        <div class="rounded-xl border border-hairline bg-white p-5 shadow-sm">
+          {% if activity %}
+            <ol class="relative space-y-6 before:absolute before:left-[15px] before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-hairline">
+              {% for item in activity %}
+                <li class="relative flex gap-4">
+                  <span class="z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-panel">
+                    <span class="material-symbols-outlined text-[18px] text-muted">{{ item.icon }}</span>
+                  </span>
+                  <div class="flex min-w-0 flex-1 items-start justify-between gap-3 pt-1">
+                    <p class="text-sm text-ink">{{ item.text }}</p>
+                    <time class="shrink-0 text-xs text-muted">{{ item.at|timesince }} ago</time>
+                  </div>
+                </li>
+              {% endfor %}
+            </ol>
+          {% else %}
+            <div class="py-10 text-center">
+              <span class="material-symbols-outlined mb-2 text-3xl text-muted">history</span>
+              <p class="text-sm text-muted">No activity recorded yet.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# --- Responses list --- #}
+      <div x-show="tab === 'responses'" x-cloak>
+        {% if responses %}
+          <div class="overflow-hidden rounded-xl border border-hairline bg-white shadow-sm">
+            <table class="min-w-full divide-y divide-hairline text-sm">
+              <thead class="bg-panel/50 text-left">
+                <tr>
+                  <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Survey</th>
+                  <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">Status</th>
+                  <th class="hidden px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted sm:table-cell">Answers</th>
+                  <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">When</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-hairline">
+                {% for r in responses %}
+                  <tr class="transition-colors hover:bg-panel/30">
+                    <td class="px-5 py-4 font-medium text-ink">{{ r.survey_name }}</td>
+                    <td class="px-5 py-4">
+                      {% if r.finished %}
+                        {% include "_components/status_pill.html" with status="live" %}
+                      {% else %}
+                        {% include "_components/status_pill.html" with status="draft" %}
+                      {% endif %}
+                    </td>
+                    <td class="hidden px-5 py-4 text-right text-muted sm:table-cell">{{ r.answer_count }}</td>
+                    <td class="px-5 py-4 text-right text-muted">{{ r.started_at|timesince }} ago</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="rounded-xl border border-dashed border-hairline bg-white py-12 text-center">
+            <span class="material-symbols-outlined mb-2 text-3xl text-muted">inbox</span>
+            <p class="text-sm text-muted">This contact hasn’t responded to any surveys yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

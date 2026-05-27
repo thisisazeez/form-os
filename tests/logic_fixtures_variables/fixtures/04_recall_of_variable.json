@@ -1,0 +1,208 @@
+[
+  {
+    "name": "recall — a number variable resolves to its live value",
+    "description": "score=10+5=15; recall token for score renders '15'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 10
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 5
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {
+      "q1": 1
+    },
+    "recall_text": "Your score is #recall:score/fallback:0#.",
+    "expected_recall": "Your score is 15."
+  },
+  {
+    "name": "recall — a text variable resolves to its live value",
+    "description": "tier assigned 'gold'; recall token for tier renders 'gold'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "tier",
+          "name": "Tier",
+          "type": "text",
+          "initialValue": ""
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "tier",
+                "operation": "assign",
+                "value": {
+                  "type": "literal",
+                  "value": "gold"
+                }
+              }
+            }
+          ],
+          "config": {}
+        }
+      ]
+    },
+    "answers": {
+      "q1": "x"
+    },
+    "recall_text": "You are a #recall:tier/fallback:member# customer.",
+    "expected_recall": "You are a gold customer."
+  },
+  {
+    "name": "recall — an unchanged number variable renders its initial value (not the fallback)",
+    "description": "score initial 0, no calculate fired (q1 unanswered); 0 is NOT empty -> renders '0'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "score",
+          "name": "Score",
+          "type": "number",
+          "initialValue": 0
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "score",
+                "operation": "add",
+                "value": {
+                  "type": "literal",
+                  "value": 5
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "answers": {},
+    "recall_text": "Score: #recall:score/fallback:none#",
+    "expected_recall": "Score: 0"
+  },
+  {
+    "name": "recall — an empty text variable renders the fallback",
+    "description": "tier initial '' and never assigned (q1 unanswered) -> empty -> fallback 'standard'",
+    "survey": {
+      "languages": [
+        {
+          "code": "en",
+          "default": true
+        }
+      ],
+      "variables": [
+        {
+          "id": "tier",
+          "name": "Tier",
+          "type": "text",
+          "initialValue": ""
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": {
+            "default": "n"
+          },
+          "logic": [
+            {
+              "id": "r1",
+              "condition": {
+                "leftQuestionId": "q1",
+                "operator": "isSubmitted"
+              },
+              "action": {
+                "type": "calculate",
+                "variableId": "tier",
+                "operation": "assign",
+                "value": {
+                  "type": "literal",
+                  "value": "gold"
+                }
+              }
+            }
+          ],
+          "config": {}
+        }
+      ]
+    },
+    "answers": {},
+    "recall_text": "Tier: #recall:tier/fallback:standard#",
+    "expected_recall": "Tier: standard"
+  }
+]

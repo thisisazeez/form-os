@@ -1,0 +1,178 @@
+[
+  {
+    "name": "validate — no-backward-jump guard rejects a jumpTo to an earlier question",
+    "description": "q3 jumps back to q1 (lower index) -> validateSurvey fails with backward_jump. (Structurally valid JSON; the in-code check catches it.)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "q1" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        {
+          "id": "q3",
+          "type": "singleSelect",
+          "headline": { "default": "q3" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }] },
+          "logic": [
+            { "id": "bad", "condition": { "leftQuestionId": "q3", "operator": "equals", "value": "a" }, "action": { "type": "jumpTo", "target": "q1" } }
+          ]
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "backward_jump"
+  },
+
+  {
+    "name": "validate — jumpTo to self is a backward jump",
+    "description": "A rule on q2 jumping to q2 (same index) is rejected (not strictly later).",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "q1" }, "config": { "inputType": "short" }, "logic": [] },
+        {
+          "id": "q2",
+          "type": "number",
+          "headline": { "default": "q2" },
+          "config": {},
+          "logic": [
+            { "id": "selfjump", "condition": { "leftQuestionId": "q2", "operator": "greaterThan", "value": 5 }, "action": { "type": "jumpTo", "target": "q2" } }
+          ]
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "backward_jump"
+  },
+
+  {
+    "name": "validate — jumpTo to an unknown target",
+    "description": "Target neither a question nor an ending -> unknown_target.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": { "default": "q1" },
+          "config": {},
+          "logic": [
+            { "id": "bad", "condition": { "leftQuestionId": "q1", "operator": "greaterThan", "value": 5 }, "action": { "type": "jumpTo", "target": "nonexistent" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "unknown_target"
+  },
+
+  {
+    "name": "validate — duplicate question ids",
+    "description": "Two questions share id 'dup' -> duplicate_id.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "dup", "type": "openText", "headline": { "default": "first" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "dup", "type": "openText", "headline": { "default": "second" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "duplicate_id"
+  },
+
+  {
+    "name": "validate — question id collides with an ending id",
+    "description": "A question id equals an ending id -> duplicate_id (ids unique across questions+endings).",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "shared", "type": "openText", "headline": { "default": "q" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "shared", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "duplicate_id"
+  },
+
+  {
+    "name": "validate — invalid operator for question type",
+    "description": "'greaterThan' on a singleSelect is not in the operator-validity table -> invalid_operator.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "pick",
+          "type": "singleSelect",
+          "headline": { "default": "Pick" },
+          "config": { "choices": [{ "id": "a", "label": { "default": "A" } }, { "id": "b", "label": { "default": "B" } }] },
+          "logic": [
+            { "id": "bad", "condition": { "leftQuestionId": "pick", "operator": "greaterThan", "value": 1 }, "action": { "type": "jumpTo", "target": "q2" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "invalid_operator"
+  },
+
+  {
+    "name": "validate — condition references a later (forward) question",
+    "description": "A rule on q1 conditions on q2 (a later question) -> forward_condition_ref.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "openText",
+          "headline": { "default": "q1" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "bad", "condition": { "leftQuestionId": "q2", "operator": "isSubmitted" }, "action": { "type": "jumpTo", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "q3" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": false,
+    "expectedErrorCode": "forward_condition_ref"
+  },
+
+  {
+    "name": "validate — valid forward jumpTo and ending target passes",
+    "description": "A correct survey (forward jump to q3, then a rule to an ending) -> validateSurvey ok. Sanity 'positive' validation case.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        {
+          "id": "q1",
+          "type": "number",
+          "headline": { "default": "q1" },
+          "config": {},
+          "logic": [
+            { "id": "ok1", "condition": { "leftQuestionId": "q1", "operator": "greaterThan", "value": 5 }, "action": { "type": "jumpTo", "target": "q3" } }
+          ]
+        },
+        { "id": "q2", "type": "openText", "headline": { "default": "q2" }, "config": { "inputType": "short" }, "logic": [] },
+        {
+          "id": "q3",
+          "type": "openText",
+          "headline": { "default": "q3" },
+          "config": { "inputType": "short" },
+          "logic": [
+            { "id": "ok2", "condition": { "leftQuestionId": "q3", "operator": "isSubmitted" }, "action": { "type": "jumpTo", "target": "end1" } }
+          ]
+        }
+      ],
+      "endings": [{ "id": "end1", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "expectValid": true
+  }
+]

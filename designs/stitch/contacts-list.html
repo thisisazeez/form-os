@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contacts - OpenSurvey</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Outfit:wght@400;500;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            heading: '#222b27',
+                            body: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)'
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "Public Sans", "sans-serif"],
+                        "display": ["Outfit", "Public Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'float': '0 8px 30px -4px rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.surface.page'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="font-body text-ink-body bg-surface-page antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-surface-card border-b border-border shadow-sm flex justify-between items-center px-8 z-40">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm">search</span>
+<input class="pl-9 pr-4 py-1.5 text-sm rounded-lg border border-border bg-surface-panel focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all w-64 placeholder:text-ink-muted" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-ink-muted hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-panel">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="text-ink-muted hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-panel">
+<span class="material-symbols-outlined text-xl">help</span>
+</button>
+<button class="text-secondary font-medium text-sm hover:underline transition-all px-3">Support</button>
+<button class="bg-primary hover:bg-primary-hover text-white text-sm font-medium px-4 py-2 rounded-lg transition-transform duration-200 hover:-translate-y-[1px] active:scale-95 shadow-soft">
+                Create Survey
+            </button>
+<div class="h-8 w-8 rounded-full bg-surface-panel overflow-hidden border border-border shrink-0 ml-2">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRwbxd4IZKjAsXTdQ70NmBI2Z9wCQqvarhRVZYi8NYVx9jMRoIomsoaz7BknLbS9_AXzar69rbhJKy131q65sTeHKHWfjSpWxC7a8tQEEDjL09smHrXSFBUnTKqSHuse3LM4Asj3wdflXApsMmIx8DkGVr_Yz4SM9Bb_PpblwpX3YtO5ylsDb_Pm1dBY1-lrXGNP2YdraADLsWO6AWdqwbR7M10DWBC7sFLIbxNKV-tGLVunL24FTD5j6Z4pnPvcBOlBv-wQsIg7Wt"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-card shadow-xl z-50 flex flex-col py-6 px-4 gap-2 border-r border-border">
+<div class="px-4 mb-8 flex flex-col gap-1">
+<h1 class="text-2xl font-headline font-bold text-primary">OpenSurvey</h1>
+<span class="text-xs text-ink-muted font-medium uppercase tracking-wider">Enterprise Admin</span>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px] text-ink-muted group-hover:text-primary transition-colors">home</span>
+                Home
+            </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px] text-ink-muted group-hover:text-primary transition-colors">poll</span>
+                Surveys
+            </a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-primary bg-surface-panel font-bold text-sm scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px] icon-fill">group</span>
+                Contacts
+            </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px] text-ink-muted group-hover:text-primary transition-colors">segment</span>
+                Segments
+            </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px] text-ink-muted group-hover:text-primary transition-colors">analytics</span>
+                Results
+            </a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px] text-ink-muted group-hover:text-primary transition-colors">badge</span>
+                Team
+            </a>
+</nav>
+<div class="mt-auto">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-ink-body hover:bg-surface-panel transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px] text-ink-muted group-hover:text-primary transition-colors">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen p-8 flex flex-col">
+<!-- Header Section -->
+<header class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+<div class="flex items-baseline gap-3">
+<h2 class="text-3xl font-headline font-semibold text-ink-heading tracking-tight">Contacts</h2>
+<span class="text-sm font-medium text-ink-muted bg-border px-2.5 py-0.5 rounded-full">1,248</span>
+</div>
+<div class="flex items-center gap-3 flex-wrap">
+<!-- Chip Builder Placeholder -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-sm font-medium text-ink-body bg-surface-card hover:border-ink-muted transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Add filter
+                </button>
+<button class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-ink-heading hover:bg-border transition-colors">
+<span class="material-symbols-outlined text-[18px]">upload</span>
+                    Import CSV
+                </button>
+<button class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-hover shadow-soft transition-all duration-200 hover:-translate-y-[1px] active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New contact
+                </button>
+</div>
+</header>
+<!-- Two Column Layout -->
+<div class="flex gap-8 flex-1">
+<!-- Left Rail: Saved Segments -->
+<aside class="w-64 shrink-0 hidden lg:block">
+<h3 class="text-xs font-bold text-ink-muted uppercase tracking-wider mb-4 px-2">Saved Segments</h3>
+<ul class="space-y-1">
+<li>
+<button class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-surface-panel text-primary font-medium text-sm group transition-colors">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] icon-fill text-primary">groups</span>
+                                All contacts
+                            </span>
+<span class="text-xs font-semibold">1,248</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading text-sm group transition-colors">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-ink-muted group-hover:text-ink-heading">bolt</span>
+                                Active
+                            </span>
+<span class="text-xs text-ink-muted group-hover:text-ink-heading">892</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading text-sm group transition-colors">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-ink-muted group-hover:text-success text-success">sentiment_satisfied</span>
+                                Promoters
+                            </span>
+<span class="text-xs text-ink-muted group-hover:text-ink-heading">415</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-ink-body hover:bg-surface-panel hover:text-ink-heading text-sm group transition-colors">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-ink-muted group-hover:text-primary">warning</span>
+                                Churn-risk
+                            </span>
+<span class="text-xs text-ink-muted group-hover:text-ink-heading">38</span>
+</button>
+</li>
+</ul>
+</aside>
+<!-- Main Panel: Data Table -->
+<div class="flex-1 min-w-0 flex flex-col relative">
+<!-- Floating Bulk Action Bar (Simulating 3 rows selected) -->
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-white border border-primary/30 shadow-float rounded-xl px-4 py-2.5 flex items-center gap-4 z-10 animate-fade-in-up">
+<div class="flex items-center gap-2 border-r border-border pr-4">
+<span class="flex h-5 w-5 items-center justify-center rounded bg-primary text-white text-xs font-bold">3</span>
+<span class="text-sm font-medium text-ink-heading">selected</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-sm font-medium text-ink-body hover:text-primary px-3 py-1.5 rounded hover:bg-surface-panel transition-colors">Add to segment</button>
+<button class="text-sm font-medium text-ink-body hover:text-primary px-3 py-1.5 rounded hover:bg-surface-panel transition-colors">Export</button>
+<button class="text-sm font-medium text-primary hover:text-primary-hover px-3 py-1.5 rounded hover:bg-red-50 transition-colors">Delete</button>
+</div>
+<button class="ml-2 text-ink-muted hover:text-ink-heading">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="bg-surface-card rounded-xl shadow-soft border border-border flex-1 overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-surface-card border-b border-border text-ink-muted font-medium text-xs uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4 w-12">
+<input checked="" class="rounded border-border text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</th>
+<th class="px-6 py-4">Contact</th>
+<th class="px-6 py-4">Company</th>
+<th class="px-6 py-4">Plan</th>
+<th class="px-6 py-4">Country</th>
+<th class="px-6 py-4 text-right"># Surveys</th>
+<th class="px-6 py-4">Last Seen</th>
+<th class="px-6 py-4 w-12"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border/50 text-ink-body">
+<!-- Row 1 (Selected) -->
+<tr class="hover:bg-surface-panel transition-colors bg-primary/5">
+<td class="px-6 py-4">
+<input checked="" class="rounded border-border text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-secondary font-bold text-xs shrink-0">EK</div>
+<div>
+<div class="font-medium text-ink-heading">Elena Kravchenko</div>
+<div class="text-xs text-ink-muted">elena.k@techflow.io</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">TechFlow Inc.</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-secondary border border-blue-100">Enterprise</span>
+</td>
+<td class="px-6 py-4">Germany</td>
+<td class="px-6 py-4 text-right font-medium">14</td>
+<td class="px-6 py-4 text-ink-muted">2 hours ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink-heading p-1"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<!-- Row 2 (Selected) -->
+<tr class="hover:bg-surface-panel transition-colors bg-primary/5">
+<td class="px-6 py-4">
+<input checked="" class="rounded border-border text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-primary font-bold text-xs shrink-0">MJ</div>
+<div>
+<div class="font-medium text-ink-heading">Marcus Johnson</div>
+<div class="text-xs text-ink-muted">mjohnson@retailplus.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">RetailPlus</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-success border border-green-100">Pro</span>
+</td>
+<td class="px-6 py-4">United States</td>
+<td class="px-6 py-4 text-right font-medium">8</td>
+<td class="px-6 py-4 text-ink-muted">Yesterday</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink-heading p-1"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<!-- Row 3 (Selected) -->
+<tr class="hover:bg-surface-panel transition-colors bg-primary/5">
+<td class="px-6 py-4">
+<input checked="" class="rounded border-border text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Sarah Chen" class="h-8 w-8 rounded-full object-cover shrink-0 border border-border" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGSzhpCuBWtPLYqkLwJeKzI3aQ2gHPyc7VSF6YiiPi_52tX-YlDP1MM2OgCb0Ili6lpA9sQCqBxSCE1sVFNLn1KsrwDye_d3AYutURIXHtGyx2ILgXelGPu4Heqi0Rz1zQdRhMh4UY32fxKFRU1jo_XUCQDv3oPGv3z7daJ06kXHIKYZ-Y3tAy6sHbtw3WC-GOUWZgw6bjblYDWfLWyuSn4cXyMLz1N3IbhepMW3LCAwB8K6ZOeIFkIeED_vZk2gX0eTxZor99-s-7"/>
+<div>
+<div class="font-medium text-ink-heading">Sarah Chen</div>
+<div class="text-xs text-ink-muted">sarah@designco.net</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">DesignCo</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-ink-body border border-gray-200">Free</span>
+</td>
+<td class="px-6 py-4">Canada</td>
+<td class="px-6 py-4 text-right font-medium">2</td>
+<td class="px-6 py-4 text-ink-muted">3 days ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink-heading p-1"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-panel transition-colors">
+<td class="px-6 py-4">
+<input class="rounded border-border text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-xs shrink-0">DT</div>
+<div>
+<div class="font-medium text-ink-heading">David Thompson</div>
+<div class="text-xs text-ink-muted">david.t@globalfin.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">Global Finance</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-secondary border border-blue-100">Enterprise</span>
+</td>
+<td class="px-6 py-4">United Kingdom</td>
+<td class="px-6 py-4 text-right font-medium">42</td>
+<td class="px-6 py-4 text-ink-muted">1 week ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink-heading p-1"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-panel transition-colors">
+<td class="px-6 py-4">
+<input class="rounded border-border text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-xs shrink-0">LP</div>
+<div>
+<div class="font-medium text-ink-heading">Laura Perez</div>
+<div class="text-xs text-ink-muted">lperez@startup.io</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">InnovateNow</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-success border border-green-100">Pro</span>
+</td>
+<td class="px-6 py-4">Spain</td>
+<td class="px-6 py-4 text-right font-medium">5</td>
+<td class="px-6 py-4 text-ink-muted">1 week ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-ink-muted hover:text-ink-heading p-1"><span class="material-symbols-outlined">more_horiz</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="border-t border-border bg-surface-card px-6 py-4 flex items-center justify-between text-sm mt-auto">
+<span class="text-ink-muted">Showing 1-5 of 1,248</span>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 border border-border rounded text-ink-muted hover:text-ink-heading hover:bg-surface-panel disabled:opacity-50 transition-colors" disabled="">Previous</button>
+<button class="px-3 py-1.5 border border-border rounded text-ink-heading bg-surface-panel font-medium">1</button>
+<button class="px-3 py-1.5 border border-transparent rounded text-ink-muted hover:bg-surface-panel transition-colors">2</button>
+<button class="px-3 py-1.5 border border-transparent rounded text-ink-muted hover:bg-surface-panel transition-colors">3</button>
+<span class="px-2 text-ink-muted">...</span>
+<button class="px-3 py-1.5 border border-border rounded text-ink-heading hover:bg-surface-panel transition-colors">Next</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="w-full py-4 mt-8 border-t border-border flex justify-between items-center text-xs text-ink-muted">
+<p>© 2024 OpenSurvey. All rights reserved.</p>
+<div class="flex gap-4">
+<a class="hover:text-ink-heading transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-ink-heading transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-ink-heading transition-colors" href="#">Security</a>
+</div>
+</footer>
+</main>
+</body></html>

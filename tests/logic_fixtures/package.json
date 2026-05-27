@@ -1,0 +1,15 @@
+{
+  "name": "@opensurvey/logic-fixtures",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Shared TS<->PY logic-fixture harness (TS side). Runs the SAME fixtures as run_py.py to enforce TS/Python logic-engine parity. See README.md.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

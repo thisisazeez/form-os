@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - New Segment</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        tertiary: '#8ac449',
+                        ink: {
+                            DEFAULT: '#222b27',
+                            muted: '#444444',
+                            light: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: 'rgba(34, 43, 39, 0.10)'
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                        '8px': '8px',
+                        '12px': '12px',
+                        '16px': '16px'
+                    },
+                    fontFamily: {
+                        headline: ["Outfit", "sans-serif"],
+                        display: ["Outfit", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 24px -6px rgba(0, 0, 0, 0.05)',
+                        'lift': '0 8px 32px -8px rgba(0, 0, 0, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Outfit', sans-serif; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(34, 43, 39, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(34, 43, 39, 0.2); }
+        
+        /* Interactive states */
+        .btn-scale { transition: transform 0.15s ease-out; }
+        .btn-scale:active { transform: scale(0.98); }
+        
+        .card-lift { transition: all 0.2s ease-out; }
+        .card-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.08); }
+        
+        /* Form elements */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23666666' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-print-color-adjust: exact;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="bg-surface-page text-ink flex h-full overflow-hidden antialiased">
+<!-- TopNavBar (Web) -->
+<header class="hidden md:flex bg-white dark:bg-neutral-900 border-b border-black/10 dark:border-white/10 shadow-sm flex justify-between items-center px-6 py-3 w-full sticky top-0 z-50 fixed w-full top-0">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-headline font-bold text-[#222b27] dark:text-white">OpenSurvey</span>
+<nav class="ml-8 flex gap-6">
+<!-- Navigation Tabs - Segments Active -->
+<a class="font-body text-sm text-[#444] hover:text-[#222b27] pb-1 hover:bg-[#faf8f7] dark:hover:bg-neutral-800 transition-colors duration-200" href="#">Surveys</a>
+<a class="font-body text-sm text-[#444] hover:text-[#222b27] pb-1 hover:bg-[#faf8f7] dark:hover:bg-neutral-800 transition-colors duration-200" href="#">Contacts</a>
+<a class="font-body text-sm text-[#444] hover:text-[#222b27] pb-1 hover:bg-[#faf8f7] dark:hover:bg-neutral-800 transition-colors duration-200" href="#">Results</a>
+<a class="font-body text-sm text-[#0d9488] font-bold border-b-2 border-[#0d9488] pb-1" href="#">Segments</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="p-2 text-[#444] dark:text-neutral-300 hover:bg-[#faf8f7] dark:hover:bg-neutral-800 rounded-full transition-colors duration-200 scale-98 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-[#444] dark:text-neutral-300 hover:bg-[#faf8f7] dark:hover:bg-neutral-800 rounded-full transition-colors duration-200 scale-98 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="p-2 text-[#444] dark:text-neutral-300 hover:bg-[#faf8f7] dark:hover:bg-neutral-800 rounded-full transition-colors duration-200 scale-98 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<button class="bg-[#0d9488] hover:bg-[#0f766e] text-white font-body text-sm px-4 py-2 rounded-8px font-medium scale-98 active:scale-95 transition-transform duration-200">
+                Create Survey
+            </button>
+<img alt="Admin profile" class="w-8 h-8 rounded-full border border-black/10" data-alt="A professional headshot of an administrator in a corporate setting. The lighting is bright and modern, creating a clear and trustworthy appearance. The background is slightly blurred to focus on the subject." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIgUqGwTw8CRyLUgRBF3MiXwfDv-ru5jG4EAC4g002uKewYCxXwtX0V76wln-sze1Eb6Ypo2aVWl9fpz0o7O-zP4xm9w9vXlXZnPZEe5NY_LMXeRJpn0BCXCiWz_1JHXcD2F_-_9vjBz5xC7L3dUGSKrNVEbmwOqmMAO7FQ4-yHH7vG-_04PPu0OCR2LhA1anwIkKVW9Ztdt0itC6YyMooiqmbarZVLPX-f82q9WXVvBnaLOTvLnZ97ELLSkpKzlI7r9VVl88UHOrr"/>
+</div>
+</header>
+<!-- SideNavBar (Mobile / Responsive logic normally handles this, but since we are showing the builder, we'll assume a focused view. We will include a collapsed version or just rely on Top Nav for this specific view to match constraints of 'focused workspace panel') -->
+<!-- Main Workspace Area -->
+<main class="flex-1 flex flex-col h-full overflow-y-auto pt-[60px] pb-8 px-4 md:px-8">
+<div class="max-w-[1100px] w-full mx-auto mt-8 flex flex-col lg:flex-row gap-6">
+<!-- Left Panel: Builder -->
+<div class="flex-1 bg-surface-card rounded-16px shadow-soft border border-border flex flex-col overflow-hidden">
+<!-- Builder Header -->
+<div class="px-8 py-6 border-b border-border bg-white flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h1 class="text-2xl font-headline font-bold text-ink">New segment</h1>
+<p class="text-sm text-ink-light mt-1 font-body">Define rules to filter your contacts dynamically.</p>
+</div>
+<div class="flex items-center gap-2 bg-orange-50 text-primary px-4 py-2 rounded-full border border-orange-100">
+<span class="material-symbols-outlined text-sm">group</span>
+<span class="text-sm font-semibold font-body">≈ 1,240 contacts match</span>
+</div>
+</div>
+<div class="mt-2">
+<label class="sr-only" for="segmentName">Segment Name</label>
+<input class="w-full text-lg font-body font-medium text-ink placeholder:text-ink-light/50 border-0 border-b-2 border-transparent hover:border-border focus:border-primary focus:ring-0 px-0 py-2 transition-colors bg-transparent" id="segmentName" placeholder="e.g., High-Value Customers" type="text"/>
+</div>
+</div>
+<!-- Builder Canvas -->
+<div class="p-8 flex-1 overflow-y-auto bg-surface-page/50">
+<!-- Main Logic Group -->
+<div class="border border-border rounded-12px bg-white p-6 relative">
+<!-- Logic Toggle -->
+<div class="absolute -top-3 left-6 bg-white px-2">
+<div class="flex items-center border border-border rounded-lg overflow-hidden text-xs font-semibold font-body">
+<button class="px-3 py-1 bg-primary text-white cursor-default">AND</button>
+<button class="px-3 py-1 text-ink-light hover:bg-surface-panel transition-colors cursor-pointer">OR</button>
+</div>
+</div>
+<div class="flex flex-col gap-4 mt-2">
+<!-- Condition Row 1 -->
+<div class="flex items-center gap-3 group">
+<div class="w-1/3">
+<select class="w-full form-select border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="plan">Plan</option>
+<option value="status">Status</option>
+<option value="last_seen">Last Seen</option>
+</select>
+</div>
+<div class="w-1/4">
+<select class="w-full form-select border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="is">is</option>
+<option value="is_not">is not</option>
+<option value="contains">contains</option>
+</select>
+</div>
+<div class="w-1/3">
+<input class="w-full border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none" type="text" value="Enterprise"/>
+</div>
+<button class="text-ink-light opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-1 rounded-full hover:bg-red-50">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<!-- Nested Group (OR logic) -->
+<div class="pl-6 border-l-2 border-border ml-2 mt-2 relative pb-2">
+<!-- Logic Tag for Nested -->
+<div class="absolute top-1/2 -left-[18px] -translate-y-1/2 bg-surface-panel border border-border px-2 py-0.5 rounded-full text-[10px] font-bold text-ink-muted">OR</div>
+<div class="flex flex-col gap-3">
+<!-- Nested Condition 1 -->
+<div class="flex items-center gap-3 group">
+<div class="w-[32%]">
+<select class="w-full form-select border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="nps">NPS Score</option>
+</select>
+</div>
+<div class="w-[24%]">
+<select class="w-full form-select border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="greater_than">&gt; Greater than</option>
+</select>
+</div>
+<div class="w-[32%]">
+<input class="w-full border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none" type="number" value="8"/>
+</div>
+<button class="text-ink-light opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-1 rounded-full hover:bg-red-50">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<!-- Nested Condition 2 -->
+<div class="flex items-center gap-3 group">
+<div class="w-[32%]">
+<select class="w-full form-select border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="responses">Total Responses</option>
+</select>
+</div>
+<div class="w-[24%]">
+<select class="w-full form-select border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="greater_than">&gt; Greater than</option>
+</select>
+</div>
+<div class="w-[32%]">
+<input class="w-full border border-border rounded-8px text-sm font-body text-ink py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none" type="number" value="5"/>
+</div>
+<button class="text-ink-light opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-1 rounded-full hover:bg-red-50">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add Buttons -->
+<div class="flex gap-3 mt-4">
+<button class="btn-scale flex items-center gap-1.5 text-sm font-medium font-body text-ink-muted bg-surface-panel hover:bg-border px-3 py-1.5 rounded-8px transition-colors border border-dashed border-ink-light/30">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                                    Add condition
+                                </button>
+<button class="btn-scale flex items-center gap-1.5 text-sm font-medium font-body text-ink-muted hover:text-primary px-3 py-1.5 rounded-8px transition-colors">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+                                    Add group
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-6 border-t border-border bg-white flex justify-end gap-4 mt-auto">
+<button class="btn-scale px-5 py-2.5 text-sm font-medium font-body text-ink-muted hover:text-ink hover:bg-surface-panel rounded-8px transition-colors">
+                        Cancel
+                    </button>
+<button class="btn-scale px-6 py-2.5 text-sm font-medium font-body text-white bg-primary hover:bg-primary-hover rounded-8px transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                        Save segment
+                    </button>
+</div>
+</div>
+<!-- Right Sidebar: Live Preview -->
+<div class="w-full lg:w-80 flex flex-col gap-4">
+<div class="bg-surface-card rounded-16px shadow-soft border border-border p-6 flex flex-col h-full max-h-[600px]">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">visibility</span>
+<h2 class="font-headline font-semibold text-ink text-lg">Live Preview</h2>
+</div>
+<p class="text-xs text-ink-light font-body mb-4 uppercase tracking-wider font-semibold">Sample Matches</p>
+<div class="flex flex-col gap-4 overflow-y-auto pr-2">
+<!-- Sample Contact 1 -->
+<div class="flex items-center gap-3 p-2 hover:bg-surface-panel rounded-8px transition-colors cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-headline font-bold text-sm">
+                                JA
+                            </div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-sm font-semibold font-body text-ink truncate">Jane Doe</span>
+<span class="text-xs text-ink-light font-body truncate">jane@acme.com</span>
+</div>
+</div>
+<!-- Sample Contact 2 -->
+<div class="flex items-center gap-3 p-2 hover:bg-surface-panel rounded-8px transition-colors cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-headline font-bold text-sm">
+                                BS
+                            </div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-sm font-semibold font-body text-ink truncate">Bob Smith</span>
+<span class="text-xs text-ink-light font-body truncate">bob@globex.com</span>
+</div>
+</div>
+<!-- Sample Contact 3 -->
+<div class="flex items-center gap-3 p-2 hover:bg-surface-panel rounded-8px transition-colors cursor-pointer">
+<img alt="Sarah Connor" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a smiling woman in a bright office environment. Soft natural lighting highlights her features. The aesthetic is clean, modern, and trustworthy, fitting an enterprise software context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPsNv2673Fs3_g0cvrRlKZOseF47tcD9IL80zUHPH-pvwtEDdL7CVAWoPr9aZo3JESA0mF8J6j7mm9W4GjD0DGYKDbJtqXQcEYcwbEOJjl1yll6X1_QDEhVgvwDqSkh1wcHhPv-3zXM7Rd3D5NzN82EXHcOTAuNw4XrofRmIJetcepx1BBpvx3CPzZe8TrxD2kT9qsThnjF6tGZ3jVvB6bd88pV-WwKC-tzOjzJXcFl54FT8OvfBn6ab_ElrnCEYPPQh3mM43lOn_B"/>
+<div class="flex flex-col overflow-hidden">
+<span class="text-sm font-semibold font-body text-ink truncate">Sarah Connor</span>
+<span class="text-xs text-ink-light font-body truncate">sarah@cyberdyne.sys</span>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-border border-dashed">
+<button class="w-full py-2 text-sm font-medium font-body text-secondary hover:text-primary transition-colors text-center">
+                            View all 1,240 contacts
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

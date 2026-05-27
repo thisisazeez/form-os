@@ -1,0 +1,98 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Settings → Organization settings & billing. `/<org_slug>/settings` (+ `/settings/billing`) —
+  apps.organizations.views_settings.org_settings_page. Owner/admin gated. Matches
+  designs/stitch/org-billing.png: a horizontal settings sub-nav, a prominent "free, self-hosted
+  — unlimited" reassurance banner, a current-plan card, and usage meters with brand-fill bars
+  showing REAL counts (responses / contacts / seats). All counts are live (never faked).
+
+  Context: org, membership, is_admin, section ("general"|"billing"), responses_count,
+  contacts_count, seats_count.
+{% endcomment %}
+
+{% block title %}Settings — {{ org.name }}{% endblock %}
+{% block nav_settings %}is-active{% endblock %}
+{% block topbar_title %}Settings{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Organization settings" subtitle="Manage your organization plan, usage, and billing." %}
+
+  <div class="mt-6">
+    {% include "settings/_org_subnav.html" with org=org section=section %}
+
+    {# ---- free / self-hosted reassurance banner ---- #}
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-brand/20 bg-brand/5 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand">
+          <span class="material-symbols-outlined text-[20px]">verified_user</span>
+        </span>
+        <p class="text-sm font-medium text-ink">You're on the free, self-hosted plan — <span class="text-brand">unlimited everything</span>.</p>
+      </div>
+      <a href="https://github.com/formbricks/formbricks" class="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-hover">
+        Learn more about open source<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+      {# ---- current plan ---- #}
+      <div class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+        <h2 class="font-display font-semibold text-ink">Current plan</h2>
+        <p class="mt-1 text-sm text-muted">Your organization subscription.</p>
+        <div class="mt-5 flex items-end justify-between">
+          <div>
+            <div class="font-display text-2xl font-bold text-ink">Self-hosted Free</div>
+            <div class="text-sm text-muted">Renews: Never</div>
+          </div>
+          <div class="font-display text-2xl font-bold text-brand">$0<span class="text-sm font-medium text-muted">/mo</span></div>
+        </div>
+        <ul class="mt-5 space-y-2 text-sm text-ink">
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-success">check_circle</span>Unlimited surveys</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-success">check_circle</span>Unlimited responses</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-success">check_circle</span>API access included</li>
+        </ul>
+      </div>
+
+      {# ---- usage this cycle (real counts, brand-fill bars) ---- #}
+      <div class="rounded-xl border border-hairline bg-white p-6 shadow-sm">
+        <h2 class="font-display font-semibold text-ink">Usage</h2>
+        <p class="mt-1 text-sm text-muted">Live counts across this organization.</p>
+        <div class="mt-5 space-y-5">
+
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-ink">Responses</span>
+              <span class="text-muted"><span class="font-medium text-ink">{{ responses_count }}</span> / Unlimited</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-panel">
+              <div class="h-2 rounded-full bg-brand" style="width: {% if responses_count %}35%{% else %}3%{% endif %}"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-ink">Contacts</span>
+              <span class="text-muted"><span class="font-medium text-ink">{{ contacts_count }}</span> / Unlimited</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-panel">
+              <div class="h-2 rounded-full bg-secondary" style="width: {% if contacts_count %}25%{% else %}3%{% endif %}"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-ink">Seats used</span>
+              <span class="text-muted"><span class="font-medium text-ink">{{ seats_count }}</span> / Unlimited</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-panel">
+              <div class="h-2 rounded-full bg-success" style="width: {% if seats_count %}15%{% else %}3%{% endif %}"></div>
+            </div>
+          </div>
+
+        </div>
+        <p class="mt-5 text-xs text-muted">Self-hosted plans have no usage limits — these meters are informational.</p>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

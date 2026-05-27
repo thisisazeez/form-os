@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Results - OpenSurvey</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e',
+                            light: 'rgba(230, 73, 24, 0.05)'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            dark: '#222b27',
+                            DEFAULT: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            bg: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: {
+                            light: 'rgba(34,43,39,0.10)'
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", // 8px for buttons/inputs
+                        "lg": "0.75rem",   // 12px for cards
+                        "xl": "1rem",      // 16px for large cards
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "display": ["Public Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(34, 43, 39, 0.05)',
+                        'hover': '0 8px 30px -4px rgba(34, 43, 39, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.surface.bg'); color: theme('colors.ink.DEFAULT'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom Scrollbar for canvas to not overlap sidebar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(34,43,39,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(34,43,39,0.3); }
+
+        /* Animation utilities */
+        .fade-in-up { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Chart gradient */
+        .chart-gradient {
+            background: linear-gradient(180deg, rgba(230,73,24,0.15) 0%, rgba(230,73,24,0) 100%);
+        }
+    </style>
+</head>
+<body class="font-body antialiased flex h-screen overflow-hidden">
+<!-- ==================== SIDE NAV BAR (Shared Component) ==================== -->
+<!-- Content: Exact Labels/Icons. Style Execution: style_* keys mapped. Logic: "Results" is Active. -->
+<nav class="hidden md:flex flex-col h-full py-6 px-4 bg-[#faf8f7] dark:bg-surface border-r border-[#222b27]/10 fixed left-0 top-0 w-[248px] z-50">
+<!-- Brand / Header -->
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold font-headline text-lg shadow-sm">
+                C
+            </div>
+<div>
+<h1 class="text-xl font-bold text-[#222b27] dark:text-white font-headline tracking-tight">OpenSurvey</h1>
+<p class="text-xs text-ink-muted">Pro Workspace</p>
+</div>
+</div>
+<!-- Main Navigation Links -->
+<ul class="flex-1 space-y-1">
+<!-- Home -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="font-medium text-sm">Home</span>
+</a>
+</li>
+<!-- Surveys -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-medium text-sm">Surveys</span>
+</a>
+</li>
+<!-- Contacts -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="font-medium text-sm">Contacts</span>
+</a>
+</li>
+<!-- Segments -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">segment</span>
+<span class="font-medium text-sm">Segments</span>
+</a>
+</li>
+<!-- Results (ACTIVE) -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#0d9488] font-semibold border-r-4 border-[#0d9488] bg-[#0d9488]/5 scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">leaderboard</span>
+<span class="font-semibold text-sm">Results</span>
+</a>
+</li>
+<!-- Team -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">group_add</span>
+<span class="font-medium text-sm">Team</span>
+</a>
+</li>
+<!-- Settings -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+</li>
+</ul>
+<!-- Storage CTA -->
+<div class="mt-auto mb-4 px-3">
+<div class="bg-surface-panel rounded-lg p-3 text-xs">
+<div class="flex justify-between items-center mb-1.5">
+<span class="font-medium text-ink-dark">Storage: 80% Full</span>
+</div>
+<div class="w-full bg-border-light h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[80%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Footer Links -->
+<ul class="space-y-1 border-t border-border-light pt-4 px-2">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span class="font-medium text-sm">Help</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#444] dark:text-[#666] hover:bg-[#f2f4ef] dark:hover:bg-white/5 transition-colors scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[18px]">contact_support</span>
+<span class="font-medium text-sm">Support</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- ==================== MAIN CANVAS & TOP APP BAR ==================== -->
+<div class="flex-1 flex flex-col md:ml-[248px] relative w-full bg-surface-bg h-screen">
+<!-- TOP APP BAR (Shared Component) -->
+<header class="h-16 flex justify-between items-center px-8 w-full bg-white/80 backdrop-blur-md dark:bg-surface/80 border-b border-[#222b27]/10 shadow-sm sticky top-0 z-40">
+<!-- Left: Search (from JSON config) -->
+<div class="flex-1 flex items-center">
+<div class="relative w-full max-w-md hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-1.5 bg-surface-panel border-transparent focus:border-primary focus:ring-1 focus:ring-primary rounded-full text-sm transition-all outline-none" placeholder="Search surveys, contacts..." type="text"/>
+</div>
+</div>
+<!-- Right: Actions & Profile -->
+<div class="flex items-center gap-4">
+<button class="text-[#444] hover:text-[#0d9488] transition-all p-2 rounded-full hover:bg-primary-light">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-md font-medium text-sm shadow-sm hover:shadow transition-all scale-98 active:scale-95 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New survey
+                </button>
+<div class="h-8 w-8 rounded-full bg-border-light overflow-hidden border border-border-light ml-2 cursor-pointer">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ1vSG64msdgrOIVFm4-QdGXe6yPTsyU4bdGoSq1ZDSi5WXrr4_xywavA7lzXtOFiefm7Ox7AJIvojFTibPLSGDFVj5bpUghT93wC-oaPMOgusoAzjvhzBi8aXFIcNzTVibLz39o7jOPCPx8uCR1fcBSTon7_zmy18QUbj9QXXomMHDqj0rg8ljCwk3kjoEHgTPqiGFIm9WMZMwrk39qcCeMYW23qj9sO7h-qbyK_amO1Td8FurXoviW4FhFxH8jN7IGAuqcgPr-qc"/>
+</div>
+</div>
+</header>
+<!-- MAIN SCROLLABLE CONTENT -->
+<main class="flex-1 overflow-y-auto p-6 md:p-8">
+<div class="max-w-6xl mx-auto pb-24">
+<!-- HEADER SECTION -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 fade-in-up">
+<!-- Title & Status -->
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h2 class="text-3xl font-headline font-bold text-ink-dark tracking-tight">Customer Satisfaction Q4</h2>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-semibold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+                                Live
+                            </span>
+</div>
+<!-- Controls / Filters -->
+<div class="flex flex-wrap items-center gap-3 mt-4">
+<button class="flex items-center gap-2 bg-white border border-border-light rounded-md px-3 py-1.5 text-sm font-medium hover:border-ink-muted transition-colors">
+<span class="material-symbols-outlined text-[18px] text-ink-muted">calendar_today</span>
+                                Last 30 days
+                                <span class="material-symbols-outlined text-[18px] text-ink-muted ml-1">expand_more</span>
+</button>
+<button class="flex items-center gap-2 bg-white border border-border-light rounded-md px-3 py-1.5 text-sm font-medium hover:border-ink-muted transition-colors">
+<span class="material-symbols-outlined text-[18px] text-ink-muted">filter_list</span>
+                                Segment: All Users
+                                <span class="material-symbols-outlined text-[18px] text-ink-muted ml-1">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Header Actions -->
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm border border-border-light bg-white hover:bg-surface-panel transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                            Share
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm border border-border-light bg-white hover:bg-surface-panel transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                            Export CSV
+                        </button>
+<button class="flex items-center gap-2 px-5 py-2 rounded-md font-medium text-sm bg-primary text-white hover:bg-primary-hover shadow-sm hover:shadow transition-all">
+                            View responses
+                        </button>
+</div>
+</div>
+<!-- SUB-TABS -->
+<div class="border-b border-border-light mb-8 fade-in-up delay-100">
+<nav class="-mb-px flex space-x-8">
+<a class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm border-primary text-primary" href="#">Summary</a>
+<a class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm border-transparent text-ink-muted hover:text-ink-dark hover:border-border-light transition-colors" href="#">Responses <span class="ml-1 bg-surface-panel text-ink-dark py-0.5 px-2 rounded-full text-xs">2.4k</span></a>
+<a class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm border-transparent text-ink-muted hover:text-ink-dark hover:border-border-light transition-colors" href="#">Insights</a>
+</nav>
+</div>
+<!-- ==================== SUMMARY CONTENT ==================== -->
+<!-- 1. KPI STRIP (Bento style grid) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 fade-in-up delay-200">
+<!-- KPI: Total Responses -->
+<div class="bg-white rounded-lg p-5 shadow-soft hover:shadow-hover transition-shadow relative overflow-hidden group">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-sm font-medium text-ink-muted font-label">Total Responses</h3>
+<span class="material-symbols-outlined text-ink-muted/50 text-[20px]">forum</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-headline font-bold text-ink-dark">2,450</span>
+<span class="inline-flex items-center text-sm font-medium text-success bg-success/10 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> 12%
+                            </span>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-9xl">forum</span>
+</div>
+</div>
+<!-- KPI: Completion Rate -->
+<div class="bg-white rounded-lg p-5 shadow-soft hover:shadow-hover transition-shadow flex items-center justify-between">
+<div>
+<h3 class="text-sm font-medium text-ink-muted font-label mb-2">Completion Rate</h3>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-headline font-bold text-ink-dark">68%</span>
+</div>
+</div>
+<!-- Circular Progress -->
+<div class="relative w-14 h-14">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(34,43,39,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#0d9488" stroke-dasharray="68, 100" stroke-width="3"></path>
+</svg>
+</div>
+</div>
+<!-- KPI: Avg Time -->
+<div class="bg-white rounded-lg p-5 shadow-soft hover:shadow-hover transition-shadow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-sm font-medium text-ink-muted font-label">Avg. Time to Complete</h3>
+<span class="material-symbols-outlined text-ink-muted/50 text-[20px]">timer</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-headline font-bold text-ink-dark">2m 45s</span>
+<span class="text-sm text-ink-muted">Median</span>
+</div>
+</div>
+<!-- KPI: Drop-off Rate -->
+<div class="bg-white rounded-lg p-5 shadow-soft hover:shadow-hover transition-shadow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-sm font-medium text-ink-muted font-label">Drop-off Rate</h3>
+<span class="material-symbols-outlined text-ink-muted/50 text-[20px]">trending_down</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-headline font-bold text-ink-dark">12%</span>
+<span class="inline-flex items-center text-sm font-medium text-[#e61818] bg-[#e61818]/10 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> 3%
+                            </span>
+</div>
+</div>
+</div>
+<!-- 2. MAIN CHART: Area Chart -->
+<div class="bg-white rounded-xl shadow-soft hover:shadow-hover transition-shadow mb-8 p-6 fade-in-up delay-300">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline font-bold text-lg text-ink-dark">Responses over time</h3>
+<button class="text-ink-muted hover:text-ink-dark">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<!-- Faux Chart implementation with CSS -->
+<div class="relative h-64 w-full flex items-end pt-4">
+<!-- Gridlines -->
+<div class="absolute inset-0 flex flex-col justify-between border-l border-b border-border-light z-0">
+<div class="w-full border-t border-border-light/50 h-0"></div>
+<div class="w-full border-t border-border-light/50 h-0"></div>
+<div class="w-full border-t border-border-light/50 h-0"></div>
+<div class="w-full border-t border-border-light/50 h-0"></div>
+</div>
+<!-- Y-Axis Labels -->
+<div class="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-xs text-ink-muted py-2">
+<span>100</span>
+<span>75</span>
+<span>50</span>
+<span>25</span>
+<span>0</span>
+</div>
+<!-- X-Axis Labels -->
+<div class="absolute -bottom-6 left-0 right-0 flex justify-between text-xs text-ink-muted">
+<span>Nov 1</span>
+<span>Nov 8</span>
+<span>Nov 15</span>
+<span>Nov 22</span>
+<span>Nov 29</span>
+</div>
+<!-- SVG Area Chart Graphic -->
+<div class="relative w-full h-full z-10">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 200">
+<defs>
+<lineargradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0d9488" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#0d9488" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Fill Area -->
+<path d="M0,200 L0,150 C100,140 200,80 300,100 C400,120 500,40 600,60 C700,80 800,20 900,40 C950,50 1000,30 1000,30 L1000,200 Z" fill="url(#areaGradient)"></path>
+<!-- Line path -->
+<path d="M0,150 C100,140 200,80 300,100 C400,120 500,40 600,60 C700,80 800,20 900,40 C950,50 1000,30 1000,30" fill="none" stroke="#0d9488" stroke-width="3"></path>
+<!-- Data Points (Hover targets) -->
+<circle class="hover:r-6 cursor-pointer transition-all" cx="300" cy="100" fill="white" r="4" stroke="#0d9488" stroke-width="2"></circle>
+<circle class="hover:r-6 cursor-pointer transition-all" cx="600" cy="60" fill="white" r="4" stroke="#0d9488" stroke-width="2"></circle>
+<circle class="hover:r-6 cursor-pointer transition-all" cx="900" cy="40" fill="white" r="4" stroke="#0d9488" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+</div>
+<!-- 3. QUESTION RESULTS GRID (Bento layout) -->
+<h3 class="font-headline font-bold text-xl text-ink-dark mb-4 fade-in-up delay-300">Question Results</h3>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in-up delay-300">
+<!-- Q1: NPS Question -->
+<div class="bg-white rounded-xl p-6 shadow-soft hover:shadow-hover transition-shadow flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="text-xs font-semibold text-ink-muted uppercase tracking-wider">Q1 • Net Promoter Score</span>
+<h4 class="font-headline font-bold text-lg text-ink-dark mt-1">How likely are you to recommend us?</h4>
+<p class="text-sm text-ink-muted mt-1">(238 responses)</p>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex items-center gap-4 mb-6">
+<div class="text-5xl font-headline font-bold text-ink-dark">+42</div>
+<div class="bg-surface-panel text-ink-dark text-xs px-2 py-1 rounded font-medium">Excellent</div>
+</div>
+<!-- NPS Segmented Bar -->
+<div>
+<div class="flex w-full h-4 rounded-full overflow-hidden mb-2">
+<div class="bg-[#e61818]/80 h-full" style="width: 15%;"></div> <!-- Detractors -->
+<div class="bg-[#f0b12b]/80 h-full" style="width: 28%;"></div> <!-- Passives -->
+<div class="bg-success h-full" style="width: 57%;"></div> <!-- Promoters -->
+</div>
+<div class="flex justify-between text-xs font-medium text-ink-muted">
+<span class="text-[#e61818]">15% Detractors</span>
+<span class="text-[#f0b12b]">28% Passives</span>
+<span class="text-success">57% Promoters</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Q2: Single-select Bar Chart -->
+<div class="bg-white rounded-xl p-6 shadow-soft hover:shadow-hover transition-shadow">
+<div class="mb-6">
+<span class="text-xs font-semibold text-ink-muted uppercase tracking-wider">Q2 • Single Choice</span>
+<h4 class="font-headline font-bold text-lg text-ink-dark mt-1">Primary reason for using our product?</h4>
+<p class="text-sm text-ink-muted mt-1">(238 responses)</p>
+</div>
+<div class="space-y-4">
+<!-- Bar Item 1 -->
+<div>
+<div class="flex justify-between text-sm font-medium mb-1">
+<span class="text-ink-dark">Ease of use</span>
+<span class="text-ink-muted">45% <span class="text-xs font-normal ml-1">(107)</span></span>
+</div>
+<div class="w-full bg-border-light h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 45%;"></div>
+</div>
+</div>
+<!-- Bar Item 2 -->
+<div>
+<div class="flex justify-between text-sm font-medium mb-1">
+<span class="text-ink-dark">Features &amp; Integrations</span>
+<span class="text-ink-muted">32% <span class="text-xs font-normal ml-1">(76)</span></span>
+</div>
+<div class="w-full bg-border-light h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full opacity-80" style="width: 32%;"></div>
+</div>
+</div>
+<!-- Bar Item 3 -->
+<div>
+<div class="flex justify-between text-sm font-medium mb-1">
+<span class="text-ink-dark">Pricing</span>
+<span class="text-ink-muted">15% <span class="text-xs font-normal ml-1">(36)</span></span>
+</div>
+<div class="w-full bg-border-light h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full opacity-60" style="width: 15%;"></div>
+</div>
+</div>
+<!-- Bar Item 4 -->
+<div>
+<div class="flex justify-between text-sm font-medium mb-1">
+<span class="text-ink-dark">Other</span>
+<span class="text-ink-muted">8% <span class="text-xs font-normal ml-1">(19)</span></span>
+</div>
+<div class="w-full bg-border-light h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full opacity-40" style="width: 8%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Q3: Star Rating Histogram -->
+<div class="bg-white rounded-xl p-6 shadow-soft hover:shadow-hover transition-shadow">
+<div class="mb-6">
+<span class="text-xs font-semibold text-ink-muted uppercase tracking-wider">Q3 • Star Rating</span>
+<h4 class="font-headline font-bold text-lg text-ink-dark mt-1">Rate the onboarding experience</h4>
+<p class="text-sm text-ink-muted mt-1">(238 responses)</p>
+</div>
+<div class="flex items-center gap-8">
+<!-- Big Avg -->
+<div class="text-center flex-shrink-0">
+<div class="text-5xl font-headline font-bold text-ink-dark mb-1">4.2</div>
+<div class="flex text-[#f0b12b]">
+<span class="material-symbols-outlined icon-fill">star</span>
+<span class="material-symbols-outlined icon-fill">star</span>
+<span class="material-symbols-outlined icon-fill">star</span>
+<span class="material-symbols-outlined icon-fill">star</span>
+<span class="material-symbols-outlined">star_half</span>
+</div>
+</div>
+<!-- Histogram -->
+<div class="flex-1 space-y-2">
+<div class="flex items-center gap-2 text-xs">
+<span class="w-3 text-right">5</span>
+<span class="material-symbols-outlined text-[14px] text-ink-muted">star</span>
+<div class="flex-1 bg-border-light h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#f0b12b] h-full rounded-full" style="width: 60%;"></div>
+</div>
+<span class="w-8 text-right text-ink-muted">142</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="w-3 text-right">4</span>
+<span class="material-symbols-outlined text-[14px] text-ink-muted">star</span>
+<div class="flex-1 bg-border-light h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#f0b12b] h-full rounded-full" style="width: 25%;"></div>
+</div>
+<span class="w-8 text-right text-ink-muted">60</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="w-3 text-right">3</span>
+<span class="material-symbols-outlined text-[14px] text-ink-muted">star</span>
+<div class="flex-1 bg-border-light h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#f0b12b] h-full rounded-full" style="width: 10%;"></div>
+</div>
+<span class="w-8 text-right text-ink-muted">24</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="w-3 text-right">2</span>
+<span class="material-symbols-outlined text-[14px] text-ink-muted">star</span>
+<div class="flex-1 bg-border-light h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#f0b12b] h-full rounded-full" style="width: 3%;"></div>
+</div>
+<span class="w-8 text-right text-ink-muted">8</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="w-3 text-right">1</span>
+<span class="material-symbols-outlined text-[14px] text-ink-muted">star</span>
+<div class="flex-1 bg-border-light h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#f0b12b] h-full rounded-full" style="width: 2%;"></div>
+</div>
+<span class="w-8 text-right text-ink-muted">4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Q4: Open Text Responses -->
+<div class="bg-white rounded-xl p-6 shadow-soft hover:shadow-hover transition-shadow flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-xs font-semibold text-ink-muted uppercase tracking-wider">Q4 • Open Text</span>
+<h4 class="font-headline font-bold text-lg text-ink-dark mt-1">What could we improve?</h4>
+<p class="text-sm text-ink-muted mt-1">(240 responses)</p>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div class="bg-surface-panel rounded-lg p-3 text-sm italic text-ink-dark border-l-4 border-primary">
+                                "The dashboard is great, but I'd love more export options for the reports..."
+                            </div>
+<div class="bg-surface-panel rounded-lg p-3 text-sm italic text-ink-dark border-l-4 border-secondary">
+                                "Sometimes the load times are a bit slow on mobile, otherwise perfect."
+                            </div>
+<div class="bg-surface-panel rounded-lg p-3 text-sm italic text-ink-dark border-l-4 border-success">
+                                "It would be amazing to have a dark mode option."
+                            </div>
+</div>
+<div class="mt-4 pt-4 border-t border-border-light text-center">
+<a class="text-primary font-medium text-sm hover:text-primary-hover flex items-center justify-center gap-1 transition-colors" href="#">
+                                View all 240 responses
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

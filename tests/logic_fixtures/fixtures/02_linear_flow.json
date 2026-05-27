@@ -1,0 +1,81 @@
+[
+  {
+    "name": "linear — q1 -> q2 (no logic)",
+    "description": "Three questions, no logic. After q1, linear next is q2.",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Name?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "Email?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "Comments?" }, "config": { "inputType": "long" }, "logic": [] }
+      ],
+      "endings": [{ "id": "thanks", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "Ada" },
+    "currentQuestionId": "q1",
+    "expected_next": { "type": "question", "id": "q2" }
+  },
+
+  {
+    "name": "linear — q2 -> q3 (no logic)",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Name?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "Email?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "Comments?" }, "config": { "inputType": "long" }, "logic": [] }
+      ],
+      "endings": [{ "id": "thanks", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "Ada", "q2": "ada@x.io" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "question", "id": "q3" }
+  },
+
+  {
+    "name": "linear — last question falls off the end -> first ending",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Name?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "Email?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q3", "type": "openText", "headline": { "default": "Comments?" }, "config": { "inputType": "long" }, "logic": [] }
+      ],
+      "endings": [{ "id": "thanks", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": { "q1": "Ada", "q2": "ada@x.io", "q3": "Great" },
+    "currentQuestionId": "q3",
+    "expected_next": { "type": "ending", "id": "thanks" }
+  },
+
+  {
+    "name": "linear — last question, NO endings defined -> end-of-survey",
+    "description": "Frozen resolution rule: fall off the end with no endings -> {type:end} (no id).",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Name?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "Email?" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": []
+    },
+    "answers": { "q1": "Ada", "q2": "ada@x.io" },
+    "currentQuestionId": "q2",
+    "expected_next": { "type": "end" }
+  },
+
+  {
+    "name": "linear — start with no answers returns first question",
+    "survey": {
+      "languages": [{ "code": "en", "label": "English", "default": true }],
+      "questions": [
+        { "id": "q1", "type": "openText", "headline": { "default": "Name?" }, "config": { "inputType": "short" }, "logic": [] },
+        { "id": "q2", "type": "openText", "headline": { "default": "Email?" }, "config": { "inputType": "short" }, "logic": [] }
+      ],
+      "endings": [{ "id": "thanks", "type": "endScreen", "headline": { "default": "Done" } }]
+    },
+    "answers": {},
+    "currentQuestionId": null,
+    "expected_next": { "type": "question", "id": "q1" }
+  }
+]

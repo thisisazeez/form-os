@@ -1,0 +1,12 @@
+{% extends "accounts/_auth_base.html" %}
+{% block title %}Access denied — OpenSurvey{% endblock %}
+{% block card_title %}No access{% endblock %}
+
+{% comment %}Rebranded to OpenSurvey tokens; centered _auth_base card. `org` comes from the
+   members view (rendered with status 403). Semantic red-* for the denial message.{% endcomment %}
+{% block card_body %}
+  <div class="flex items-start gap-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+    <span class="material-symbols-outlined text-[20px] text-red-600">block</span>
+    <p>You don't have permission to manage members of <strong>{{ org.name }}</strong>.</p>
+  </div>
+{% endblock %}

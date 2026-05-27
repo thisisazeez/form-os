@@ -1,0 +1,72 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Global search results. `/<org_slug>/search?q=` — apps.common.views.search_page. Lists matching
+  surveys (by name, current-workspace scoped) and contacts (by attribute value, readable-env scoped
+  with PII masking). Context: org, query, surveys (Survey objects), contacts (dicts: id, key, value).
+{% endcomment %}
+
+{% block title %}Search — {{ org.name }}{% endblock %}
+{% block topbar_title %}Search{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Search" subtitle="Find surveys and contacts across this workspace." %}
+
+  <form method="get" action="/{{ org.slug }}/search" class="mt-2">
+    <div class="relative max-w-xl">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted">search</span>
+      <input type="text" name="q" value="{{ query }}" autofocus
+             placeholder="Search surveys, contacts…"
+             class="w-full rounded-full border border-hairline bg-white py-2 pl-9 pr-4 text-sm placeholder-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+    </div>
+  </form>
+
+  {% if query %}
+    <p class="mt-4 text-sm text-muted">Results for <span class="font-medium text-ink">“{{ query }}”</span></p>
+
+    {# Surveys #}
+    <div class="mt-6">
+      <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Surveys ({{ surveys|length }})</h2>
+      {% if surveys %}
+        <div class="overflow-hidden rounded-xl border border-hairline bg-white shadow-sm">
+          <ul class="divide-y divide-hairline">
+            {% for s in surveys %}
+              <li>
+                <a href="/{{ org.slug }}/surveys/{{ s.id }}/edit"
+                   class="flex items-center justify-between px-5 py-3 text-sm transition-colors hover:bg-panel/50">
+                  <span class="font-medium text-ink">{{ s.name }}</span>
+                  <span class="text-xs text-muted">{{ s.status }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-sm text-muted">No matching surveys.</p>
+      {% endif %}
+    </div>
+
+    {# Contacts #}
+    <div class="mt-6">
+      <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Contacts ({{ contacts|length }})</h2>
+      {% if contacts %}
+        <div class="overflow-hidden rounded-xl border border-hairline bg-white shadow-sm">
+          <ul class="divide-y divide-hairline">
+            {% for c in contacts %}
+              <li>
+                <a href="/{{ org.slug }}/contacts/{{ c.id }}"
+                   class="flex items-center justify-between px-5 py-3 text-sm transition-colors hover:bg-panel/50">
+                  <span class="font-medium text-ink">{{ c.value }}</span>
+                  <span class="text-xs text-muted">{{ c.key }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-sm text-muted">No matching contacts.</p>
+      {% endif %}
+    </div>
+  {% else %}
+    {% include "_components/empty_state.html" with icon="search" title="Search your workspace" message="Type a survey name or a contact’s email to get started." %}
+  {% endif %}
+{% endblock %}

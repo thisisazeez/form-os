@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e',
+                        },
+                        secondary: {
+                            DEFAULT: '#3d63dc',
+                        },
+                        tertiary: {
+                            DEFAULT: '#8ac449',
+                        },
+                        ink: {
+                            DEFAULT: '#222b27',
+                            secondary: '#444444',
+                            muted: '#666666',
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef',
+                        },
+                        border: {
+                            DEFAULT: 'rgba(34,43,39,0.10)',
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "card": "12px",
+                        "input": "8px",
+                        "button": "8px"
+                    },
+                    fontFamily: {
+                        "headline": ["Outfit", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(34,43,39,0.08)',
+                        'hover': '0 20px 40px -10px rgba(34,43,39,0.12)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-page font-body text-ink min-h-screen flex items-center justify-center p-4 md:p-8">
+<div class="max-w-6xl w-full grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-24 items-center">
+<!-- Left Side: Login Form -->
+<div class="flex flex-col items-center justify-center w-full max-w-md mx-auto">
+<div class="w-full bg-surface-card rounded-card shadow-soft p-8 md:p-10 border border-border">
+<div class="mb-8 flex justify-center">
+<img alt="OpenSurvey Logo" class="h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uiA0oDC3L4_nhZlJrE4TYtyfxrzvLIAOxPKLKRVaxD_WjYWzmHlSZi1BRW--NBd1W3xnBQlBl17k0YrDgWCVy7ZGEW4cxPTycxO0lTsLUhWDQ60bwI3l3u8OFD45npGV7YEo1tVqD-q6IqIXqsd_3fDl9ghffiSuNIM4jQBtv2Z6eS77oQhtO1W36cPwal3vyNVNnE0601fbZ2uy3lETgRRG5G4_g5Grb8N8Ovd8vPuVNORVJ9h8iJ1PH5i"/>
+</div>
+<div class="text-center mb-8">
+<h1 class="font-headline font-bold text-3xl text-ink mb-2">Welcome back</h1>
+<p class="text-ink-muted text-sm">Please enter your details to sign in.</p>
+</div>
+<form action="#" class="space-y-5" method="POST">
+<!-- Email Field -->
+<div>
+<label class="block text-sm font-medium text-ink-secondary mb-1.5 font-label" for="email">Email</label>
+<input class="block w-full rounded-input border-border bg-surface-page py-2.5 px-3 text-ink shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-colors duration-200 text-sm" id="email" name="email" placeholder="Enter your email" type="email" value="user@example.com"/>
+</div>
+<!-- Password Field with Error -->
+<div>
+<label class="block text-sm font-medium text-ink-secondary mb-1.5 font-label" for="password">Password</label>
+<div class="relative">
+<input class="block w-full rounded-input border-red-300 bg-surface-page py-2.5 px-3 pr-10 text-ink shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-colors duration-200 text-sm" id="password" name="password" placeholder="Enter your password" type="password" value="password123"/>
+<button class="absolute inset-y-0 right-0 flex items-center pr-3 text-ink-muted hover:text-ink transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+<p class="mt-2 text-sm text-red-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">error</span>
+                            Incorrect email or password
+                        </p>
+</div>
+<!-- Actions Row -->
+<div class="flex items-center justify-between mt-4">
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-border text-primary focus:ring-primary cursor-pointer" id="remember-me" name="remember-me" type="checkbox"/>
+<label class="ml-2 block text-sm text-ink-secondary cursor-pointer" for="remember-me">Remember me</label>
+</div>
+<div class="text-sm">
+<a class="font-medium text-secondary hover:text-secondary/80 transition-colors" href="#">Forgot password?</a>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-2">
+<button class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-button shadow-sm text-sm font-semibold text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary active:scale-[0.98] transition-all duration-200" type="submit">
+                            Sign in
+                        </button>
+</div>
+</form>
+<!-- Footer -->
+<div class="mt-8">
+<div class="relative">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-border"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="px-2 bg-surface-card text-ink-muted">or</span>
+</div>
+</div>
+<div class="mt-6 text-center">
+<p class="text-sm text-ink-secondary">
+                            New here? <a class="font-medium text-primary hover:text-primary-hover transition-colors" href="#">Create an account</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Brand Panel (Hidden on Mobile) -->
+<div class="hidden md:flex flex-col justify-center h-full relative rounded-2xl overflow-hidden shadow-hover" style="min-height: 600px;">
+<!-- Gradient Background -->
+<div class="absolute inset-0 bg-gradient-to-br from-[#0d9488] to-[#0f766e] opacity-90 z-0"></div>
+<!-- Content Container -->
+<div class="relative z-10 p-12 text-white h-full flex flex-col justify-center items-start">
+<h2 class="font-headline font-bold text-4xl lg:text-5xl mb-6 leading-tight max-w-md">
+                    Build better surveys, together.
+                </h2>
+<p class="text-white/80 font-body text-lg mb-12 max-w-sm">
+                    Enterprise-grade data collection with a beautiful, modern interface. Self-hosted and secure.
+                </p>
+<!-- Floating Screenshot -->
+<div class="w-full relative mt-auto rounded-xl overflow-hidden shadow-2xl transform translate-x-4 translate-y-4 hover:-translate-y-1 transition-transform duration-500 ease-out border border-white/20">
+<img alt="OpenSurvey Dashboard UI" class="w-full h-auto object-cover rounded-xl scale-105 origin-top-left" src="https://lh3.googleusercontent.com/aida/ADBb0ugdsAQUrapGdE6x8YmHQvNUDQ_SDY6Ar_2lRsVlbnWHkGiqlvnWRSjAlAhFWRoWzFxMnAOgwlIijJFPk_DT6i1478rBoJjzmZqUNdrXtqXOJWaxf57C4d3I3FZIyuyLNWxN5fEgA1O65qoLCNFikqXIFhX4fi8svZgeAqJSqQUieDbGh7zzUpEitHOF1CyGKq1b4U_CUaWsUHfbauH-aYVw_PIZKl4VNI1aUvXdHMmM_BDZV0ePVr9Ej_E1"/>
+<!-- Subtle glass overlay for depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+</div>
+</div>
+<!-- Decorative Elements -->
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white/10 blur-3xl z-0"></div>
+<div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-white/10 blur-3xl z-0"></div>
+</div>
+</div>
+</body></html>

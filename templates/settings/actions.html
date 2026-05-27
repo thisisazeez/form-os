@@ -1,0 +1,178 @@
+{% extends "_layouts/app_shell.html" %}
+{% comment %}
+  Settings → Actions (FEATURE_PARITY WS-11). `/<org_slug>/settings/actions` —
+  apps.actions.views_settings.actions_page. Workspace-scoped RBAC: any member with workspace read
+  can view; workspace write is required to create/edit/delete. Lists the current workspace
+  environment's ActionClasses (the user-action definitions that trigger website/app surveys), and
+  creates / edits / deletes them via form-POST + post-redirect-get (mirrors the Webhooks tab).
+
+  Context: org, section ("actions"), actions, environment, type_choices (value,label pairs),
+  can_write, no_workspace, config_form_field, error.
+{% endcomment %}
+
+{% block title %}Actions — {{ org.name }}{% endblock %}
+{% block nav_settings %}is-active{% endblock %}
+{% block topbar_title %}Actions{% endblock %}
+
+{% block content %}
+  {% include "_components/page_header.html" with title="Actions" subtitle="User actions that trigger your website & app surveys." %}
+
+  <div class="mt-6 max-w-4xl">
+    {% include "settings/_org_subnav.html" with org=org section=section %}
+
+    {% if error %}
+      <div role="alert" class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    {% if no_workspace %}
+      <div class="rounded-xl border border-hairline bg-white p-8 text-center shadow-sm">
+        <span class="material-symbols-outlined text-[32px] text-muted">bolt</span>
+        <p class="mt-2 text-sm text-muted">Create a workspace first — actions are scoped to a workspace environment.</p>
+      </div>
+    {% else %}
+
+      {% if can_write %}
+        {% comment %} create action {% endcomment %}
+        <section class="mb-6 rounded-xl border border-hairline bg-white p-6 shadow-sm">
+          <h2 class="font-display text-lg font-semibold text-ink">Add an action</h2>
+          <p class="mt-1 text-sm text-muted">For the <span class="font-medium text-ink">{{ environment.type }}</span> environment.</p>
+          <form method="post" action="/{{ org.slug }}/settings/actions" class="mt-4 space-y-4" x-data="{ atype: 'code' }">
+            {% csrf_token %}
+            <input type="hidden" name="op" value="create" />
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-ink" for="ac_name">Name</label>
+                <input type="text" name="name" id="ac_name" placeholder="Clicked checkout" required
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-ink" for="ac_type">Type</label>
+                <select name="type" id="ac_type" x-model="atype"
+                  class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                  {% for value, label in type_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="ac_config">
+                <span x-show="atype === 'code'">Track key <span class="font-normal text-muted">(optional — defaults to the name)</span></span>
+                <span x-show="atype === 'pageview'" x-cloak>URL match <span class="font-normal text-muted">(optional)</span></span>
+                <span x-show="atype === 'click'" x-cloak>CSS selector <span class="font-normal text-muted">(optional)</span></span>
+              </label>
+              <input type="text" name="{{ config_form_field }}" id="ac_config"
+                x-bind:placeholder="atype === 'pageview' ? '/pricing' : (atype === 'click' ? '#buy-now' : 'checkout_started')"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-ink" for="ac_desc">Description <span class="font-normal text-muted">(optional)</span></label>
+              <input type="text" name="description" id="ac_desc"
+                class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+            </div>
+            <div class="flex justify-end">
+              <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
+                <span class="material-symbols-outlined text-[18px]">add</span>Add action
+              </button>
+            </div>
+          </form>
+        </section>
+      {% endif %}
+
+      {% comment %} action list {% endcomment %}
+      <section class="rounded-xl border border-hairline bg-white shadow-sm">
+        <div class="border-b border-hairline px-6 py-4">
+          <h2 class="font-display text-lg font-semibold text-ink">Actions</h2>
+        </div>
+        {% if actions %}
+          <ul class="divide-y divide-hairline">
+            {% for ac in actions %}
+              <li class="px-6 py-5">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="truncate text-sm font-semibold text-ink">{{ ac.name }}</span>
+                      <span class="inline-flex items-center rounded-full bg-panel px-2 py-0.5 font-mono text-xs text-muted">{{ ac.type }}</span>
+                    </div>
+                    {% if ac.description %}<p class="mt-1 text-sm text-muted">{{ ac.description }}</p>{% endif %}
+                    {% if ac.config %}
+                      <div class="mt-1.5 flex flex-wrap gap-1.5">
+                        {% for k, v in ac.config.items %}
+                          <code class="rounded-full bg-panel px-2 py-0.5 font-mono text-xs text-muted">{{ k }}: {{ v }}</code>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  {% if can_write %}
+                    <form method="post" action="/{{ org.slug }}/settings/actions" class="shrink-0"
+                          onsubmit="return confirm('Delete this action? Surveys that reference it will no longer be triggered by it.');">
+                      {% csrf_token %}
+                      <input type="hidden" name="op" value="delete" />
+                      <input type="hidden" name="action_id" value="{{ ac.id }}" />
+                      <button type="submit"
+                        class="rounded-lg border border-hairline px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-panel hover:text-red-700">Delete</button>
+                    </form>
+                  {% endif %}
+                </div>
+
+                {% if can_write %}
+                  {% comment %} inline edit (name / type / config / description) {% endcomment %}
+                  <details class="mt-3">
+                    <summary class="cursor-pointer text-xs font-medium text-secondary hover:underline">Edit action</summary>
+                    <form method="post" action="/{{ org.slug }}/settings/actions" class="mt-3 space-y-3 rounded-lg border border-hairline bg-surface p-4"
+                          x-data="{ atype: '{{ ac.type }}' }">
+                      {% csrf_token %}
+                      <input type="hidden" name="op" value="update" />
+                      <input type="hidden" name="action_id" value="{{ ac.id }}" />
+                      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                          <label class="mb-1.5 block text-xs font-medium text-ink">Name</label>
+                          <input type="text" name="name" value="{{ ac.name }}"
+                            class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                        </div>
+                        <div>
+                          <label class="mb-1.5 block text-xs font-medium text-ink">Type</label>
+                          <select name="type" x-model="atype"
+                            class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+                            {% for value, label in type_choices %}
+                              <option value="{{ value }}" {% if value == ac.type %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="mb-1.5 block text-xs font-medium text-ink">
+                          <span x-show="atype === 'code'">Track key</span>
+                          <span x-show="atype === 'pageview'" x-cloak>URL match</span>
+                          <span x-show="atype === 'click'" x-cloak>CSS selector</span>
+                        </label>
+                        <input type="text" name="{{ config_form_field }}"
+                          value="{{ ac.config.key|default:'' }}{{ ac.config.urlMatch|default:'' }}{{ ac.config.cssSelector|default:'' }}"
+                          class="block w-full rounded-lg border border-hairline px-3 py-2 font-mono text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                      </div>
+                      <div>
+                        <label class="mb-1.5 block text-xs font-medium text-ink">Description</label>
+                        <input type="text" name="description" value="{{ ac.description }}"
+                          class="block w-full rounded-lg border border-hairline px-3 py-2 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                      </div>
+                      <div class="flex justify-end">
+                        <button type="submit"
+                          class="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover">Save changes</button>
+                      </div>
+                    </form>
+                  </details>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="px-6 py-10 text-center text-sm text-muted">No actions yet.{% if can_write %} Add one above.{% endif %}</div>
+        {% endif %}
+      </section>
+
+    {% endif %}
+  </div>
+{% endblock %}

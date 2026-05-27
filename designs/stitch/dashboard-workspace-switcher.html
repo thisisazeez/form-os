@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenSurvey Dashboard - Workspace Switcher</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@600;700;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: "#0d9488",
+                            hover: "#0f766e",
+                            subtle: "rgba(230, 73, 24, 0.08)"
+                        },
+                        secondary: "#3d63dc",
+                        tertiary: "#8ac449",
+                        ink: {
+                            heading: "#222b27",
+                            body: "#444444",
+                            muted: "#666666"
+                        },
+                        surface: {
+                            page: "#faf8f7",
+                            panel: "#f2f4ef",
+                            white: "#ffffff"
+                        },
+                        border: "rgba(34, 43, 39, 0.10)"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "8px",
+                        "xl": "12px",
+                        "2xl": "16px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        display: ["Public Sans", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-nav-indicator {
+            position: absolute;
+            left: -16px;
+            width: 4px;
+            height: 20px;
+            background-color: #0d9488;
+            border-radius: 0 4px 4px 0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf8f7;
+            color: #444444;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Public Sans', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SIDEBAR (Fixed, ~260px) -->
+<aside class="w-64 fixed left-0 top-0 h-screen bg-[#faf8f7] border-r border-black/10 flex flex-col z-50 p-4">
+<!-- Org Switcher (Collapsed) -->
+<div class="flex items-center gap-3 p-2 mb-2 cursor-pointer hover:bg-surface-panel rounded-lg transition-colors">
+<div class="w-8 h-8 bg-[#0d9488] rounded-lg flex items-center justify-center text-white font-black text-lg">
+                C
+            </div>
+<div class="flex-1">
+<p class="font-headline font-bold text-ink-heading text-sm">Acme Inc</p>
+</div>
+<span class="material-symbols-outlined text-ink-muted text-sm" data-icon="unfold_more">unfold_more</span>
+</div>
+<!-- Workspace Switcher (OPEN STATE) -->
+<div class="relative">
+<button class="w-full flex items-center gap-3 p-2 mb-1 bg-surface-panel rounded-lg group transition-all">
+<span class="material-symbols-outlined text-ink-body" data-icon="layers">layers</span>
+<div class="flex-1 text-left">
+<p class="font-label font-medium text-ink-heading text-[13px]">Customer Experience</p>
+</div>
+<span class="px-1.5 py-0.5 bg-[#0d9488]/10 text-[#0d9488] text-[10px] font-bold rounded uppercase tracking-wider">Production</span>
+<span class="material-symbols-outlined text-ink-muted text-sm rotate-180 transition-transform" data-icon="expand_more">expand_more</span>
+</button>
+<!-- DROPDOWN PANEL -->
+<div class="absolute top-full left-0 w-[280px] mt-1 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-black/5 p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-[60]">
+<div class="px-3 py-2">
+<p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-3">Environment</p>
+<div class="flex p-1 bg-surface-panel rounded-lg">
+<button class="flex-1 py-1.5 text-xs font-bold rounded-md bg-white shadow-sm text-[#0d9488]">Production</button>
+<button class="flex-1 py-1.5 text-xs font-medium rounded-md text-ink-muted hover:text-ink-heading transition-colors">Development</button>
+</div>
+</div>
+<div class="my-2 border-t border-black/5"></div>
+<div class="px-3 py-1">
+<p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-2">Switch workspace</p>
+</div>
+<div class="space-y-1">
+<!-- Current Workspace -->
+<div class="relative flex items-center gap-3 p-2 bg-[#0d9488]/5 rounded-lg border-l-[3px] border-[#0d9488]">
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold text-ink-heading truncate">Customer Experience</p>
+</div>
+<span class="px-1.5 py-0.5 bg-[#0d9488]/10 text-[#0d9488] text-[9px] font-bold rounded">Manage</span>
+<span class="material-symbols-outlined text-[#0d9488] text-base" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Other Workspaces -->
+<div class="flex items-center gap-3 p-2 hover:bg-surface-panel rounded-lg cursor-pointer group">
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-ink-body group-hover:text-ink-heading truncate">Product Research</p>
+</div>
+<span class="px-1.5 py-0.5 bg-black/5 text-ink-muted text-[9px] font-bold rounded group-hover:bg-black/10 transition-colors">Write</span>
+</div>
+<div class="flex items-center gap-3 p-2 bg-surface-panel rounded-lg cursor-pointer group">
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-ink-body group-hover:text-ink-heading truncate">Brand Tracking</p>
+</div>
+<span class="px-1.5 py-0.5 bg-black/5 text-ink-muted text-[9px] font-bold rounded group-hover:bg-black/10">Read</span>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-surface-panel rounded-lg cursor-pointer group">
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-ink-body group-hover:text-ink-heading truncate">Employee Surveys</p>
+</div>
+<span class="px-1.5 py-0.5 bg-black/5 text-ink-muted text-[9px] font-bold rounded group-hover:bg-black/10">Manage</span>
+</div>
+</div>
+<div class="my-2 border-t border-black/5"></div>
+<div class="space-y-1">
+<button class="w-full flex items-center gap-3 p-2 hover:bg-surface-panel rounded-lg text-ink-body hover:text-[#0d9488] transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+<span class="text-sm font-medium">New workspace</span>
+</button>
+<button class="w-full flex items-center gap-3 p-2 hover:bg-surface-panel rounded-lg text-ink-body hover:text-ink-heading transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Workspace settings</span>
+</button>
+</div>
+</div>
+</div>
+<!-- NAV LINKS -->
+<nav class="mt-6 flex-1 space-y-1">
+<a class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-panel text-[#0d9488] font-bold group" href="#">
+<div class="active-nav-indicator"></div>
+<span class="material-symbols-outlined text-xl" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[14px]">Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-body hover:text-[#0d9488] hover:bg-surface-panel transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-ink-muted group-hover:text-[#0d9488]" data-icon="description">description</span>
+<span class="text-[14px]">Surveys</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-body hover:text-[#0d9488] hover:bg-surface-panel transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-ink-muted group-hover:text-[#0d9488]" data-icon="group">group</span>
+<span class="text-[14px]">Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-body hover:text-[#0d9488] hover:bg-surface-panel transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-ink-muted group-hover:text-[#0d9488]" data-icon="segment">segment</span>
+<span class="text-[14px]">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-body hover:text-[#0d9488] hover:bg-surface-panel transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-ink-muted group-hover:text-[#0d9488]" data-icon="analytics">analytics</span>
+<span class="text-[14px]">Results</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-body hover:text-[#0d9488] hover:bg-surface-panel transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-ink-muted group-hover:text-[#0d9488]" data-icon="groups">groups</span>
+<span class="text-[14px]">Team</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-body hover:text-[#0d9488] hover:bg-surface-panel transition-all group" href="#">
+<span class="material-symbols-outlined text-xl text-ink-muted group-hover:text-[#0d9488]" data-icon="settings">settings</span>
+<span class="text-[14px]">Settings</span>
+</a>
+</nav>
+<!-- FOOTER -->
+<div class="mt-auto pt-4 space-y-4">
+<!-- Usage Card -->
+<div class="bg-surface-panel rounded-xl p-3 border border-black/5">
+<div class="flex justify-between text-[11px] font-bold text-ink-muted uppercase mb-2">
+<span>Usage</span>
+<span>75%</span>
+</div>
+<div class="h-1.5 w-full bg-black/5 rounded-full overflow-hidden">
+<div class="h-full bg-[#0d9488] rounded-full" style="width: 75%"></div>
+</div>
+<p class="mt-2 text-[10px] text-ink-muted">3,750 / 5,000 responses</p>
+</div>
+<!-- User -->
+<div class="flex items-center gap-3 p-2 hover:bg-surface-panel rounded-lg cursor-pointer transition-colors">
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-black/10 object-cover" data-alt="A professional, high-quality studio portrait of a young male professional named Mohit Sharma, with a friendly expression and clean-cut appearance. The background is a soft, neutral office gradient with warm morning light. The image style is polished, modern, and high-end, fitting an enterprise dashboard environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDe_LC7l0GRBbxq2ExRVzACqdBQopClCNfsIVlnjjxsu-avrLDyTv0BJ5OX4dq5ZQUp_IEJY6xY4-lIxm9OHFyDhnLeLMX6vJnlEltIMrRMGpKPP8Qb1-geRsVmZmecSXxv2rdf8go1SJI3O44ZcKEn7j_Ocj7dWa697ZBdUM_tc7zX2y51wkJbeGFzv0mGXzvMb6sUk5NCYMulaoxWtrS88dS4577hJYWw7WXHhfnrt6LIDHZr81CwhEbMB-oeAxKX-ATRq2a4kebr"/>
+<div class="flex-1 min-w-0">
+<p class="text-[13px] font-bold text-ink-heading truncate">Mohit Sharma</p>
+<p class="text-[11px] text-ink-muted truncate">Admin</p>
+</div>
+<span class="material-symbols-outlined text-ink-muted text-sm" data-icon="more_vert">more_vert</span>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT AREA -->
+<main class="flex-1 ml-64 min-h-screen relative">
+<!-- Dimming Overlay (because workspace switcher is open) -->
+<div class="absolute inset-0 bg-black/5 pointer-events-none z-40 backdrop-blur-[1px]"></div>
+<!-- TOP BAR -->
+<header class="h-16 flex justify-between items-center px-8 bg-surface-page/80 backdrop-blur-md sticky top-0 z-30">
+<h1 class="font-headline font-semibold text-xl text-ink-heading">Dashboard</h1>
+<div class="flex items-center gap-4">
+<button class="p-2 text-ink-muted hover:text-[#0d9488] transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-[#0d9488] text-white rounded-lg font-bold text-sm shadow-sm hover:bg-[#0f766e] transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                    New survey
+                </button>
+</div>
+</header>
+<!-- DASHBOARD GRID -->
+<div class="p-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Stat Card 1 -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_12px_rgba(34,43,39,0.06)] border border-black/5">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-lg bg-[#0d9488]/10 flex items-center justify-center text-[#0d9488]">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+</div>
+<span class="text-xs font-bold text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                            +4%
+                        </span>
+</div>
+<p class="text-ink-muted text-sm font-medium mb-1">Active surveys</p>
+<h3 class="text-3xl font-headline font-bold text-ink-heading">12</h3>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_12px_rgba(34,43,39,0.06)] border border-black/5">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+</div>
+<span class="text-xs font-bold text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                            +12%
+                        </span>
+</div>
+<p class="text-ink-muted text-sm font-medium mb-1">Total responses</p>
+<h3 class="text-3xl font-headline font-bold text-ink-heading">2,450</h3>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_12px_rgba(34,43,39,0.06)] border border-black/5">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+</div>
+<span class="text-xs font-bold text-[#0d9488] flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_down">trending_down</span>
+                            -2%
+                        </span>
+</div>
+<p class="text-ink-muted text-sm font-medium mb-1">Avg. completion rate</p>
+<h3 class="text-3xl font-headline font-bold text-ink-heading">68%</h3>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-white p-6 rounded-xl shadow-[0_2px_12px_rgba(34,43,39,0.06)] border border-black/5">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-lg bg-ink-heading/10 flex items-center justify-center text-ink-heading">
+<span class="material-symbols-outlined" data-icon="thumb_up">thumb_up</span>
+</div>
+<span class="text-xs font-bold text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                            +8%
+                        </span>
+</div>
+<p class="text-ink-muted text-sm font-medium mb-1">Avg. NPS Score</p>
+<h3 class="text-3xl font-headline font-bold text-ink-heading">+42</h3>
+</div>
+</div>
+<!-- Bento Content Area (Placeholder for visual depth) -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-white rounded-xl border border-black/5 p-6 h-[400px] flex flex-col items-center justify-center text-center">
+<div class="w-16 h-16 bg-surface-panel rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-3xl text-ink-muted" data-icon="bar_chart">bar_chart</span>
+</div>
+<h4 class="font-headline font-bold text-ink-heading mb-2">Response Trends</h4>
+<p class="text-sm text-ink-muted max-w-sm">Detailed visualization of survey responses and engagement trends will appear here.</p>
+</div>
+<div class="bg-white rounded-xl border border-black/5 p-6 h-[400px]">
+<h4 class="font-headline font-bold text-ink-heading mb-4">Recent Activity</h4>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-tertiary mt-1.5"></div>
+<div>
+<p class="text-xs font-bold text-ink-heading">Brand Awareness Survey</p>
+<p class="text-[11px] text-ink-muted">24 new responses • 5 mins ago</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-secondary mt-1.5"></div>
+<div>
+<p class="text-xs font-bold text-ink-heading">UX Research Segment</p>
+<p class="text-[11px] text-ink-muted">Segment updated • 2 hours ago</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-[#0d9488] mt-1.5"></div>
+<div>
+<p class="text-xs font-bold text-ink-heading">Workspace Created</p>
+<p class="text-[11px] text-ink-muted">Employee Surveys • Yesterday</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interactions and subtle effects
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.98)';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = 'scale(1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simple entrance animation for cards
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('opacity-100', 'translate-y-0');
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.bg-white').forEach(card => {
+            card.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-500');
+            observer.observe(card);
+        });
+    </script>
+</body></html>

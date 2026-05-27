@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Accept Invitation - OpenSurvey</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0d9488',
+                            hover: '#0f766e'
+                        },
+                        secondary: '#3d63dc',
+                        success: '#8ac449',
+                        ink: {
+                            DEFAULT: '#222b27',
+                            secondary: '#444444',
+                            muted: '#666666'
+                        },
+                        surface: {
+                            page: '#faf8f7',
+                            card: '#ffffff',
+                            panel: '#f2f4ef'
+                        },
+                        border: 'rgba(34,43,39,0.10)'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", /* 8px */
+                        "md": "0.5rem",
+                        "lg": "0.75rem", /* 12px */
+                        "xl": "1rem", /* 16px */
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "display": ["Public Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(34,43,39,0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #faf8f7; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0; }
+    </style>
+</head>
+<body class="font-body text-ink antialiased bg-surface-page min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
+<div class="w-full max-w-[480px] bg-surface-card rounded-lg shadow-soft p-8 md:p-12 animate-fade-in-up">
+<!-- Logo -->
+<div class="flex justify-center mb-10">
+<img alt="OpenSurvey Logo" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uiA0oDC3L4_nhZlJrE4TYtyfxrzvLIAOxPKLKRVaxD_WjYWzmHlSZi1BRW--NBd1W3xnBQlBl17k0YrDgWCVy7ZGEW4cxPTycxO0lTsLUhWDQ60bwI3l3u8OFD45npGV7YEo1tVqD-q6IqIXqsd_3fDl9ghffiSuNIM4jQBtv2Z6eS77oQhtO1W36cPwal3vyNVNnE0601fbZ2uy3lETgRRG5G4_g5Grb8N8Ovd8vPuVNORVJ9h8iJ1PH5i"/>
+</div>
+<!-- Invitation Context -->
+<div class="text-center mb-8">
+<div class="w-16 h-16 rounded-full bg-surface-panel flex items-center justify-center mx-auto mb-4 border border-border">
+<span class="font-headline font-bold text-2xl text-ink">AI</span>
+</div>
+<h1 class="font-headline text-2xl font-bold text-ink mb-2">Acme Inc</h1>
+<p class="text-ink-secondary">
+                Sarah from Acme Inc invited you to join as a 
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-panel text-ink-secondary ml-1">
+                    Member
+                </span>
+</p>
+</div>
+<!-- Benefits -->
+<div class="bg-surface-panel rounded-md p-6 mb-8 border border-border">
+<h2 class="font-medium text-ink mb-4 text-sm uppercase tracking-wider">You'll get access to:</h2>
+<ul class="space-y-3">
+<li class="flex items-start">
+<span class="material-symbols-outlined text-success text-xl mr-3" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-ink-secondary text-sm">Shared workspaces</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-success text-xl mr-3" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-ink-secondary text-sm">Survey creation tools</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-success text-xl mr-3" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-ink-secondary text-sm">Live results and analytics</span>
+</li>
+</ul>
+</div>
+<!-- Account Creation Form -->
+<form class="space-y-5 mb-8">
+<div>
+<label class="block text-sm font-medium text-ink mb-1.5" for="fullname">Full name</label>
+<input class="block w-full rounded-md border-border bg-surface-card px-4 py-2.5 text-ink focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors" id="fullname" name="fullname" placeholder="e.g. Jane Doe" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-ink mb-1.5" for="password">Password</label>
+<input class="block w-full rounded-md border-border bg-surface-card px-4 py-2.5 text-ink focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors" id="password" name="password" placeholder="Create a secure password" type="password"/>
+</div>
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98]" type="button">
+                Accept invitation
+            </button>
+</form>
+<!-- Decline Action -->
+<div class="text-center">
+<button class="text-sm font-medium text-ink-muted hover:text-ink transition-colors" type="button">
+                Decline
+            </button>
+</div>
+</div>
+<!-- Footer Note -->
+<div class="mt-8 text-center">
+<p class="text-xs text-ink-muted">Invited to the wrong place? Ignore this.</p>
+</div>
+<style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+    </style>
+</body></html>
