@@ -44,6 +44,9 @@ services:
       DATABASE_URL: postgres://opensurvey:opensurvey@db:5432/opensurvey
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
+      # This container serves on :8000, so the links in outgoing emails (verification,
+      # password reset, invitations) must point there — not the dev default of :8011.
+      PUBLIC_BASE_URL: http://127.0.0.1:8000
     ports:
       - "8000:8000"
     depends_on:
