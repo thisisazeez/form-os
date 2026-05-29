@@ -1,4 +1,22 @@
-# OpenSurvey
+<h1 align="center">OpenSurvey</h1>
+
+<p align="center">
+  <b>The open-source, self-hosted survey platform.</b><br>
+  A Typeform / Formbricks alternative you fully own — visual builder, conditional logic,
+  analytics, contacts &amp; segments, teams &amp; RBAC. No seat limits, no paywalled features.
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-0d9488.svg"></a>
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-3776ab.svg">
+  <img alt="Django 5.1" src="https://img.shields.io/badge/Django-5.1-092e20.svg">
+  <img alt="React 18" src="https://img.shields.io/badge/React-18-149eca.svg">
+  <a href="https://github.com/mohitbadwal/opensurvey/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/mohitbadwal/opensurvey?style=social"></a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/builder-demo.gif" alt="Building a survey in OpenSurvey — add questions and see a live preview" width="860">
+</p>
 
 **OpenSurvey** is a self-hosted, multi-tenant survey & experience-management platform built with
 Django and React. Create surveys with a visual builder, share them as links (or embed them on your
@@ -8,11 +26,9 @@ segments, teams, and roles — all from a single, fully-owned, open-source codeb
 It’s a self-hosted alternative to proprietary survey SaaS: features that are usually paywalled
 (Teams & RBAC, Contacts/Segments, webhooks, API keys, white-label) are first-class here.
 
-## Screenshots
+> 📊 See how it stacks up: [OpenSurvey vs Typeform vs Formbricks](docs/comparison.md).
 
-<p align="center">
-  <img src="docs/screenshots/builder.png" alt="OpenSurvey survey builder — question palette, settings, and a live preview" width="900">
-</p>
+## Screenshots
 
 <table>
   <tr>
@@ -20,12 +36,17 @@ It’s a self-hosted alternative to proprietary survey SaaS: features that are u
     <td width="50%"><img src="docs/screenshots/results.png" alt="Results & analytics"><br><sub><b>Results & analytics</b> — completion funnel, drop-off, and response trends.</sub></td>
   </tr>
   <tr>
+    <td width="50%"><img src="docs/screenshots/builder.png" alt="Survey builder"><br><sub><b>Survey builder</b> — 15+ question types, settings, and a live preview.</sub></td>
     <td width="50%"><img src="docs/screenshots/runtime.png" alt="Public survey runtime"><br><sub><b>Public survey</b> — what respondents see (shareable link or embed).</sub></td>
+  </tr>
+  <tr>
     <td width="50%"><img src="docs/screenshots/contacts.png" alt="Contacts & segments"><br><sub><b>Contacts & segments</b> — typed attributes, dynamic segments, PII masking.</sub></td>
+    <td width="50%"><img src="docs/screenshots/surveys.png" alt="Surveys list"><br><sub><b>Surveys</b> — manage forms, track responses, and filter by status.</sub></td>
   </tr>
 </table>
 
-> Screenshots can be regenerated against any running instance with `scripts/capture_screenshots.mjs`.
+> Screenshots/GIF can be regenerated against any running instance with the scripts in
+> [`scripts/`](scripts/) (`npm run capture` and `npm run gif`).
 
 ## Features
 
