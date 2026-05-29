@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { nextStep, requiredQuestionIds, validateSurvey, type NextStep } from "./evaluator-under-test";
+import type { AnswerMap } from "../../frontend/src/lib/types";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = join(HERE, "fixtures");
@@ -24,7 +25,7 @@ interface FixtureCase {
   name: string;
   description?: string;
   survey: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  answers?: Record<string, unknown>;
+  answers?: AnswerMap;
   currentQuestionId?: string | null;
   expected_next?: NextStep;
   expected_required?: string[];

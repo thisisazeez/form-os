@@ -31,7 +31,7 @@ import json
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django_tenants.utils import schema_context, get_public_schema_name
+from django_tenants.utils import schema_context
 
 # These are the stable identities the harness keys on. Other feature agents can import them.
 ORG_SLUG = "globex"
