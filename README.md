@@ -15,7 +15,13 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/builder-demo.gif" alt="Building a survey in OpenSurvey — add questions and see a live preview" width="860">
+  <img src="docs/screenshots/builder-demo.gif" alt="Building a survey in OpenSurvey — add questions and see a live preview" width="820"><br>
+  <sub><b>Build</b> — add questions from the palette and watch the live preview.</sub>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/runtime-demo.gif" alt="Answering a survey in OpenSurvey — type, rate, and submit" width="640"><br>
+  <sub><b>Answer</b> — what respondents see when they take your survey.</sub>
 </p>
 
 **OpenSurvey** is a self-hosted, multi-tenant survey & experience-management platform built with
