@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder question list (select + reorder + delete).
+// onForm — Builder question list (select + reorder + delete).
 //
 // Shows the ordered questions. Reordering uses up/down arrow buttons (keyboard-
 // accessible, zero new deps — drag-drop is deferred). Selecting a row opens it in

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 
 # =============================================================================
-# OpenSurvey API — FROZEN Wave-0 contract.
+# onForm API — FROZEN Wave-0 contract.
 # Two APIs in one document:
 #   (A) Builder/Admin API   — authenticated (session cookie OR API key); RBAC-gated.
 #   (B) Public Survey API   — unauthenticated or single-use token; RATE-LIMITED.
@@ -19,7 +19,7 @@ openapi: 3.1.0
 # =============================================================================
 
 info:
-  title: OpenSurvey API
+  title: onForm API
   version: "1.0.0-wave0"
   description: |
     Survey/experience-management platform API.
@@ -51,13 +51,13 @@ info:
     write endpoints are **rate-limited** (per IP + per survey) — see the `429` responses
     and `x-rate-limit` hints. Bodies are validated against contracts/survey-schema.json.
   license:
-    name: Proprietary (OpenSurvey)
+    name: Proprietary (onForm)
 
 servers:
   - url: https://{host}
     variables:
       host:
-        default: app.opensurvey.example.com
+        default: app.onform.example.com
 
 tags:
   - name: Auth

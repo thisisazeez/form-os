@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Shared props for question-renderer components.
+// onForm — Shared props for question-renderer components.
 // ============================================================================
 import type { AnswerValue, Question } from "../types";
 

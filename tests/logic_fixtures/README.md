@@ -265,7 +265,7 @@ no fixture changes:
 - **TypeScript** (`run_ts.ts`): imports from `./evaluator-under-test.ts`, a one-line re-export
   shim. Today it re-exports `./reference/evaluator`. Wave 3 **repoints that single shim file** to
   the real package (e.g. `export { nextStep, requiredQuestionIds, validateSurvey } from
-  "@opensurvey/runtime/logic";`) — `run_ts.ts` and the fixtures are untouched. The target module
+  "@onform/runtime/logic";`) — `run_ts.ts` and the fixtures are untouched. The target module
   MUST export `nextStep`, `requiredQuestionIds`, and `validateSurvey`.
 
 This is why the contract is **injectable**: the harness asserts behavior, not a specific

@@ -1,17 +1,17 @@
-# OpenSurvey vs Typeform vs Formbricks
+# onForm vs Typeform vs Formbricks
 
-A quick, honest comparison to help you decide whether OpenSurvey fits your needs. If you want
+A quick, honest comparison to help you decide whether onForm fits your needs. If you want
 **full ownership of your survey data**, **no per-seat pricing**, and **team/RBAC features without an
-enterprise upgrade**, OpenSurvey is built for you. If you want a zero-ops hosted product and don't
+enterprise upgrade**, onForm is built for you. If you want a zero-ops hosted product and don't
 mind a subscription, a SaaS tool may suit you better. We'll be straight about the trade-offs.
 
-> OpenSurvey is young and self-hosted. Typeform is a mature commercial SaaS; Formbricks is an
+> onForm is young and self-hosted. Typeform is a mature commercial SaaS; Formbricks is an
 > established open-source experience-management platform. This table reflects general, publicly
 > known positioning — always check each vendor's current plans for specifics.
 
 ## At a glance
 
-| | **OpenSurvey** | **Typeform** | **Formbricks** |
+| | **onForm** | **Typeform** | **Formbricks** |
 |---|---|---|---|
 | **License** | MIT (fully open source) | Proprietary SaaS | Open-core (some features gated) |
 | **Hosting** | Self-hosted (your infra) | Vendor-hosted only | Self-hosted or cloud |
@@ -28,7 +28,7 @@ mind a subscription, a SaaS tool may suit you better. We'll be straight about th
 | **Multi-tenant** | ✅ schema-per-org | n/a | n/a |
 | **Self-host effort** | You run Postgres + the app | None | You run the stack |
 
-## When OpenSurvey is the right call
+## When onForm is the right call
 
 - You don't want customer/respondent data leaving your infrastructure (compliance, privacy, or principle).
 - Per-seat or per-response pricing doesn't fit how you work.
@@ -42,9 +42,9 @@ mind a subscription, a SaaS tool may suit you better. We'll be straight about th
 - You need a polished managed product today and a subscription is acceptable.
 - You rely on a large library of native integrations/templates a vendor maintains for you.
 
-## Why OpenSurvey exists
+## Why onForm exists
 
 Many survey tools gate the genuinely useful capabilities — team access control, contacts/segments,
-the full API, white-labeling — behind higher paid tiers or an enterprise license. OpenSurvey makes
+the full API, white-labeling — behind higher paid tiers or an enterprise license. onForm makes
 those first-class and free, in a codebase you fully own. See the [README](../README.md) to get
 started in a couple of minutes.

@@ -1,5 +1,5 @@
 """
-OpenSurvey — CI settings.
+onForm — CI settings.
 
 Used by GitHub Actions (`DJANGO_SETTINGS_MODULE=config.settings.ci`, see
 `.github/workflows/ci.yml`). Inherits base and applies test-runner-friendly overrides.

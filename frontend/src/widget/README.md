@@ -1,4 +1,4 @@
-# OpenSurvey embeddable widget
+# onForm embeddable widget
 
 A single, self-contained `<script>` a customer drops on their website/app to show
 **in-product ("app") surveys**. It reads its config from its own `<script>` tag, identifies

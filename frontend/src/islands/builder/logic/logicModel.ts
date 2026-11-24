@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder LOGIC model helpers (pure, no React).
+// onForm — Builder LOGIC model helpers (pure, no React).
 //
 // Immutable transforms over the SHARED Survey definition's per-question logic
 // (../../../lib/types — the FROZEN contracts/survey-schema.json shape). Logic

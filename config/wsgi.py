@@ -1,4 +1,4 @@
-"""WSGI config for OpenSurvey."""
+"""WSGI config for onForm."""
 import os
 
 from django.core.wsgi import get_wsgi_application

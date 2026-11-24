@@ -12,7 +12,7 @@ import "./test-storage"; // install in-memory Web Storage on jsdom globals (side
 
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
-import { OpenSurvey } from "./core";
+import { OnFormWidget } from "./core";
 import type { RenderedSurvey, RenderOptions } from "./render";
 import { WidgetStorage } from "./storage";
 import type { CatalogSurvey, WidgetConfig } from "./types";
@@ -34,14 +34,14 @@ const SURVEY: CatalogSurvey = {
 };
 
 interface Harness {
-  cs: OpenSurvey;
+  cs: OnFormWidget;
   storage: WidgetStorage;
   calls: () => { url: string; method: string; body: unknown }[];
   rendered: string[];
   fetchMock: Mock<[RequestInfo | URL, (RequestInit | undefined)?], Promise<Response>>;
 }
 
-/** Build a OpenSurvey with a routed fetch mock + a render stub. */
+/** Build an OnFormWidget with a routed fetch mock + a render stub. */
 function makeHarness(opts: {
   config?: Partial<WidgetConfig>;
   trackSurveys?: CatalogSurvey[];
@@ -94,7 +94,7 @@ function makeHarness(opts: {
     return { surveyId: ro.surveyId, dismiss: () => {} };
   };
 
-  const cs = new OpenSurvey(config, {
+  const cs = new OnFormWidget(config, {
     fetchImpl: fetchMock as unknown as typeof fetch,
     storage,
     render: renderStub,
@@ -108,7 +108,7 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
-describe("OpenSurvey.init", () => {
+describe("onForm.init", () => {
   it("generates + persists a userId and warms the catalog", async () => {
     const h = makeHarness();
     await h.cs.init();

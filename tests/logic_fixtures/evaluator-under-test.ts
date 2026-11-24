@@ -3,7 +3,7 @@
  *
  * Today it re-exports the REFERENCE evaluator so the shared fixture corpus is
  * green before Wave 3 exists. When Wave 3 ships the real TS evaluator (e.g.
- * `@opensurvey/runtime/logic`), repoint this re-export at that module — the
+ * `@onform/runtime/logic`), repoint this re-export at that module — the
  * fixtures and the runner do NOT change (README §6, "Injecting the real
  * evaluator").
  *

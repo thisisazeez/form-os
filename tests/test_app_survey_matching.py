@@ -1,7 +1,7 @@
 """
 Tests for the PUBLIC widget APIs + the app-survey matching engine (FEATURE_PARITY WS-11).
 
-DISTINCT DB: DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_appsurvey
+DISTINCT DB: DATABASE_URL=postgres://onform:onform@localhost:5432/parity_appsurvey
 
 Covers the canonical matching rules (apps.actions.public_services):
   - track records (upserts) the person + returns the app-surveys triggered by the action.

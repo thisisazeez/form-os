@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Public Survey API client (runtime island).
+// onForm — Public Survey API client (runtime island).
 //
 // Wraps the four public endpoints from contracts/openapi.yaml. Unauthenticated;
 // rate-limited (handles 429). All paths are tenant-prefixed: /api/v1/{org_slug}/...

@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             name="remove_branding",
             field=models.BooleanField(
                 default=False,
-                help_text="When True, the public survey runtime hides the 'Powered by OpenSurvey' footer. Default False (branding shown).",
+                help_text="When True, the public survey runtime hides the 'Powered by onForm' footer. Default False (branding shown).",
             ),
         ),
     ]

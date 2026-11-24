@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder LIVE PREVIEW pane  ★ (the headline feature).
+// onForm — Builder LIVE PREVIEW pane  ★ (the headline feature).
 //
 // Renders the current draft survey EXACTLY as a respondent sees it, by REUSING
 // the shared Wave-3a runtime library directly:

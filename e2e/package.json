@@ -1,8 +1,8 @@
 {
-  "name": "opensurvey-e2e",
+  "name": "onform-e2e",
   "version": "0.1.0",
   "private": true,
-  "description": "Playwright end-to-end test harness for OpenSurvey. Runs against a DEDICATED test instance (DB parity_e2e on port 8099), never the live dev server.",
+  "description": "Playwright end-to-end test harness for onForm. Runs against a DEDICATED test instance (DB parity_e2e on port 8099), never the live dev server.",
   "type": "module",
   "scripts": {
     "e2e": "playwright test",

@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 // ============================================================================
-// OpenSurvey — Vitest config for the React island unit/flow tests.
+// onForm — Vitest config for the React island unit/flow tests.
 //
 // jsdom environment + @testing-library/react. Tests live alongside the code
 // under src/ (*.test.ts / *.test.tsx). Network is mocked per-test (vi.fn on

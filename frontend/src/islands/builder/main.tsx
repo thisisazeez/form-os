@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Survey Builder island (ENTRYPOINT).
+// onForm — Survey Builder island (ENTRYPOINT).
 //
 // The admin authoring UI (behind auth), mounted into the Django admin shell via
 // django-vite. Hydrates from the survey definition injected by the host page,

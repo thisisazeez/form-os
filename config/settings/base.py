@@ -1,5 +1,5 @@
 """
-OpenSurvey — base settings (shared by dev/prod).
+onForm — base settings (shared by dev/prod).
 
 Authoritative references:
   - PLAN.md §3 (architecture), §4 (tenancy), §13 (stack)
@@ -10,6 +10,7 @@ Authoritative references:
 Multi-tenancy is provided by django-tenants: ONE Postgres schema per Organization.
 SHARED_APPS live in the `public` schema; TENANT_APPS are migrated into each org schema.
 """
+import json
 from pathlib import Path
 
 import environ
@@ -19,6 +20,11 @@ import environ
 # ---------------------------------------------------------------------------
 # config/settings/base.py -> config/settings -> config -> <repo root>
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Brand kernel. brand/tokens.json is the ONLY authored source for the product name,
+# wordmark, palette and typography. Django reads it here; the browser bundles get the
+# generated frontend/src/lib/brand.ts (see scripts/generate_brand.py).
+BRAND = json.loads((BASE_DIR / "brand" / "tokens.json").read_text(encoding="utf-8"))
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -122,7 +128,7 @@ PUBLIC_SCHEMA_URLCONF = "config.urls_public"  # public-schema urlconf (no tenant
 # anonymous visitor to a non-existent URL (404). The `?next=` round-trip is honored by
 # login_page → _post_login_redirect.
 LOGIN_URL = "/auth/login"
-LOGIN_REDIRECT_URL = "/"  # `/` sends a signed-in user into their app home (see common.views.landing)
+LOGIN_REDIRECT_URL = "/app"  # `/` is the marketing homepage; `/app` dispatches into the app
 
 # ---------------------------------------------------------------------------
 # Middleware — tenant resolution must come first (before auth/session use the schema)
@@ -167,14 +173,14 @@ ASGI_APPLICATION = "config.asgi.application"
 # ---------------------------------------------------------------------------
 # DATABASE_URL provides connection params; the ENGINE is forced to the django-tenants
 # backend, and the tenant-aware router is registered.
-_db = env.db("DATABASE_URL", default="postgres://opensurvey:opensurvey@localhost:5432/opensurvey")
+_db = env.db("DATABASE_URL", default="postgres://onform:onform@localhost:5432/onform")
 _db["ENGINE"] = "django_tenants.postgresql_backend"
 DATABASES = {"default": _db}
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"  # only affects models WITHOUT an explicit PK;
-# every OpenSurvey model declares a UUID PK (ADR-003), so this default is essentially unused.
+# every onForm model declares a UUID PK (ADR-003), so this default is essentially unused.
 
 # ---------------------------------------------------------------------------
 # Auth (PLAN §9; contracts/models.md §1.1)
@@ -222,7 +228,9 @@ EMAIL_BACKEND = env(
         else "django.core.mail.backends.console.EmailBackend"
     ),
 )
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@example.com")
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL", default=f"no-reply@{BRAND['name'].lower()}.example.com"
+)
 # Absolute base URL for links in emails (verify/reset/invite). apps.accounts.emails falls
 # back to http://<BASE_DOMAIN>:8000 when this is unset.
 PUBLIC_BASE_URL = env("PUBLIC_BASE_URL", default="")

@@ -1,10 +1,17 @@
-{% load static %}
+{% load static brand %}
 <!doctype html>
 <html lang="en" class="h-full">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}OpenSurvey{% endblock %}</title>
+    <title>{% block title %}{% brand_name %}{% endblock %}</title>
+    <link rel="icon" href="{% static 'brand/favicon.svg' %}" type="image/svg+xml" />
+    <meta name="description" content="{% brand_tagline %}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{% brand_name %}" />
+    <meta property="og:description" content="{% brand_tagline %}" />
+    <meta property="og:image" content="{% if request %}{{ request.scheme }}://{{ request.get_host }}{% endif %}{% static 'brand/og.svg' %}" />
+    <meta name="twitter:card" content="summary_large_image" />
 
     {% comment %}
        Frontend base (PLAN §13): Tailwind + HTMX + Alpine for the server-rendered
@@ -12,30 +19,64 @@
        surface renders without a Node build (only the React ISLANDS need Vite).
        A production build would vendor these or compile Tailwind; flagged for Wave 1+.
 
-       Brand: OpenSurvey. The Tailwind config below registers
-       the brand TOKEN classes (brand / ink / muted / surface / panel / hairline + the
-       Poppins/Inter font families) — every admin/auth template uses ONLY these brand-token
-       classes (no raw hex, no default Tailwind color scales). The config <script> MUST come
-       right after the Tailwind CDN and BEFORE HTMX/Alpine so the utilities exist at parse time.
+       Brand: {% brand_name %} (tokens from brand/tokens.json via the `brand` template tags).
+       The Tailwind config below registers the brand TOKEN classes (brand / ink / muted /
+       surface / panel / hairline + the display/body font families) — every admin/auth template
+       uses ONLY these brand-token classes (no raw hex, no default Tailwind color scales). The
+       config <script> MUST come right after the Tailwind CDN and BEFORE HTMX/Alpine so the
+       utilities exist at parse time.
     {% endcomment %}
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = { theme: { extend: { colors: { brand:'#0d9488','brand-hover':'#0f766e', secondary:'#3d63dc', success:'#8ac449', ink:'#222b27', muted:'#666666', surface:'#faf8f7', panel:'#f2f4ef', hairline:'rgba(34,43,39,0.10)' }, fontFamily: { display:['Poppins','sans-serif'], body:['Inter','sans-serif'] } } } }
+      tailwind.config = { theme: { extend: { colors: { brand:'{% brand_token "brand" %}', 'brand-hover':'{% brand_token "brand-hover" %}', secondary:'{% brand_token "secondary" %}', success:'{% brand_token "success" %}', ink:'{% brand_token "ink" %}', muted:'{% brand_token "muted" %}', surface:'{% brand_token "surface" %}', panel:'{% brand_token "panel" %}', hairline:'{% brand_token "hairline" %}' }, fontFamily: { display:[{% brand_font "display" %}], body:[{% brand_font "body" %}] } } } }
     </script>
     <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-    {% comment %}Google Fonts: Poppins (display/headings), Inter (body), Material Symbols (icons).{% endcomment %}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
-      rel="stylesheet"
-    />
+    {% comment %}
+      Self-hosted brand fonts (Phase 3) — Vite copies frontend/public/fonts into dist,
+      which Django serves as STATIC_URL. No Google Fonts runtime fetch or icon-font CDN.
+    {% endcomment %}
+    <link rel="preload" href="{% static 'fonts/plus-jakarta-sans-var.woff2' %}" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="{% static 'fonts/inter-var.woff2' %}" as="font" type="font/woff2" crossorigin />
+    <style>
+      @font-face {
+        font-family: 'Plus Jakarta Sans';
+        src: url('{% static 'fonts/plus-jakarta-sans-var.woff2' %}') format('woff2');
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('{% static 'fonts/inter-var.woff2' %}') format('woff2');
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Material Symbols Outlined';
+        src: url('{% static 'fonts/material-symbols-outlined.woff2' %}') format('woff2');
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+      }
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
 
     {% block head_extra %}{% endblock %}
   </head>
@@ -52,7 +93,7 @@
       <header class="border-b border-hairline bg-white">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <a href="/" class="font-display text-lg font-bold tracking-tight">
-            Open<span class="text-brand">Survey</span>
+            {% brand_wordmark %}
           </a>
           <nav class="text-sm text-muted">{% block nav %}{% endblock %}</nav>
         </div>
@@ -63,7 +104,7 @@
       </main>
 
       <footer class="mx-auto max-w-5xl px-4 py-8 text-xs text-muted">
-        OpenSurvey · survey &amp; experience management.
+        {% brand_name %} · survey &amp; experience management.
       </footer>
     {% endblock %}
 

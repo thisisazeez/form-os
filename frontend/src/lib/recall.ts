@@ -1,10 +1,10 @@
 // ============================================================================
-// OpenSurvey — Recall / piping resolution (shared runtime + builder preview).
+// onForm — Recall / piping resolution (shared runtime + builder preview).
 //
 // Lets an author embed a PRIOR answer (or a survey-level hidden field, or any
 // captured Response.data value) inside a later question's headline/subheader.
 //
-// FROZEN TOKEN FORMAT (mirrors Formbricks' recall idea, single OpenSurvey shape):
+// FROZEN TOKEN FORMAT (mirrors Formbricks' recall idea, single onForm shape):
 //
 //     #recall:<id>/fallback:<text>#
 //

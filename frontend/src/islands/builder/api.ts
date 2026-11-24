@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder Survey API client (authenticated admin CRUD).
+// onForm — Builder Survey API client (authenticated admin CRUD).
 //
 // Wraps the AUTHENTICATED survey endpoints from contracts/openapi.yaml (Surveys
 // tag), tenant-prefixed under /api/v1/{org_slug}/...:

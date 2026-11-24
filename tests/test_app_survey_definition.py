@@ -3,7 +3,7 @@ Tests for the Survey definition carry-through of the website/app fields (FEATURE
 ``survey_type`` / ``triggers`` / ``display_options`` through the authenticated Survey CRUD API +
 the create/replace service + validation.
 
-DISTINCT DB: DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_appsurvey
+DISTINCT DB: DATABASE_URL=postgres://onform:onform@localhost:5432/parity_appsurvey
 
 Covers:
   - default survey_type == "link"; triggers == []; display_options == {} (backward-compatible).

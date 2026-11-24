@@ -40,20 +40,20 @@ describe("resolveConfig", () => {
       script({
         "data-environment-id": "e",
         "data-org-slug": "acme",
-        src: "https://app.opensurvey.com/static/widget/opensurvey-widget.js",
+        src: "https://app.onform.com/static/widget/opensurvey-widget.js",
       }),
     );
-    expect(fromSrc!.apiHost).toBe("https://app.opensurvey.com");
+    expect(fromSrc!.apiHost).toBe("https://app.onform.com");
 
     const override = resolveConfig(
       script({
         "data-environment-id": "e",
         "data-org-slug": "acme",
         src: "https://cdn.example.com/opensurvey-widget.js",
-        "data-api-host": "https://api.opensurvey.com/",
+        "data-api-host": "https://api.onform.com/",
       }),
     );
-    expect(override!.apiHost).toBe("https://api.opensurvey.com");
+    expect(override!.apiHost).toBe("https://api.onform.com");
   });
 
   it("reads the optional pageview / click trigger config", () => {

@@ -62,7 +62,7 @@
           <div>
             <label class="mb-1.5 block text-sm font-medium text-ink" for="ws_slug">Workspace slug</label>
             <div class="flex items-stretch overflow-hidden rounded-lg border border-hairline shadow-sm">
-              <span class="flex items-center bg-panel px-3 text-sm text-muted">opensurvey.com/</span>
+              <span class="flex items-center bg-panel px-3 text-sm text-muted">onform.com/</span>
               <input type="text" id="ws_slug" value="{{ workspace.slug }}" disabled
                 class="block w-full border-0 bg-white px-3 py-2 text-sm text-muted focus:outline-none" />
             </div>
@@ -109,7 +109,7 @@
           </a>
         </div>
 
-        {% comment %}White-label (enterprise): remove the "Powered by OpenSurvey" footer from the
+        {% comment %}White-label (enterprise): remove the "Powered by onForm" footer from the
            PUBLIC runtime. Its own form (hidden `section=branding`) so it saves independently of
            the General rename/recontact form above.{% endcomment %}
         <div class="mt-6 border-t border-hairline pt-6">
@@ -120,8 +120,8 @@
             {% csrf_token %}
             <input type="hidden" name="section" value="branding" />
             <div>
-              <div class="text-sm font-medium text-ink">Remove OpenSurvey branding</div>
-              <p class="mt-1 text-xs text-muted">Hide the &ldquo;Powered by OpenSurvey&rdquo; footer on your published surveys. Enterprise white-label.</p>
+              <div class="text-sm font-medium text-ink">Remove onForm branding</div>
+              <p class="mt-1 text-xs text-muted">Hide the &ldquo;Powered by onForm&rdquo; footer on your published surveys. Enterprise white-label.</p>
             </div>
             <div class="flex shrink-0 items-center gap-3">
               <label class="flex cursor-pointer items-center gap-2 text-sm text-ink">

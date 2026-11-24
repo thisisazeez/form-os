@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — number question (numeric input).
+// onForm — number question (numeric input).
 // Answer shape: number (survey-schema.json #/$defs/answerShapes).
 //
 // The answer is a real number (not a string): an empty field clears to

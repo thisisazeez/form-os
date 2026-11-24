@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder question palette.
+// onForm — Builder question palette.
 //
 // The "add a question" menu: one tile per question type the runtime can render
 // (openText covers short+long via config.inputType). Clicking a tile appends a

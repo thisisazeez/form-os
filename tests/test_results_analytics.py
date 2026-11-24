@@ -20,7 +20,7 @@ Two layers:
     query count regardless of question/response count).
 
 Uses ``transactional_db`` (tenant schema DDL) mirroring tests/test_surveys_admin.py. Run on a
-DISTINCT DB:  DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_analytics
+DISTINCT DB:  DATABASE_URL=postgres://onform:onform@localhost:5432/parity_analytics
 """
 from datetime import timedelta
 

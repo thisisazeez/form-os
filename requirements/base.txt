@@ -1,5 +1,5 @@
 # ============================================================================
-# OpenSurvey — base runtime dependencies (production + dev share these)
+# onForm — base runtime dependencies (production + dev share these)
 # Stack locked by PLAN.md §13 + contracts/decisions.md ADR-005.
 # Pins use compatible-release ranges; lock exact versions in a lockfile if desired.
 # ============================================================================
@@ -40,5 +40,6 @@ segno>=1.6,<2.0
 # Required by Django ImageField (accounts.User.avatar) for image validation.
 Pillow>=10.0,<13.0
 
-# --- WSGI/ASGI server for non-dev runs ---
+# --- WSGI/ASGI server + static files for non-dev runs ---
 gunicorn>=21.2,<23.0
+whitenoise>=6.6,<7.0

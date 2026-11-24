@@ -76,7 +76,7 @@ def build_slack_message(event: str, payload: dict) -> dict:
         {
             "type": "context",
             "elements": [
-                {"type": "mrkdwn", "text": "Sent by *OpenSurvey* integrations"}
+                {"type": "mrkdwn", "text": "Sent by *onForm* integrations"}
             ],
         }
     )

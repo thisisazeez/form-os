@@ -1,8 +1,8 @@
 // ============================================================================
-// playwright.config.ts — OpenSurvey parity E2E harness.
+// playwright.config.ts — onForm parity E2E harness.
 //
 // Boots a DEDICATED Django dev server on port 8099 backed by the `parity_e2e`
-// Postgres DB (NOT the user's live :8011 / opensurvey_demo). A global-setup
+// Postgres DB (NOT the user's live :8011 / onform_demo). A global-setup
 // migrates + seeds the DB, builds the React islands if needed, and mints a
 // password-less Django session persisted as storageState so every spec starts
 // already logged-in as the seeded org owner.

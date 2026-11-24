@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — open text question (short input / long textarea).
+// onForm — open text question (short input / long textarea).
 // Answer shape: string (survey-schema.json #/$defs/answerShapes).
 // ============================================================================
 import { resolveI18n } from "../i18n";

@@ -29,7 +29,7 @@ from .enums import InviteStatus, MembershipStatus, OrgRole
 RESERVED_SLUGS = frozenset(
     {
         "www", "api", "admin", "app", "static", "s", "public", "media",
-        "healthz", "django-admin", "auth", "favicon.ico",
+        "healthz", "django-admin", "auth", "landing", "favicon.ico",
     }
 )
 

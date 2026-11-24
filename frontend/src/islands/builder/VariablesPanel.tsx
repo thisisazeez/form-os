@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder Variables editor (Settings tab section).
+// onForm — Builder Variables editor (Settings tab section).
 //
 // Survey variables (survey-schema.json #/$defs/variable) are author-defined,
 // typed mutable values (number | text) seeded from an `initialValue`. A

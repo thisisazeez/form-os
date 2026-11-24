@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder BLOCKS editor (Blocks tab).
+// onForm — Builder BLOCKS editor (Blocks tab).
 //
 // Question-grouping blocks (survey-schema.json #/$defs/block) are an ADDITIVE,
 // OPTIONAL overlay: the flat `questions[]` array stays the single source of truth

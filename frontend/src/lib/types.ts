@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Shared survey TypeScript types.
+// onForm — Shared survey TypeScript types.
 //
 // Derived from contracts/survey-schema.json (the FROZEN Wave-0 contract; single
 // source of truth for the Survey definition + answer shapes) and the PublicSurvey

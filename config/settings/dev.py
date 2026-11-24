@@ -1,5 +1,5 @@
 """
-OpenSurvey — development settings.
+onForm — development settings.
 
 Imports everything from base and relaxes a few things for local work. Used by
 `manage.py` (default) and pytest (DJANGO_SETTINGS_MODULE in pyproject.toml).

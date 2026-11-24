@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder survey-model helpers (pure, no React).
+// onForm — Builder survey-model helpers (pure, no React).
 //
 // Immutable transforms over the SHARED Survey definition (../../lib/types, the
 // frozen contracts/survey-schema.json shape). Every "add question" factory emits

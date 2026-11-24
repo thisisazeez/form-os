@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey widget — userId persistence + in-session de-dup.
+// onForm widget — userId persistence + in-session de-dup.
 //
 // userId:   stable per-browser id. If the host calls setUserId(id) we use that and
 //           persist it (localStorage). Otherwise we generate + persist an anonymous

@@ -1,0 +1,44 @@
+# Render Blueprint — deploy this file from Render → New → Blueprint.
+# Creates a managed Postgres database plus the Django API web service.
+# Frontend assets are deployed separately to Vercel (see deploy/README.md).
+databases:
+  - name: onform-db
+    databaseName: onform
+    user: onform
+    plan: free  # upgrade to starter+ before using this for real data
+
+services:
+  - type: web
+    name: onform-api
+    runtime: python
+    plan: starter
+    buildCommand: ./deploy/render/api-build.sh
+    startCommand: ./deploy/render/api-start.sh
+    healthCheckPath: /healthz
+    envVars:
+      # Render injects the managed Postgres connection string here automatically.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: onform-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      # Change `onform-api` to your Render service slug if different.
+      - key: ALLOWED_HOSTS
+        value: onform-api.onrender.com
+      - key: BASE_DOMAIN
+        value: onform-api.onrender.com
+      - key: DJANGO_VITE_DEV_MODE
+        value: "false"
+      - key: SECURE_SSL_REDIRECT
+        value: "true"
+      # No Celery worker in this blueprint: run the few email/webhook tasks inline.
+      # Set to false and add a worker service before production use.
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "true"
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.console.EmailBackend

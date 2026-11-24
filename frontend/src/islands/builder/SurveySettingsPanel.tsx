@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder SETTINGS tab editor.
+// onForm — Builder SETTINGS tab editor.
 //
 // Survey-level behavior settings (distinct from SettingsPanel, which edits the
 // name/languages on the Build tab). Surfaces the response/lifecycle controls the

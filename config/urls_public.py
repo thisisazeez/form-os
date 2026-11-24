@@ -18,7 +18,11 @@ from apps.organizations.urls import public_htmx_urlpatterns as org_public_htmx_u
 from apps.organizations.urls import public_urlpatterns as org_public_urlpatterns
 
 urlpatterns = [
-    path("", common_views.landing, name="landing"),
+    # `/` is the public marketing homepage. The old anonymous→login / authed→dashboard
+    # dispatcher still lives at `/app` (name="landing" is kept for existing reverse() callers).
+    path("", common_views.marketing_landing, name="landing"),
+    path("landing", common_views.marketing_landing, name="marketing_landing"),
+    path("app", common_views.landing, name="app_home"),
     path("healthz", common_views.healthz, name="healthz"),
     path("django-admin/", admin.site.urls),
     # ---------------------------------------------------------------------

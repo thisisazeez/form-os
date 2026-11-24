@@ -1,12 +1,12 @@
-# OpenSurvey — Stitch designs (complete set)
+# onForm — Stitch designs (complete set)
 
-UI mockups generated with **Google Stitch**, branded with the **OpenSurvey** visual identity
+UI mockups generated with **Google Stitch**, branded with the **onForm** visual identity
 (teal palette - see ../../STYLE_GUIDE.md). Full per-page prompts (and exact brand tokens) live in
 `../../PROMPTS.md`.
 
 ## Stitch project
-- **Project:** `OpenSurvey` — `projects/14794828435381141346`
-- **Design system:** `assets/18240071344380900389` ("OpenSurvey Brand" — primary `#0d9488`,
+- **Project:** `onForm` — `projects/14794828435381141346`
+- **Design system:** `assets/18240071344380900389` ("onForm Brand" — primary `#0d9488`,
   secondary `#3d63dc`, success `#8ac449`, neutral `#faf8f7`, Outfit + Inter, 8px radius)
 
 Each screen has a `.png` (rendered mockup) + `.html` (generated markup — Tailwind via the
@@ -70,8 +70,8 @@ runtime + endings expanded into several mobile screens.
 - **Duplicates in the Stitch project** (safe to delete in the Stitch UI): the broken builder
   (`e9e03791…`), a second Marketing Landing copy (`0f4dbb38…`), and Stitch's auto-generated helper
   assets — a hero product-shot image (`37cdf8ed…`), an envelope illustration (`f662300c…`), and a
-  `OpenSurvey Logo` SVG (`0c17cc41…`).
-- **Font caveat:** Stitch uses **Outfit** (closest match to OpenSurvey's **Poppins**, which isn't in
+  `onForm Logo` SVG (`0c17cc41…`).
+- **Font caveat:** Stitch uses **Outfit** (closest match to onForm's **Poppins**, which isn't in
   Stitch's font list). Swap to Poppins in the real front-end build.
 - **Animations:** Stitch renders static screens. Intended motion per page is documented in prose in
   `../../PROMPTS.md`.

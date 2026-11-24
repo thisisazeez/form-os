@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder QUOTAS section (Settings tab).
+// onForm — Builder QUOTAS section (Settings tab).
 //
 // Authors response quotas: cap how many FINISHED responses matching a condition are accepted,
 // then route over-quota respondents to an ending (or a built-in 'quota full' screen). Mirrors

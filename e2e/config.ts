@@ -4,7 +4,7 @@
 // All ports, paths, DB URLs and the Python interpreter live here so specs,
 // the global-setup, and playwright.config.ts agree. ISOLATION is the whole point:
 // we run a DEDICATED Django instance on port 8099 backed by the `parity_e2e`
-// Postgres DB — NEVER the user's live :8011 dev server / opensurvey_demo DB.
+// Postgres DB — NEVER the user's live :8011 dev server / onform_demo DB.
 // ============================================================================
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -14,10 +14,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 /** Repo root (the Django project) — e2e/ lives one level below it. */
 export const REPO_ROOT = resolve(__dirname, "..");
 
-/** Dedicated E2E Postgres DB — isolated from the live opensurvey_demo. */
+/** Dedicated E2E Postgres DB — isolated from the live onform_demo. */
 export const DATABASE_URL =
   process.env.E2E_DATABASE_URL ??
-  "postgres://opensurvey:opensurvey@localhost:5432/parity_e2e";
+  "postgres://onform:onform@localhost:5432/parity_e2e";
 
 /** Dedicated E2E port — NOT :8011 (the user's live dev server). */
 export const PORT = Number(process.env.E2E_PORT ?? 8099);
@@ -28,12 +28,10 @@ export const DJANGO_SETTINGS_MODULE =
   process.env.E2E_DJANGO_SETTINGS_MODULE ?? "config.settings.dev";
 
 /**
- * Python interpreter. Defaults to the canonical repo's venv (has every dep + matches
- * the worktree's identical code). Override with E2E_PYTHON for a different env.
+ * Python interpreter. Prefer the caller's active environment so the harness works on
+ * any machine (CI, Linux, macOS). Override with E2E_PYTHON to pin a specific venv.
  */
-export const PYTHON =
-  process.env.E2E_PYTHON ??
-  "/Users/mohitbadwal/PycharmProjects/opensurvey/.venv/bin/python";
+export const PYTHON = process.env.E2E_PYTHON ?? "python3";
 
 export const MANAGE_PY = resolve(REPO_ROOT, "manage.py");
 

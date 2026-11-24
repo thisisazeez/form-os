@@ -1,22 +1,22 @@
-# OpenSurvey — Playwright E2E harness
+# onForm — Playwright E2E harness
 
-End-to-end browser tests for the OpenSurvey Django app, driven by [Playwright](https://playwright.dev).
+End-to-end browser tests for the onForm Django app, driven by [Playwright](https://playwright.dev).
 This frees the team from manual Chrome clicking: specs boot a dedicated app instance, seed it,
 log in without a password, and exercise real user flows (dashboard, survey builder, public runtime).
 
 ## Isolation (read this first)
 
 The harness runs against a **dedicated test instance** — it never touches the live dev server
-on `:8011` / the `opensurvey_demo` database:
+on `:8011` / the `onform_demo` database:
 
 | Concern        | Live dev server        | This harness                 |
 | -------------- | ---------------------- | ---------------------------- |
 | Port           | `8011`                 | **`8099`**                   |
-| Postgres DB    | `opensurvey_demo`      | **`parity_e2e`**             |
+| Postgres DB    | `onform_demo`      | **`parity_e2e`**             |
 | Django settings| `config.settings.dev`  | `config.settings.dev`        |
 
 Playwright's `webServer` boots `manage.py runserver 8099` with
-`DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_e2e` and tears it down
+`DATABASE_URL=postgres://onform:onform@localhost:5432/parity_e2e` and tears it down
 when the run finishes. All values live in `e2e/config.ts` (override via env vars if needed).
 
 ## How to run
@@ -34,9 +34,9 @@ npm run e2e:report               # open the last HTML report
 Prerequisites:
 
 - **Postgres + Redis running** (`docker compose up -d` from the repo root). The `parity_e2e`
-  database must exist — create it once: `createdb -h localhost -U opensurvey parity_e2e`
+  database must exist — create it once: `createdb -h localhost -U onform parity_e2e`
   (or `psql ... -c "CREATE DATABASE parity_e2e"`). `global-setup` runs the migrations + seed.
-- **The repo's Python venv** with deps installed (default `…/opensurvey/.venv`). Override the
+- **The repo's Python venv** with deps installed (default `…/onform/.venv`). Override the
   interpreter with `E2E_PYTHON=/path/to/python`.
 - **The React islands built** in this worktree (`frontend/dist/.vite/manifest.json`). `global-setup`
   builds them automatically if the manifest is missing; otherwise build once with

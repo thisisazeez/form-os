@@ -1,4 +1,4 @@
-"""Reference Python implementation of the OpenSurvey logic evaluator.
+"""Reference Python implementation of the onForm logic evaluator.
 
 ================================================================================
   REFERENCE / STAND-IN IMPLEMENTATION — NOT the production evaluator.

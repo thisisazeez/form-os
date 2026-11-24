@@ -244,7 +244,7 @@ describe("SurveyRuntime — closed / expired / invalid (terminal error states)",
     // Calm, non-alarming headline (NOT a red error) + the brand footer.
     expect(await screen.findByText(/this survey is closed/i)).toBeInTheDocument();
     expect(screen.getByText(/Powered by/i)).toBeInTheDocument();
-    expect(screen.getByText("OpenSurvey")).toBeInTheDocument();
+    expect(screen.getByText("onForm")).toBeInTheDocument();
   });
 
   it("shows the closed card when the survey is gone/closed (410: auto-closed or link consumed)", async () => {
@@ -346,11 +346,11 @@ describe("SurveyRuntime — completed (thank-you) ending", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("shows the 'Powered by OpenSurvey' footer on the thank-you screen", async () => {
+  it("shows the 'Powered by onForm' footer on the thank-you screen", async () => {
     await finishSurvey();
     await screen.findByText(/thanks for your feedback/i);
     expect(screen.getByText(/Powered by/i)).toBeInTheDocument();
-    expect(screen.getByText("OpenSurvey")).toBeInTheDocument();
+    expect(screen.getByText("onForm")).toBeInTheDocument();
   });
 
   it("redirect endings navigate the browser instead of rendering the thank-you card", async () => {
@@ -481,7 +481,7 @@ describe("SurveyRuntime — welcome card HTML is sanitized (XSS boundary)", () =
 });
 
 // =========================================================================== //
-//  White-label — removeBranding hides the "Powered by OpenSurvey" footer      //
+//  White-label — removeBranding hides the "Powered by onForm" footer      //
 // =========================================================================== //
 describe("SurveyRuntime — removeBranding (white-label) hides the footer", () => {
   beforeEach(() => {
@@ -513,12 +513,12 @@ describe("SurveyRuntime — removeBranding (white-label) hides the footer", () =
 
   it("shows the footer on the ending screen by default (branding on)", async () => {
     await finishToEnding(undefined);
-    expect(screen.getByText("OpenSurvey")).toBeInTheDocument();
+    expect(screen.getByText("onForm")).toBeInTheDocument();
   });
 
   it("hides the footer on the ending screen when removeBranding is true", async () => {
     await finishToEnding(true);
-    expect(screen.queryByText("OpenSurvey")).not.toBeInTheDocument();
+    expect(screen.queryByText("onForm")).not.toBeInTheDocument();
     expect(screen.queryByText(/Powered by/i)).not.toBeInTheDocument();
   });
 
@@ -534,6 +534,6 @@ describe("SurveyRuntime — removeBranding (white-label) hides the footer", () =
     };
     render(<SurveyRuntime api={calls as unknown as RuntimeApi} removeBranding={true} />);
     await screen.findByText(/this survey is closed/i);
-    expect(screen.queryByText("OpenSurvey")).not.toBeInTheDocument();
+    expect(screen.queryByText("onForm")).not.toBeInTheDocument();
   });
 });

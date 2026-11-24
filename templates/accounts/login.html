@@ -1,5 +1,5 @@
 {% extends "accounts/_auth_base.html" %}
-{% block title %}Sign in — OpenSurvey{% endblock %}
+{% block title %}Sign in — onForm{% endblock %}
 
 {% comment %}Split layout (matches designs/stitch/login.png): left form card + right warm
    brand panel. We extend _auth_base.html for the parent chain but override {% block content %}
@@ -12,7 +12,7 @@
     <div class="flex flex-col justify-center">
       <div class="mx-auto w-full max-w-md rounded-xl border border-hairline bg-white p-8 shadow-sm">
         <a href="/" class="block text-center font-display text-xl font-bold tracking-tight text-ink">
-          Open<span class="text-brand">Survey</span>
+          on<span class="text-brand">Form</span>
         </a>
         <h1 class="mt-6 text-center font-display text-2xl font-bold tracking-tight text-ink">Welcome back</h1>
         <p class="mt-1 text-center text-sm text-muted">Please enter your details to sign in.</p>
@@ -52,7 +52,7 @@
     </div>
 
     {# Right: warm orange→coral brand panel #}
-    <div class="hidden overflow-hidden rounded-xl bg-gradient-to-br from-brand to-[#0f766e] p-10 text-white shadow-sm lg:flex lg:flex-col lg:justify-center">
+    <div class="hidden overflow-hidden rounded-xl bg-gradient-to-br from-brand to-brand-hover p-10 text-white shadow-sm lg:flex lg:flex-col lg:justify-center">
       <h2 class="font-display text-3xl font-bold leading-tight tracking-tight">
         Build better surveys, together.
       </h2>

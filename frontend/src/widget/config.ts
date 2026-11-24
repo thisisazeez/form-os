@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey widget — config resolution from the <script> tag.
+// onForm widget — config resolution from the <script> tag.
 //
 // The embed contract (must match the admin settings page):
 //   <script src="<APP_ORIGIN>/static/widget/opensurvey-widget.js"
@@ -52,7 +52,7 @@ export function resolveConfig(script: Element): WidgetConfig | null {
   if (!environmentId || !orgSlug) {
     // eslint-disable-next-line no-console
     console.warn(
-      "[OpenSurvey] missing required data-environment-id and/or data-org-slug on the widget <script> tag; widget disabled.",
+      "[onForm] missing required data-environment-id and/or data-org-slug on the widget <script> tag; widget disabled.",
     );
     return null;
   }

@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 // ============================================================================
-// OpenSurvey — Vite config for the React island pipeline (PLAN.md §8).
+// onForm — Vite config for the React island pipeline (PLAN.md §8).
 //
 // Two islands are built and mounted into Django templates via django-vite:
 //   - builder:  the survey builder (admin, behind auth)   [Wave 3]

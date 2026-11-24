@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Survey Builder app (top-level component).
+// onForm — Survey Builder app (top-level component).
 //
 // Owns the editable DRAFT survey (the shared ../../lib/types shape) and wires:
 //   - QuestionPalette  → add a schema-valid question

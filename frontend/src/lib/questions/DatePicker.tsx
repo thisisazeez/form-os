@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — date question (native date picker).
+// onForm — date question (native date picker).
 // Answer shape: 'YYYY-MM-DD' string (survey-schema.json #/$defs/answerShapes).
 //
 // We use a native <input type="date">, which always reads/writes the ISO

@@ -1,5 +1,5 @@
 """
-Celery app for OpenSurvey (PLAN §13).
+Celery app for onForm (PLAN §13).
 
 Wiring only in Phase 0: emails, exports, webhook delivery, and analytics rollups
 land in later phases. Note: django-tenants + Celery needs tenant-aware task routing
@@ -12,7 +12,7 @@ from celery import Celery
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 
-app = Celery("opensurvey")
+app = Celery("onform")
 
 # Read CELERY_* settings from Django config.
 app.config_from_object("django.conf:settings", namespace="CELERY")

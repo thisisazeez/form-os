@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — survey flow state machine (runtime island).
+// onForm — survey flow state machine (runtime island).
 //
 // Drives the respondent through: welcome card -> questions (via the logic
 // engine for next-step/branching + required-gating) -> ending/thank-you.

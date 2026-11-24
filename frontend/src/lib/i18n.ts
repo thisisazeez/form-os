@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — i18n string resolution.
+// onForm — i18n string resolution.
 //
 // Every user-facing display string in survey-schema.json is an i18n map
 // {langCode: text} that MUST contain a 'default' key (the schema-required

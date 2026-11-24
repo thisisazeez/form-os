@@ -1,7 +1,7 @@
 """
 Base model mixins — the global conventions from contracts/models.md §0.
 
-Every OpenSurvey model (public AND tenant) uses:
+Every onForm model (public AND tenant) uses:
   - UUIDv4 primary key (ADR-003): non-enumerable in public URLs, no cross-schema PK
     collisions, safe to expose in the API and to copy into `*_user_id` columns.
   - created_at / updated_at timestamps (audit/sort baseline).

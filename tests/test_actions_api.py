@@ -1,7 +1,7 @@
 """
 HTTP-level tests for the ActionClass management API (FEATURE_PARITY WS-11 "Actions / Events").
 
-DISTINCT DB: DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_appsurvey
+DISTINCT DB: DATABASE_URL=postgres://onform:onform@localhost:5432/parity_appsurvey
 
 Exercises the real request path through TenantSlugMiddleware: endpoints are hit at
 ``/api/v1/<slug>/...`` so the middleware resolves + activates the org schema and ``IsOrgMember``

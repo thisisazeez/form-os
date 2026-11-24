@@ -1,5 +1,5 @@
 # ============================================================================
-# OpenSurvey — local infrastructure (Postgres + Redis) and an optional full app.
+# onForm — local infrastructure (Postgres + Redis) and an optional full app.
 # django-tenants REQUIRES PostgreSQL (schema-per-tenant); SQLite is not supported.
 #
 #   docker compose up -d              # just Postgres + Redis (run the app in a venv)
@@ -12,15 +12,15 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: opensurvey
-      POSTGRES_PASSWORD: opensurvey
-      POSTGRES_DB: opensurvey
+      POSTGRES_USER: onform
+      POSTGRES_PASSWORD: onform
+      POSTGRES_DB: onform
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - opensurvey_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U opensurvey -d opensurvey"]
+      test: ["CMD-SHELL", "pg_isready -U onform -d onform"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -35,13 +35,13 @@ services:
       timeout: 3s
       retries: 10
 
-  # The whole OpenSurvey app (Django + built React islands). Opt-in via the "app" profile so the
+  # The whole onForm app (Django + built React islands). Opt-in via the "app" profile so the
   # default `docker compose up -d` stays infra-only. Runs migrations + creates the demo org on boot.
   web:
     build: .
     profiles: ["app"]
     environment:
-      DATABASE_URL: postgres://opensurvey:opensurvey@db:5432/opensurvey
+      DATABASE_URL: postgres://onform:onform@db:5432/onform
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       # This container serves on :8000, so the links in outgoing emails (verification,

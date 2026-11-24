@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load orgs %}
+{% load orgs brand %}
 {% comment %}
-  OpenSurvey AUTHENTICATED admin shell — the app chrome behind every signed-in admin page.
+  onForm AUTHENTICATED admin shell — the app chrome behind every signed-in admin page.
   Layout mirrors designs/stitch/dashboard-home.png: a fixed left sidebar (logo + workspace
   switcher + primary nav + storage meter + user card) and a top bar (page-title slot + global
   search + notifications + "New survey"), with the page body rendered into {% block content %}.
@@ -82,7 +82,7 @@
       {# Logo #}
       <div class="mb-8 flex items-center justify-between px-3">
         <a href="{% if tslug %}/{{ tslug }}/{% else %}/{% endif %}" class="font-display text-xl font-bold tracking-tight text-ink">
-          Open<span class="text-brand">Survey</span>
+          {% brand_wordmark %}
         </a>
         <button @click="sidebarOpen = false" class="text-muted hover:text-ink lg:hidden" aria-label="Close menu">
           <span class="material-symbols-outlined text-[20px]">close</span>

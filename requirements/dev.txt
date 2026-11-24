@@ -1,5 +1,5 @@
 # ============================================================================
-# OpenSurvey — development & test dependencies.
+# onForm — development & test dependencies.
 # Install with:  pip install -r requirements/dev.txt   (pulls in base.txt)
 # ============================================================================
 -r base.txt

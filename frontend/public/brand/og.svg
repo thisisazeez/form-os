@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="onForm — forms you own">
+  <defs>
+    <linearGradient id="of" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5B4BE1"/>
+      <stop offset="1" stop-color="#4838C4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#FAFAFC"/>
+  <circle cx="1080" cy="80" r="220" fill="#F1F2F7"/>
+  <circle cx="90" cy="600" r="180" fill="#F1F2F7"/>
+  <rect x="88" y="120" width="112" height="112" rx="32" fill="url(#of)"/>
+  <circle cx="128" cy="176" r="18" fill="none" stroke="#fff" stroke-width="10"/>
+  <path d="M162 146h38v12h-23v11h20v12h-20v19h-15z" fill="#fff"/>
+  <text x="230" y="212" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="92" font-weight="700" letter-spacing="-3" fill="#14161F">on<tspan fill="#5B4BE1">Form</tspan></text>
+  <text x="92" y="342" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="46" font-weight="600" fill="#14161F">Forms you own. No seat limits, no paywalled logic.</text>
+  <text x="92" y="398" font-family="Inter, sans-serif" font-size="27" fill="#667085">Self-hosted forms, surveys and feedback for teams that own their data.</text>
+  <g transform="translate(92 480)">
+    <rect width="170" height="8" rx="4" fill="#5B4BE1"/>
+    <rect x="184" width="170" height="8" rx="4" fill="#0E7490"/>
+    <rect x="368" width="170" height="8" rx="4" fill="#16A34A"/>
+  </g>
+  <text x="92" y="560" font-family="Inter, sans-serif" font-size="22" fill="#667085">Open source · MIT · Self-hosted</text>
+</svg>

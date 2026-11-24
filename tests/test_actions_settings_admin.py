@@ -6,7 +6,7 @@ These are server-rendered HTML pages (form-POST + post-redirect-get), workspace-
 workspace write. The owner of an org has full workspace access; a plain member with NO workspace
 grant has neither read nor write.
 
-DISTINCT DB: DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_appui
+DISTINCT DB: DATABASE_URL=postgres://onform:onform@localhost:5432/parity_appui
 
 Covers:
   - actions page: owner GET 200; create persists ActionClass (with type-specific config); a

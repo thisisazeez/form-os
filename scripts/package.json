@@ -1,8 +1,8 @@
 {
-  "name": "opensurvey-scripts",
+  "name": "onform-scripts",
   "private": true,
   "type": "module",
-  "description": "Maintenance scripts for OpenSurvey (not part of the app build).",
+  "description": "Maintenance scripts for onForm (not part of the app build).",
   "scripts": {
     "capture": "node capture_screenshots.mjs",
     "gif": "node record_demo_gif.mjs",

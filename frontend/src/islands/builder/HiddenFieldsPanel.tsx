@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder Hidden Fields editor (Settings tab section).
+// onForm — Builder Hidden Fields editor (Settings tab section).
 //
 // Survey-level hidden fields (survey-schema.json #/$defs/hiddenFields) are
 // captured from the URL query string at runtime (?key=value) into the response

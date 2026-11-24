@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Public Survey Runtime island (ENTRYPOINT).
+// onForm — Public Survey Runtime island (ENTRYPOINT).
 //
 // The ONLY public JS surface (PLAN.md §8). Renders the survey question-by-question
 // using the shared logic engine for next-step/branching + required-gating; partial
@@ -53,7 +53,7 @@ export function mountRuntime(el: HTMLElement): void {
   const apiBase = el.dataset.apiBase ?? "/api/v1";
   const initialSurvey = parseJsonAttr<Survey>(el.dataset.initialSurvey);
   const prefill = parseJsonAttr<AnswerMap>(el.dataset.prefill) ?? undefined;
-  // Workspace white-label flag (enterprise): when "true", hide the "Powered by OpenSurvey"
+  // Workspace white-label flag (enterprise): when "true", hide the "Powered by onForm"
   // footer on the terminal screens. Anything other than the exact string "true" → false.
   const removeBranding = el.dataset.removeBranding === "true";
 

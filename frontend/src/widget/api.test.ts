@@ -75,9 +75,9 @@ describe("WidgetApi — URLs + bodies", () => {
 
   it("folds a cross-origin apiHost into the URL", async () => {
     const fetchImpl = fetchMock(async () => jsonResponse({ userId: "u1", person_id: "p", surveys: [] }));
-    await makeApi(fetchImpl as unknown as typeof fetch, "https://api.opensurvey.com").getAppSurveys("u1");
+    await makeApi(fetchImpl as unknown as typeof fetch, "https://api.onform.com").getAppSurveys("u1");
     expect(fetchImpl.mock.calls[0][0]).toBe(
-      "https://api.opensurvey.com/api/v1/acme/public/environments/env-9/app-surveys?userId=u1",
+      "https://api.onform.com/api/v1/acme/public/environments/env-9/app-surveys?userId=u1",
     );
   });
 

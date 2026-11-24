@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — NPS question (fixed 0..10 scale, 11 buttons).
+// onForm — NPS question (fixed 0..10 scale, 11 buttons).
 // Answer shape: integer 0..10. (No range config — survey-schema.json q_nps.)
 // ============================================================================
 import { resolveI18n } from "../i18n";

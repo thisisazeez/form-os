@@ -1,11 +1,12 @@
 {
-  "name": "opensurvey-frontend",
+  "name": "onform-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "OpenSurvey React islands (survey builder + public runtime) built with Vite, mounted into Django via django-vite. PLAN.md §8.",
+  "description": "onForm React islands (survey builder + public runtime) built with Vite, mounted into Django via django-vite. PLAN.md §8.",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "brand:generate": "python3 ../scripts/generate_brand.py",
     "build": "vite build && npm run build:widget",
     "build:islands": "vite build",
     "build:widget": "vite build --config vite.widget.config.ts",
@@ -20,10 +21,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@fontsource/material-symbols-outlined": "^5.3.9",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^22.20.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",

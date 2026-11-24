@@ -8,7 +8,7 @@ toggle), both stored on ``Workspace`` (migration 0003):
     survey to the same respondent. Persisted + exposed for parity; link surveys don't consume it
     yet.
   - ``remove_branding`` (BooleanField, default False): when True the PUBLIC runtime hides the
-    "Powered by OpenSurvey" footer. Threaded to the runtime via the host page (data-remove-branding
+    "Powered by onForm" footer. Threaded to the runtime via the host page (data-remove-branding
     / runtime_config), NOT via PublicSurvey.
 
 Coverage:
@@ -201,7 +201,7 @@ def test_settings_page_renders_general_and_branding_for_owner(client, ctx):
     body = resp.content
     assert b"Cooldown period" in body
     assert b"recontact_days" in body
-    assert b"Remove OpenSurvey branding" in body
+    assert b"Remove onForm branding" in body
     assert b"remove_branding" in body
 
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder Welcome-card + Endings editors (the "Endings" tab).
+// onForm — Builder Welcome-card + Endings editors (the "Endings" tab).
 //
 // Two content editors that author the survey's non-question screens — both shapes
 // already exist in contracts/survey-schema.json (#/$defs/welcomeCard, #/$defs/ending)

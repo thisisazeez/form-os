@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — multi select question (checkbox list).
+// onForm — multi select question (checkbox list).
 // Answer shape: [choiceId] (array of selected choice ids).
 //
 // minSelections/maxSelections are enforced at the answer-gating layer (the

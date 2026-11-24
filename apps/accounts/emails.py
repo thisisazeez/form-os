@@ -33,6 +33,11 @@ def _name_suffix(name: str | None) -> str:
     return f" {name}" if name else ""
 
 
+def _brand_name() -> str:
+    """Product name from the brand kernel (brand/tokens.json → settings.BRAND)."""
+    return str(getattr(settings, "BRAND", {}).get("name", "onForm"))
+
+
 def _base_url() -> str:
     """Best-effort public base URL for links in emails.
 
@@ -61,10 +66,10 @@ def _send(subject: str, body: str, to_email: str, html: str | None = None) -> No
 
 def send_verification_email(user, token: str) -> None:
     link = f"{_base_url()}/auth/verify-email?{urlencode({'token': token})}"
-    subject = "Verify your OpenSurvey email"
+    subject = f"Verify your {_brand_name()} email"
     body = (
         f"Hi{_name_suffix(user.name)},\n\n"
-        "Welcome to OpenSurvey. Confirm your email address to activate your account:\n\n"
+        f"Welcome to {_brand_name()}. Confirm your email address to activate your account:\n\n"
         f"  {link}\n\n"
         "If you didn't create this account, you can ignore this message.\n"
     )
@@ -76,10 +81,10 @@ def send_verification_email(user, token: str) -> None:
 
 def send_password_reset_email(user, token: str) -> None:
     link = f"{_base_url()}/auth/reset-password?{urlencode({'token': token})}"
-    subject = "Reset your OpenSurvey password"
+    subject = f"Reset your {_brand_name()} password"
     body = (
         f"Hi{_name_suffix(user.name)},\n\n"
-        "We received a request to reset your OpenSurvey password. Use the link below "
+        f"We received a request to reset your {_brand_name()} password. Use the link below "
         "to choose a new one:\n\n"
         f"  {link}\n\n"
         "If you didn't request this, no action is needed — your password is unchanged.\n"
@@ -94,13 +99,13 @@ def send_invitation_email(invitation) -> None:
     """Email an org invitation. ``invitation.token`` is the opaque DB token."""
     org = invitation.organization
     link = f"{_base_url()}/auth/invitations/accept?{urlencode({'token': invitation.token})}"
-    subject = f"You're invited to {org.name} on OpenSurvey"
+    subject = f"You're invited to {org.name} on {_brand_name()}"
     expires = f"{invitation.expires_at:%Y-%m-%d %H:%M UTC}"
     body = (
         f"You've been invited to join '{org.name}' as a {invitation.role}.\n\n"
         "Accept the invitation here:\n\n"
         f"  {link}\n\n"
-        "If you don't have a OpenSurvey account yet, you'll be able to create one first. "
+        f"If you don't have an {_brand_name()} account yet, you'll be able to create one first. "
         f"This invitation expires on {expires}.\n"
     )
     html = render_to_string(

@@ -1,6 +1,6 @@
 {% comment %}Render a Django form's fields with Tailwind styling + per-field and non-field errors.
    Used by all auth forms. Expects `form` in context. Hidden fields render bare. Branded with
-   OpenSurvey tokens (brand focus ring, ink/muted labels, hairline borders). Semantic error
+   onForm tokens (brand focus ring, ink/muted labels, hairline borders). Semantic error
    colors (red-*) are kept — they signal validation failure, not brand palette.{% endcomment %}
 {% if form.non_field_errors %}
   <div class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">

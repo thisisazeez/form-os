@@ -1,4 +1,5 @@
 {% extends "_layouts/app_shell.html" %}
+{% load brand %}
 {% comment %}
   Survey share (/<org_slug>/surveys/<id>/share) — every affordance is functional (WS-7):
     - Public link: the open runtime URL /<org_slug>/s/<survey.id> (ADR-009) + copy button.
@@ -12,7 +13,7 @@
   Brand tokens only (STYLE_GUIDE) — no indigo, no raw hex.
 {% endcomment %}
 
-{% block title %}Share {{ survey.name }} — OpenSurvey{% endblock %}
+{% block title %}Share {{ survey.name }} — onForm{% endblock %}
 {% block nav_surveys %}is-active{% endblock %}
 {% block topbar_title %}Share survey{% endblock %}
 
@@ -91,7 +92,7 @@
       <div x-data="{
               copied: '',
               subject: `{{ survey.name|escapejs }} — we'd love your feedback`,
-              body: `<p>Hi there,</p>\n<p>We'd really value your input on a quick survey. It only takes a couple of minutes.</p>\n<p><a href=&quot;{{ public_url }}&quot; style=&quot;display:inline-block;padding:10px 18px;background:#0d9488;color:#ffffff;border-radius:8px;text-decoration:none;font-weight:600&quot;>Take the survey</a></p>\n<p>Or paste this link into your browser:<br>{{ public_url }}</p>\n<p>Thank you!</p>`
+              body: `<p>Hi there,</p>\n<p>We'd really value your input on a quick survey. It only takes a couple of minutes.</p>\n<p><a href=&quot;{{ public_url }}&quot; style=&quot;display:inline-block;padding:10px 18px;background:{% brand_token 'brand' %};color:#ffffff;border-radius:8px;text-decoration:none;font-weight:600&quot;>Take the survey</a></p>\n<p>Or paste this link into your browser:<br>{{ public_url }}</p>\n<p>Thank you!</p>`
            }"
            class="rounded-xl border border-hairline bg-white p-6">
         <div class="mb-2 flex items-center gap-2">

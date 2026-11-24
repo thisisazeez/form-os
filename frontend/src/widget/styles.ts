@@ -1,9 +1,9 @@
 // ============================================================================
-// OpenSurvey widget — scoped CSS injected into the shadow root.
+// onForm widget — scoped CSS injected into the shadow root.
 //
 // The reused runtime (SurveyRuntime + QuestionRenderer) is styled with Tailwind
 // UTILITY classes that, on the admin/public pages, resolve against the Tailwind
-// CDN config in templates/base.html (which registers the OpenSurvey brand tokens).
+// CDN config in templates/base.html (which registers the onForm brand tokens).
 // Inside the widget's SHADOW ROOT those host-page styles do NOT cascade in, so we
 // ship a curated subset of the utilities the runtime actually uses + a small popup
 // chrome. This is deliberately a SUBSET, not a full Tailwind build — exact visual
@@ -13,19 +13,45 @@
 // affordance; `.cs-close` is our injected dismiss button (not part of the runtime).
 // ============================================================================
 
-/** Brand tokens — mirror templates/base.html tailwind.config (kept in one place). */
+import { BRAND } from "../lib/brand";
+
+/** Brand tokens — generated from brand/tokens.json (no more drift with the admin shell). */
 const TOKENS = `
-  --cs-brand: #0d9488;
-  --cs-brand-hover: #c93d12;
-  --cs-success: #8ac449;
-  --cs-ink: #222b27;
-  --cs-muted: #6b7470;
-  --cs-surface: #faf8f7;
-  --cs-panel: #f1eeec;
-  --cs-hairline: #e7e2de;
+  --cs-brand: ${BRAND.colors.brand};
+  --cs-brand-hover: ${BRAND.colors["brand-hover"]};
+  --cs-secondary: ${BRAND.colors.secondary};
+  --cs-success: ${BRAND.colors.success};
+  --cs-ink: ${BRAND.colors.ink};
+  --cs-muted: ${BRAND.colors.muted};
+  --cs-surface: ${BRAND.colors.surface};
+  --cs-panel: ${BRAND.colors.panel};
+  --cs-hairline: ${BRAND.colors.hairline};
 `;
 
+/** Absolute app origin so embedded widgets load fonts from onForm, not the host site. */
+const APP_ORIGIN = (() => {
+  const script = document.currentScript as HTMLScriptElement | null;
+  if (!script?.src) return "";
+  try {
+    return new URL(script.src).origin;
+  } catch {
+    return "";
+  }
+})();
+
 export const WIDGET_CSS = `
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('${APP_ORIGIN}/static/fonts/plus-jakarta-sans-var.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('${APP_ORIGIN}/static/fonts/inter-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
 :host {
   ${TOKENS}
   all: initial;
@@ -107,7 +133,7 @@ export const WIDGET_CSS = `
 .text-muted { color: var(--cs-muted); }
 .text-white { color: #fff; }
 .text-red-600 { color: #dc2626; }
-.font-display { font-family: Poppins, Inter, system-ui, sans-serif; }
+.font-display { font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif; }
 .font-bold { font-weight: 700; }
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }

@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Logic FLOW MAP (lightweight node-graph preview).
+// onForm — Logic FLOW MAP (lightweight node-graph preview).
 //
 // A dependency-free SVG/CSS preview of the survey's flow (matching the mockup's
 // right column): question nodes stacked top-to-bottom + ending nodes, with edges:

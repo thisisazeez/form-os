@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder survey-level settings (name + language management).
+// onForm — Builder survey-level settings (name + language management).
 //
 // Surfaces the survey name (editable) and the MULTI-LANGUAGE controls:
 //   - Add a language (code + optional label, e.g. fr / Français)

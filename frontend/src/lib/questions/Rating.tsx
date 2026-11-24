@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — rating question (stars / numbers / smileys, range 3..10).
+// onForm — rating question (stars / numbers / smileys, range 3..10).
 // Answer shape: integer 1..range.
 // ============================================================================
 import { resolveI18n } from "../i18n";

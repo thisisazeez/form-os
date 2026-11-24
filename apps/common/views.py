@@ -20,14 +20,14 @@ from django.urls import reverse
 
 
 def landing(request):
-    """Base URL (``/``) — points at the login page, not a marketing landing page.
+    """App entrypoint (served at ``/app``) — the old behavior of the base URL.
 
     - Anonymous visitor → the login page (``/auth/login``).
     - Signed-in visitor → straight into the app: their first active-org dashboard
       (``/<slug>/``), or the create-org page if they have no org yet.
 
-    (The standalone ``landing.html`` marketing page is no longer served; the template file is
-    kept in the repo but this route now redirects.)
+    ``/`` now serves the public marketing page (``marketing_landing``); this view is kept
+    under ``/app`` so existing post-login deep links and auth flows still have a stable home.
     """
     if request.user.is_authenticated:
         # Local import: organizations is a separate app; keep common.views import-light.
@@ -38,6 +38,15 @@ def landing(request):
             return redirect(f"/{org.slug}/")
         return redirect(reverse("org_public_htmx:org-create"))
     return redirect(reverse("accounts_htmx:login"))
+
+
+def marketing_landing(request):
+    """Public marketing homepage (``/``, alias ``/landing``) — branded onForm template.
+
+    The signed-in app entrypoint remains available at ``/app`` (``landing``), so auth flows
+    that used to point at ``/`` are preserved without taking over the marketing homepage.
+    """
+    return render(request, "landing.html")
 
 
 def healthz(request):

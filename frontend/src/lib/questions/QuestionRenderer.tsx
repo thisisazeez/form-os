@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — question-renderer dispatcher.
+// onForm — question-renderer dispatcher.
 //
 // Renders the question shell (headline + optional subheader + required marker)
 // and dispatches to the per-type component for the supported question types.

@@ -1,11 +1,11 @@
 {% extends "accounts/_auth_base.html" %}
-{% block title %}Create organization — OpenSurvey{% endblock %}
+{% block title %}Create organization — onForm{% endblock %}
 {% block card_title %}Create an organization{% endblock %}
 {% block card_subtitle %}
   <p class="mt-1 text-sm text-muted">You'll be its owner. The slug forms your URL and can't change later.</p>
 {% endblock %}
 
-{% comment %}Rebranded to OpenSurvey tokens; keeps the centered _auth_base card + the
+{% comment %}Rebranded to onForm tokens; keeps the centered _auth_base card + the
    OrganizationCreateForm fields (name/slug) via _form_fields.html, so the "reserved"/"taken"
    slug errors the page test asserts on still surface. `form` comes from the view.{% endcomment %}
 {% block card_body %}

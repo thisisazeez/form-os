@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "opensurvey"
+name = "onform"
 version = "0.1.0"
 description = "Self-hosted, multi-tenant survey & experience-management platform built with Django and React."
 requires-python = ">=3.11"

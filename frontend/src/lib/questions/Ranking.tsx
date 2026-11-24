@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — ranking question (order a list of options).
+// onForm — ranking question (order a list of options).
 // Answer shape: [choiceId] ordered (survey-schema.json #/$defs/answerShapes).
 //
 // The answer is the FULL ordered list of choice ids. A ranking always HAS an

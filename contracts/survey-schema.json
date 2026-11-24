@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opensurvey.dev/contracts/survey-schema.json",
-  "title": "OpenSurvey Survey Definition",
+  "$id": "https://onform.dev/contracts/survey-schema.json",
+  "title": "onForm Survey Definition",
   "description": "FROZEN Wave-0 contract. Single source of truth for the Survey.questions array, per-question declarative logic, survey-level config (languages/status/close/styling), the segment filter, and answer value shapes. Consumed by: the React runtime (TS), the React builder (TS), and Django (Python jsonschema). Every user-facing display string is an i18n map {langCode: text}. Enum string values MUST match contracts/models.md PART C and contracts/openapi.yaml.",
   "type": "object",
   "$comment": "Top-level object validates a full Survey definition payload. Survey.questions == #/properties/questions; Survey.languages == #/properties/languages; Survey.styling == #/properties/styling; Survey.close_on == #/properties/closeConditions. Segment.filter validates against #/$defs/segmentFilter.",

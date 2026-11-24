@@ -63,11 +63,24 @@ def test_uuid_pk_and_can_signature_present():
 # Public schema (DB)
 # ---------------------------------------------------------------------------
 @pytest.mark.django_db
-def test_root_redirects_anonymous_to_login():
-    # The base URL is the login page, not a marketing landing page: an anonymous visitor to
-    # `/` is redirected to /auth/login (apps.common.views.landing).
+def test_root_renders_marketing_landing():
+    # `/` is the public marketing homepage; `/landing` is an alias of the same view.
     client = Client()
-    resp = client.get("/")
+    for url in ("/", "/landing"):
+        resp = client.get(url)
+        assert resp.status_code == 200, url
+        html = resp.content.decode()
+        assert "on" in html and "Form" in html  # wordmark
+        assert "Forms you" in html and "No seat limits" in html  # hero copy
+        assert "brand/logo.svg" in html  # self-hosted SVG logo
+
+
+@pytest.mark.django_db
+def test_app_route_keeps_old_root_dispatch():
+    # The previous `/` behavior (anonymous → login, authed → dashboard/create-org) moved to
+    # `/app` so existing auth links keep working after the homepage switch.
+    client = Client()
+    resp = client.get("/app")
     assert resp.status_code == 302
     assert resp["Location"] == "/auth/login"
 

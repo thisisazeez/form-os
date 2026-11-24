@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — shared frontend library barrel.
+// onForm — shared frontend library barrel.
 //
 // Public surface shared by the runtime island (and, later, the builder island):
 //   - the logic engine (nextStep / requiredQuestionIds / validateSurvey)
@@ -7,6 +7,8 @@
 //   - i18n + answer-gating helpers
 //   - the question-renderer components
 // ============================================================================
+export { BRAND } from "./brand"; // generated from brand/tokens.json
+export type { BrandColor } from "./brand";
 export * from "./types"; // includes NextStep
 export { computeVariables, nextStep, requiredQuestionIds, validateSurvey } from "./logic";
 export type { ValidationError, ValidationResult } from "./logic";

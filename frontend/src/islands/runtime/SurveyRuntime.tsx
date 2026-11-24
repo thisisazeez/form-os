@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — public Survey Runtime component.
+// onForm — public Survey Runtime component.
 //
 // Ties the flow state machine (useSurveyFlow) to the question renderers and the
 // welcome/ending/error screens. Clean, functional UI (Tailwind). Accessibility
@@ -7,9 +7,9 @@
 // is keyboard-reachable. Full a11y polish is DEFERRED.
 //
 // STYLING NOTE: this island renders inside templates/base.html, whose inline
-// Tailwind CDN config registers the OpenSurvey BRAND TOKENS — `brand`(#0d9488),
-// `brand-hover`, `secondary`, `success`(#8ac449), `ink`, `muted`, `surface`
-// (#faf8f7), `panel`, `hairline`, `font-display`(Poppins), `font-body`(Inter) —
+// Tailwind CDN config registers the onForm BRAND TOKENS from brand/tokens.json —
+// `brand`, `brand-hover`, `secondary`, `success`, `ink`, `muted`, `surface`,
+// `panel`, `hairline`, `font-display` (Plus Jakarta Sans) and `font-body` (Inter) —
 // and loads Material Symbols. So we use those token utilities directly (NOT raw
 // `slate-*`/`indigo`/hex), keeping the public ending states on-brand + brandable.
 //
@@ -45,7 +45,7 @@ export interface SurveyRuntimeProps {
   prefill?: AnswerMap;
   /**
    * Workspace white-label flag (enterprise). When true, the public runtime HIDES the
-   * "Powered by OpenSurvey" footer on the terminal (ending / closed) screens. Threaded from the
+   * "Powered by onForm" footer on the terminal (ending / closed) screens. Threaded from the
    * runtime host page (data-remove-branding) via main.tsx. Default false (branding shown).
    */
   removeBranding?: boolean;
@@ -65,7 +65,7 @@ export function SurveyRuntime(props: SurveyRuntimeProps) {
   const { phase } = flow;
 
   // Terminal states render FULL-BLEED (no app chrome, no white card) — a centered
-  // hero on warm `bg-surface` with a "Powered by OpenSurvey" footer (unless white-labeled).
+  // hero on warm `bg-surface` with a "Powered by onForm" footer (unless white-labeled).
   if (phase.kind === "error") {
     return (
       <TerminalShell>
@@ -495,11 +495,11 @@ function ArrowForward() {
   );
 }
 
-/** Subtle "Powered by OpenSurvey" footer (brand-accented wordmark). */
+/** Subtle "Powered by onForm" footer (brand-accented wordmark). */
 function PoweredByFooter({ className = "" }: { className?: string }) {
   return (
     <p className={`font-display text-sm font-semibold text-muted ${className}`}>
-      Powered by <span className="text-brand">OpenSurvey</span>
+      Powered by <span className="text-brand">onForm</span>
     </p>
   );
 }

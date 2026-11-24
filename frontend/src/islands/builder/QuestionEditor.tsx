@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder per-question settings editor.
+// onForm — Builder per-question settings editor.
 //
 // Edits the selected question's COMMON fields (headline / subheader / required)
 // plus its per-type config, writing back schema-valid shapes via the surveyModel

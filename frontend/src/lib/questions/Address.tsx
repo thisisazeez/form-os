@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — address composite question.
+// onForm — address composite question.
 //
 // Answer shape (survey-schema.json #/$defs/answerShapes):
 //   { addressLine1?, addressLine2?, city?, state?, zip?, country? }

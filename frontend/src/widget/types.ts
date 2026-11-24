@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey embeddable widget — types.
+// onForm embeddable widget — types.
 //
 // The widget consumes the EXISTING public widget APIs (apps/actions/public_*),
 // which are tenant-prefixed (`/api/v1/<org_slug>/public/...`). It does NOT add or

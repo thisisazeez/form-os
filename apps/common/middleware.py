@@ -67,6 +67,8 @@ PUBLIC_CANDIDATES = frozenset(
         "media",
         "favicon.ico",
         "auth",          # /api/v1/auth/* — signup/verify/login/reset (public schema)
+        "landing",       # /landing — public marketing page alias
+        "app",           # /app — signed-in app entrypoint (old `/` dispatcher)
         "api",           # defensive: a bare "/api/..." that isn't "/api/v1/<slug>/"
     }
 )

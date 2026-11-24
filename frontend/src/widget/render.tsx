@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey widget — survey renderer.
+// onForm widget — survey renderer.
 //
 // Mounts the EXISTING public runtime (islands/runtime SurveyRuntime + RuntimeApi)
 // inside an injected, style-isolated SHADOW ROOT so the host page's CSS can't leak

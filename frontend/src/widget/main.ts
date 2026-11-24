@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey embeddable widget — ENTRYPOINT (built to a single self-contained
+// onForm embeddable widget — ENTRYPOINT (built to a single self-contained
 // IIFE bundle at /static/widget/opensurvey-widget.js with React bundled in).
 //
 // Embed contract (matches the admin settings page):
@@ -12,7 +12,7 @@
 // host app can identify users and fire "code" triggers. Re-running the script is a
 // no-op (singleton): the existing instance is preserved.
 // ============================================================================
-import { OpenSurvey } from "./core";
+import { OnFormWidget } from "./core";
 import { findWidgetScript, resolveConfig } from "./config";
 
 /** The public surface attached to window.openSurvey. */
@@ -35,8 +35,8 @@ declare global {
   }
 }
 
-/** Build the public API object backed by a OpenSurvey instance (or a no-op shell). */
-function buildPublicApi(instance: OpenSurvey | null): OpenSurveyPublicApi {
+/** Build the public API object backed by an OnFormWidget instance (or a no-op shell). */
+function buildPublicApi(instance: OnFormWidget | null): OpenSurveyPublicApi {
   return {
     init() {
       void instance?.init();
@@ -64,7 +64,7 @@ export function boot(): OpenSurveyPublicApi {
 
   const script = findWidgetScript();
   const config = script ? resolveConfig(script) : null;
-  const instance = config ? new OpenSurvey(config) : null;
+  const instance = config ? new OnFormWidget(config) : null;
 
   const api = buildPublicApi(instance);
   window.openSurvey = api;

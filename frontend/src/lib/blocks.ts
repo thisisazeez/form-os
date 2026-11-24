@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — block within-block presentation randomization (pure, runtime).
+// onForm — block within-block presentation randomization (pure, runtime).
 //
 // Blocks are an ADDITIVE, OPTIONAL grouping overlay (contracts/survey-schema.json
 // #/$defs/block). The flat `questions[]` array is the SINGLE SOURCE OF TRUTH for

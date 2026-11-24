@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder island local types.
+// onForm — Builder island local types.
 //
 // The builder edits the SHARED Survey definition (../../lib/types — the frozen
 // contracts/survey-schema.json shape). It does NOT define new survey types; these

@@ -18,7 +18,7 @@ A clear description of the bug.
 
 **Environment**
 - How are you running it: Docker / manual venv
-- OpenSurvey version or commit SHA:
+- onForm version or commit SHA:
 - Python version:
 - Browser (if a frontend issue):
 

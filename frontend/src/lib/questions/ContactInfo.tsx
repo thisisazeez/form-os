@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — contact-info composite question.
+// onForm — contact-info composite question.
 //
 // Answer shape (survey-schema.json #/$defs/answerShapes):
 //   { firstName?, lastName?, email?, phone?, company? }

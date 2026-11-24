@@ -5,7 +5,7 @@
 // the builder edits stay client-side and no data is mutated.
 //
 //   cd scripts && npm install
-//   BASE_URL=http://127.0.0.1:8011 EMAIL=owner@example.com PASSWORD=opensurvey2026 \
+//   BASE_URL=http://127.0.0.1:8011 EMAIL=owner@example.com PASSWORD=onform2026 \
 //   ORG_SLUG=demo SURVEY_ID=<published survey id> npm run gif
 //
 // Requires ffmpeg on PATH. Output: docs/screenshots/builder-demo.gif
@@ -22,7 +22,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:8011";
 const EMAIL = process.env.EMAIL ?? "owner@example.com";
-const PASSWORD = process.env.PASSWORD ?? "opensurvey2026";
+const PASSWORD = process.env.PASSWORD ?? "onform2026";
 const ORG_SLUG = process.env.ORG_SLUG ?? "demo";
 const SURVEY_ID = process.env.SURVEY_ID ?? "67ecadce-1d8e-4a68-b02d-6f90f7a1ed06";
 const OUT = resolve(REPO_ROOT, "docs", "screenshots", "builder-demo.gif");

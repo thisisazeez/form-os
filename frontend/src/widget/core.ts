@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey widget — runtime core (`window.openSurvey`).
+// onForm widget — runtime core (`window.openSurvey`).
 //
 // Public API (task contract):
 //   init()                         auto-run from the <script> tag (reads data-*)
@@ -39,7 +39,7 @@ export interface OpenSurveyDeps {
   render?: typeof renderSurvey;
 }
 
-export class OpenSurvey {
+export class OnFormWidget {
   readonly config: WidgetConfig;
   private api: WidgetApi;
   private storage: WidgetStorage;

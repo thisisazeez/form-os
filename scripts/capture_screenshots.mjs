@@ -1,6 +1,6 @@
 // ============================================================================
 // scripts/capture_screenshots.mjs — capture README screenshots of a RUNNING
-// OpenSurvey instance, using Playwright (Chromium, retina @2x).
+// onForm instance, using Playwright (Chromium, retina @2x).
 //
 // This drives a live server READ-ONLY (it logs in and navigates; it never
 // mutates data). Point it at any instance via env vars; defaults match the
@@ -25,7 +25,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:8011";
 const EMAIL = process.env.EMAIL ?? "owner@example.com";
-const PASSWORD = process.env.PASSWORD ?? "opensurvey2026";
+const PASSWORD = process.env.PASSWORD ?? "onform2026";
 const ORG_SLUG = process.env.ORG_SLUG ?? "demo";
 const SURVEY_ID = process.env.SURVEY_ID ?? "67ecadce-1d8e-4a68-b02d-6f90f7a1ed06";
 const OUT_DIR = process.env.OUT_DIR ?? resolve(REPO_ROOT, "docs", "screenshots");
@@ -36,11 +36,11 @@ mkdirSync(OUT_DIR, { recursive: true });
 async function settle(page, { island = false } = {}) {
   await page.waitForLoadState("networkidle").catch(() => {});
   if (island) {
-    // Islands mount into a #opensurvey-* container; wait until it has children.
+    // Islands mount into a #onform-* container; wait until it has children.
     await page
       .waitForFunction(
         () => {
-          const el = document.querySelector('[id^="opensurvey-"]');
+          const el = document.querySelector('[id^="onform-"]');
           return el && el.childElementCount > 0;
         },
         { timeout: 15000 },

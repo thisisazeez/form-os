@@ -3,7 +3,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 // ============================================================================
-// OpenSurvey — Vite config for the EMBEDDABLE WIDGET bundle (FEATURE_PARITY WS-11).
+// onForm — Vite config for the EMBEDDABLE WIDGET bundle (FEATURE_PARITY WS-11).
 //
 // Separate from the django-vite island pipeline (vite.config.js, which builds the
 // admin `builder` + public `runtime` islands with hashed names + a manifest). This

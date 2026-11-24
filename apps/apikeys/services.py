@@ -32,7 +32,7 @@ __all__ = [
     "revoke_api_key",
 ]
 
-# Public, non-secret brand prefix on every key ("opensurvey key").
+# Public, non-secret brand prefix on every key ("onform key").
 PREFIX = "osk_"
 # Length (chars) of the stored, non-secret prefix kept for list display.
 _PREFIX_DISPLAY_LEN = 12

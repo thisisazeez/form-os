@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Production TypeScript logic engine.
+// onForm — Production TypeScript logic engine.
 //
 // Implements `nextStep` / `requiredQuestionIds` / `validateSurvey` per the FROZEN
 // evaluator contract (tests/logic_fixtures/README.md §2–§4 and

@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder STYLE tab editor.
+// onForm — Builder STYLE tab editor.
 //
 // Edits the survey's `Styling` object (the frozen contracts/survey-schema.json
 // #/$defs/styling shape). Every control emits a PARTIAL patch; BuilderApp runs it

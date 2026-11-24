@@ -1,5 +1,5 @@
 """
-Production Python logic evaluator for OpenSurvey surveys (Wave 2c).
+Production Python logic evaluator for onForm surveys (Wave 2c).
 
 This is the REAL Django-side evaluator that Wave 3 of the contract calls for
 (``tests/logic_fixtures/README.md`` §6, "Injecting the real evaluator";

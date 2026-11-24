@@ -1,5 +1,5 @@
 """
-pytest fixtures for the OpenSurvey Phase-0 smoke suite.
+pytest fixtures for the onForm Phase-0 smoke suite.
 
 django-tenants needs Postgres + a schema-aware migration path: pytest-django's default
 `django_db_setup` runs `migrate`, but django-tenants requires `migrate_schemas` (shared

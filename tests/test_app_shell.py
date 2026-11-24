@@ -16,7 +16,7 @@ Django's session ``Client`` + ``force_login`` — the shell page is a Django HTM
 Coverage:
   - 302 → LOGIN_URL for an anonymous visitor (the auth gate is present).
   - 200 for a logged-in user, with the SHELL CONTRACT:
-      * OpenSurvey wordmark present.
+      * onForm wordmark present.
       * all seven sidebar nav items present (Home/Surveys/Contacts/Segments/Results/Team/Settings).
       * the active item carries the `is-active` sentinel (the smoke fixture marks Home).
       * brand TOKEN classes are used (bg-surface / bg-panel / text-brand / bg-brand).
@@ -88,9 +88,9 @@ def test_shell_smoke_renders_for_logged_in_user(client, shell_ctx):
     assert resp.status_code == 200, resp.content
     html = resp.content.decode()
 
-    # OpenSurvey wordmark — the brand half ("Survey") is split into its own span.
-    assert "Open" in html
-    assert 'text-brand">Survey</span>' in html
+    # onForm wordmark — the brand half ("Form") is split into its own span.
+    assert "on" in html
+    assert 'text-brand">Form</span>' in html
 
 
 def test_shell_smoke_has_all_sidebar_nav_items(client, shell_ctx):
@@ -151,32 +151,45 @@ def test_shell_smoke_renders_components(client, shell_ctx):
 #  base.html — Tailwind brand config present on base-rendered pages           #
 # --------------------------------------------------------------------------- #
 def test_base_html_ships_tailwind_brand_config():
-    """base.html carries the inline Tailwind brand config + Google Fonts + rebranded wordmark.
+    """base.html registers palette/font tokens from brand/tokens.json via template tags.
 
     Rendered DIRECTLY via the template engine (not through a view) so the assertion targets
-    base.html's own chrome — independent of any page that overrides {% block title %}/copy. The
-    config registers the brand TOKEN classes (brand/ink/muted/surface/panel/hairline + Poppins/
-    Inter) so every admin/auth template that uses them resolves.
+    base.html's own chrome — independent of any page that overrides {% block title %}/copy.
+    The tags read settings.BRAND, so this works without a request context (as email rendering
+    requires too).
     """
+    from django.conf import settings
     from django.template.loader import render_to_string
 
     html = render_to_string("base.html", {})
+    brand = settings.BRAND
+    colors = brand["colors"]
     assert "tailwind.config" in html
-    # Brand tokens registered in the config.
-    assert "brand:'#0d9488'" in html  # primary brand token → hex
-    assert "'brand-hover':'#0f766e'" in html
-    assert "surface:'#faf8f7'" in html
-    assert "hairline:'rgba(34,43,39,0.10)'" in html
-    assert "display:['Poppins','sans-serif']" in html
-    assert "Poppins" in html  # display font family + Google Fonts link
-    assert "Material+Symbols+Outlined" in html  # icon font linked
+    # Brand tokens registered in the config — all sourced from the kernel.
+    assert f"brand:'{colors['brand']}'" in html
+    assert f"'brand-hover':'{colors['brand-hover']}'" in html
+    assert f"surface:'{colors['surface']}'" in html
+    assert f"hairline:'{colors['hairline']}'" in html
+    display_fonts = ", ".join(f"'{font}'" for font in brand["fonts"]["display"])
+    assert f"display:[{display_fonts}]" in html
+    # Fonts are self-hosted from frontend/public/fonts via Django static (no CDN fetch).
+    assert "plus-jakarta-sans-var.woff2" in html
+    assert "inter-var.woff2" in html
+    assert "material-symbols-outlined.woff2" in html
+    assert "fonts.googleapis.com" not in html
+    # Phase-3 brand assets: favicon + social preview card.
+    assert "brand/favicon.svg" in html
+    assert "brand/og.svg" in html
     # The CDN script precedes the config (config must extend an already-loaded Tailwind).
     assert html.index("cdn.tailwindcss.com") < html.index("tailwind.config")
     # …and the config precedes HTMX/Alpine (utilities must exist before markup is parsed).
     assert html.index("tailwind.config") < html.index("htmx.org")
-    # The default body uses brand tokens, not the old palette.
+    # The default body uses brand tokens and the generated wordmark.
     assert "bg-surface" in html
-    assert "Open" in html and 'text-brand">Survey</span>' in html
+    wordmark = brand["wordmark"]
+    assert (
+        f"{wordmark['prefix']}<span class=\"text-brand\">{wordmark['accent']}</span>" in html
+    )
 
 
 # --------------------------------------------------------------------------- #

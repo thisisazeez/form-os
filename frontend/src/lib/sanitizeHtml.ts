@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — shared HTML sanitizer for author-formatted rich text.
+// onForm — shared HTML sanitizer for author-formatted rich text.
 //
 // Rich-text question DESCRIPTIONS (Question.descriptionHtml) are authored as a
 // small subset of HTML in the builder and rendered with React's

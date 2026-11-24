@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — picture-choice question (image-based choices).
+// onForm — picture-choice question (image-based choices).
 //
 // Answer shape (survey-schema.json #/$defs/answerShapes):
 //   - allowMulti: false  -> choiceId (string) of the selected image

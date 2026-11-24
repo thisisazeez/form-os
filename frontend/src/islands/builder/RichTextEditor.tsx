@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — minimal rich-text editor for question DESCRIPTIONS.
+// onForm — minimal rich-text editor for question DESCRIPTIONS.
 //
 // A small contentEditable surface with a bold / italic / underline / link
 // toolbar (+ line breaks via Enter). It edits the HTML for the CURRENT authoring

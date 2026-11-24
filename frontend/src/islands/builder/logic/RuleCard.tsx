@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Logic RULE CARD (one IF/THEN rule editor).
+// onForm — Logic RULE CARD (one IF/THEN rule editor).
 //
 // Renders + edits a single LogicRule as the mockup does:
 //

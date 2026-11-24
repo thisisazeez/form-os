@@ -180,8 +180,9 @@ def _post_login_redirect(request, user) -> str:
 
     Priority: a safe ``?next=`` (e.g. the @login_required page they were heading to) → the
     user's first active-org dashboard (``/<slug>/``) → the create-org page if they have no
-    org yet. Never the public landing page — ``/`` now just redirects back into the app
-    (apps.common.views.landing), so returning to it would bounce.
+    org yet. Never the public marketing homepage (``/``): it is now a static landing page,
+    so returning there after login would strand the user. The old app dispatcher is at
+    ``/app`` (apps.common.views.landing).
     """
     nxt = _safe_next(request)
     if nxt:

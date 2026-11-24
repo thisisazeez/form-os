@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — single select question (radio list or dropdown).
+// onForm — single select question (radio list or dropdown).
 //
 // Answer shape (survey-schema.json #/$defs/answerShapes):
 //   - choiceId (string) for a normal choice

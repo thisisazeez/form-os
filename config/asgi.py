@@ -1,4 +1,4 @@
-"""ASGI config for OpenSurvey."""
+"""ASGI config for onForm."""
 import os
 
 from django.core.asgi import get_asgi_application

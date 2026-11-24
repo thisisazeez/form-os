@@ -1,5 +1,5 @@
 """
-OpenSurvey project package.
+onForm project package.
 
 Expose the Celery app so `@shared_task` works and `celery -A config` resolves.
 The import is guarded so that environments without Celery installed (or during certain

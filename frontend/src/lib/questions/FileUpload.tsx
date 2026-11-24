@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — file-upload question.
+// onForm — file-upload question.
 // Answer shape: [fileUrl] (survey-schema.json #/$defs/answerShapes) — an array
 // of the URLs of files uploaded to storage.
 //

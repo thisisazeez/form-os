@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Logic TAB view (rule list + flow map).
+// onForm — Logic TAB view (rule list + flow map).
 //
 // The Logic tab body: a left column of IF/THEN rule cards (the survey-wide flat
 // view of every question's logic[]) + a right Flow Map preview. Matches

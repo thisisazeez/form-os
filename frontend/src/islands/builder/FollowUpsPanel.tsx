@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — Builder FOLLOW-UPS tab editor (the editor's 4th tab).
+// onForm — Builder FOLLOW-UPS tab editor (the editor's 4th tab).
 //
 // Authors survey follow-up automations: send an email when a response is finished,
 // optionally only when a simple condition over the answers matches, to a recipient

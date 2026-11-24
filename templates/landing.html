@@ -1,13 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}OpenSurvey — surveys your whole team can run{% endblock %}
+{% block title %}onForm — surveys your whole team can run{% endblock %}
 
 {% comment %}Public marketing landing (matches designs/stitch/marketing-landing.png). It extends
    base.html (NOT app_shell — marketing has no sidebar) and OVERRIDES {% block body %} so it can
    render full-bleed sections (sticky nav, alternating features, stats band, pricing, CTA, footer)
    instead of base.html's constrained max-w-5xl public chrome. Uses brand TOKEN classes only
-   (Poppins via font-display, Inter via the body default; gradients via from-brand to-[#0f766e]
-   on the hero panel + CTA band). The Stitch raw output (Outfit + raw hex + gray/slate scales) is
+   (Plus Jakarta Sans via font-display, Inter via the body default; gradients via
+   from-brand to-brand-hover on the hero panel + CTA band). The Stitch raw output
+   (Outfit + raw hex + gray/slate scales) is
    translated to our tokens — never pasted verbatim.
 
    The landing_view returns an empty context ({}), so there is no context contract to keep.
@@ -18,15 +20,15 @@
   <nav class="sticky top-0 z-50 border-b border-hairline bg-white/80 font-body text-sm font-medium tracking-tight backdrop-blur-md">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
       <div class="flex items-center gap-8">
-        <a href="/" class="font-display text-xl font-bold tracking-tight text-ink">
-          Open<span class="text-brand">Survey</span>
+        <a href="/" aria-label="onForm home">
+          <img src="{% static 'brand/logo.svg' %}" alt="onForm" class="h-9 w-auto" />
         </a>
         <div class="hidden items-center gap-6 md:flex">
           <a href="#features" class="text-muted transition-colors hover:text-brand">Product</a>
           <a href="#features" class="text-muted transition-colors hover:text-brand">Features</a>
           <a href="#pricing" class="text-muted transition-colors hover:text-brand">Pricing</a>
-          <a href="#" class="text-muted transition-colors hover:text-brand">Docs</a>
-          <a href="#" class="text-muted transition-colors hover:text-brand">Open Source</a>
+          <a href="https://github.com/onform/onform#quick-start" class="text-muted transition-colors hover:text-brand">Docs</a>
+          <a href="https://github.com/onform/onform" class="text-muted transition-colors hover:text-brand">Open Source</a>
         </div>
       </div>
       <div class="flex items-center gap-4">
@@ -48,17 +50,18 @@
           <span class="material-symbols-outlined text-[16px] text-secondary">star</span> Open source · MIT
         </div>
         <h1 class="mb-6 font-display text-5xl font-bold tracking-tight text-ink md:text-6xl">
-          Surveys your <span class="text-brand">whole team</span> can run.
+          Forms you <span class="text-brand">own</span>.
         </h1>
         <p class="mb-8 text-lg leading-relaxed text-muted md:text-xl">
-          The open-source, self-hosted alternative for modern teams. Teams, RBAC, and contacts included free.
+          No seat limits, no paywalled logic. The open-source, self-hosted alternative to
+          Typeform and Formbricks — visual builder, conditional logic, analytics, teams &amp; RBAC.
         </p>
         <div class="mb-12 flex flex-wrap gap-4">
           <a href="{% url 'accounts_htmx:signup' %}"
              class="rounded-lg bg-brand px-6 py-3 text-lg font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
             Start free
           </a>
-          <a href="#"
+          <a href="mailto:hello@onform.example?subject=onForm%20demo"
              class="rounded-lg border border-hairline px-6 py-3 text-lg font-medium text-ink transition-colors hover:bg-panel">
             Book a demo
           </a>
@@ -76,7 +79,7 @@
 
       {# Floating product mock (CSS) #}
       <div class="relative">
-        <div class="rounded-xl border border-hairline bg-gradient-to-br from-brand to-[#0f766e] p-6 shadow-sm">
+        <div class="rounded-xl border border-hairline bg-gradient-to-br from-brand to-brand-hover p-6 shadow-sm">
           <div class="rounded-lg bg-white p-5 shadow-sm">
             <div class="mb-4 flex items-center gap-1.5">
               <span class="h-2.5 w-2.5 rounded-full bg-panel"></span>
@@ -263,43 +266,26 @@
     </div>
   </section>
 
-  {# ---- Pricing teaser ---- #}
+  {# ---- Pricing: one self-hosted plan, no hosted tiers ---- #}
   <section id="pricing" class="bg-surface py-24">
     <div class="mx-auto max-w-7xl px-6">
       <div class="mx-auto mb-16 max-w-2xl text-center">
-        <h2 class="mb-4 font-display text-3xl font-bold tracking-tight text-ink md:text-4xl">Simple, transparent pricing</h2>
-        <p class="text-lg text-muted">Start for free, upgrade when you need to.</p>
+        <h2 class="mb-4 font-display text-3xl font-bold tracking-tight text-ink md:text-4xl">One plan. Yours to host.</h2>
+        <p class="text-lg text-muted">No seat limits, no paywalled logic. Free forever — all prices in NGN (₦).</p>
       </div>
-      <div class="grid gap-8 md:grid-cols-3">
-        {# Self-hosted Free #}
-        <div class="flex flex-col rounded-xl border border-hairline bg-white p-8 shadow-sm transition-transform hover:-translate-y-0.5">
+      <div class="mx-auto max-w-lg">
+        <div class="flex flex-col rounded-xl border-2 border-brand bg-white p-8 shadow-md">
           <h3 class="mb-2 font-display text-xl font-bold text-ink">Self-hosted Free</h3>
-          <div class="mb-6 font-display text-3xl font-bold text-ink">$0<span class="text-lg font-normal text-muted">/mo</span></div>
-          <p class="mb-8 flex-grow text-muted">All core features. You host it.</p>
-          <a href="#"
-             class="w-full rounded-lg border border-hairline px-4 py-2.5 text-center font-medium text-ink transition-colors hover:bg-panel">
-            Deploy now
-          </a>
-        </div>
-        {# Cloud — Popular #}
-        <div class="relative flex flex-col rounded-xl border-2 border-brand bg-white p-8 shadow-md md:-translate-y-4">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">Popular</div>
-          <h3 class="mb-2 font-display text-xl font-bold text-ink">Cloud</h3>
-          <div class="mb-6 font-display text-3xl font-bold text-ink">$49<span class="text-lg font-normal text-muted">/mo</span></div>
-          <p class="mb-8 flex-grow text-muted">We host, you survey. Everything handled.</p>
-          <a href="{% url 'accounts_htmx:signup' %}"
+          <div class="mb-6 font-display text-3xl font-bold text-ink">₦0<span class="text-lg font-normal text-muted">/mo</span></div>
+          <p class="mb-8 flex-grow text-muted">All core features, unlimited seats and responses. You host it, you own the data.</p>
+          <ul class="mb-8 space-y-2 text-sm text-ink">
+            <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-success">check_circle</span>Unlimited surveys &amp; responses</li>
+            <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-success">check_circle</span>Conditional logic, teams &amp; RBAC</li>
+            <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-success">check_circle</span>MIT licensed — modify anything</li>
+          </ul>
+          <a href="https://github.com/onform/onform#quick-start"
              class="w-full rounded-lg bg-brand px-4 py-2.5 text-center font-medium text-white shadow-sm transition-colors hover:bg-brand-hover">
-            Start free trial
-          </a>
-        </div>
-        {# Enterprise #}
-        <div class="flex flex-col rounded-xl border border-hairline bg-white p-8 shadow-sm transition-transform hover:-translate-y-0.5">
-          <h3 class="mb-2 font-display text-xl font-bold text-ink">Enterprise</h3>
-          <div class="mb-6 font-display text-3xl font-bold text-ink">Custom</div>
-          <p class="mb-8 flex-grow text-muted">SSO, dedicated support, custom SLAs.</p>
-          <a href="#"
-             class="w-full rounded-lg border border-hairline px-4 py-2.5 text-center font-medium text-ink transition-colors hover:bg-panel">
-            Contact sales
+            Deploy now
           </a>
         </div>
       </div>
@@ -307,11 +293,11 @@
   </section>
 
   {# ---- Final CTA (orange gradient) ---- #}
-  <section class="bg-gradient-to-br from-brand to-[#0f766e] py-24">
+  <section class="bg-gradient-to-br from-brand to-brand-hover py-24">
     <div class="mx-auto max-w-4xl px-6 text-center text-white">
       <h2 class="mb-8 font-display text-4xl font-bold tracking-tight md:text-5xl">Own your survey data.</h2>
       <p class="mx-auto mb-10 max-w-2xl text-xl text-white/90">
-        Join thousands of teams who trust OpenSurvey for their critical feedback loops.
+        Join thousands of teams who trust onForm for their critical feedback loops.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a href="{% url 'accounts_htmx:signup' %}"
@@ -327,9 +313,9 @@
     <div class="mx-auto grid max-w-7xl grid-cols-2 gap-8 font-body text-sm text-muted md:grid-cols-4">
       <div class="col-span-2 space-y-4 md:col-span-1">
         <a href="/" class="font-display text-lg font-bold tracking-tight text-ink">
-          Open<span class="text-brand">Survey</span>
+          on<span class="text-brand">Form</span>
         </a>
-        <p class="text-xs">© OpenSurvey. Built for privacy and scale.</p>
+        <p class="text-xs">© onForm. Built for privacy and scale.</p>
         <div class="flex items-center gap-2 text-xs opacity-70">
           <span class="material-symbols-outlined text-[16px]">gavel</span> MIT licensed
         </div>
@@ -342,15 +328,15 @@
       </div>
       <div class="space-y-3">
         <h4 class="font-display font-bold text-ink">Developers</h4>
-        <a href="#" class="block transition-colors hover:text-ink">Documentation</a>
-        <a href="#" class="block transition-colors hover:text-ink">API Reference</a>
-        <a href="#" class="inline-flex items-center gap-1 transition-colors hover:text-ink">GitHub <span class="material-symbols-outlined text-[14px]">star</span></a>
+        <a href="https://github.com/onform/onform#quick-start" class="block transition-colors hover:text-ink">Documentation</a>
+        <a href="https://github.com/onform/onform/blob/main/contracts/openapi.yaml" class="block transition-colors hover:text-ink">API Reference</a>
+        <a href="https://github.com/onform/onform" class="inline-flex items-center gap-1 transition-colors hover:text-ink">GitHub <span class="material-symbols-outlined text-[14px]">star</span></a>
       </div>
       <div class="space-y-3">
         <h4 class="font-display font-bold text-ink">Legal</h4>
-        <a href="#" class="block transition-colors hover:text-ink">Privacy Policy</a>
-        <a href="#" class="block transition-colors hover:text-ink">Terms of Service</a>
-        <a href="#" class="block transition-colors hover:text-ink">Security</a>
+        <a href="mailto:legal@onform.example?subject=Privacy%20policy" class="block transition-colors hover:text-ink">Privacy Policy</a>
+        <a href="mailto:legal@onform.example?subject=Terms%20of%20service" class="block transition-colors hover:text-ink">Terms of Service</a>
+        <a href="mailto:security@onform.example?subject=Security%20report" class="block transition-colors hover:text-ink">Security</a>
       </div>
     </div>
   </footer>

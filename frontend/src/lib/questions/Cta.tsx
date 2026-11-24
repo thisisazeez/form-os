@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — statement / call-to-action question.
+// onForm — statement / call-to-action question.
 //
 // Displays content (html) + an optional external link button. Not a
 // data-collecting question unless `required` (acts as an acknowledged gate).

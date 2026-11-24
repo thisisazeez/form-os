@@ -65,13 +65,13 @@ class Workspace(TimeStampedUUIDModel):
 
     # White-label / remove-branding (Formbricks ENTERPRISE feature; FEATURE_PARITY §Enterprise +
     # §Look & Feel "remove branding [enterprise]"). When True, the PUBLIC runtime HIDES the
-    # "Powered by OpenSurvey" footer on the ending/closed screens. Threaded to the runtime via the
+    # "Powered by onForm" footer on the ending/closed screens. Threaded to the runtime via the
     # runtime host config (apps.responses.public_views.public_runtime_host → runtime.html
     # data-remove-branding / runtime_config), NOT via PublicSurvey. Default False == branding shown
     # (current behavior unchanged).
     remove_branding = models.BooleanField(
         default=False,
-        help_text="When True, the public survey runtime hides the 'Powered by OpenSurvey' "
+        help_text="When True, the public survey runtime hides the 'Powered by onForm' "
         "footer. Default False (branding shown).",
     )
 

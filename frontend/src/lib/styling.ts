@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — shared survey THEMING helpers (pure, framework-light).
+// onForm — shared survey THEMING helpers (pure, framework-light).
 //
 // Single source of truth for turning a survey's `Styling` object (the frozen
 // contracts/survey-schema.json #/$defs/styling shape — see ../lib/types) into
@@ -17,20 +17,21 @@
 // ============================================================================
 import type { CSSProperties } from "react";
 
+import { BRAND } from "./brand";
 import type { Styling } from "./types";
 
 /**
- * Effective brand-token defaults (mirror templates/base.html tailwind.config).
+ * Effective brand-token defaults, derived from brand/tokens.json via `./brand`.
  * Used to seed the builder color pickers when a key is unset — NOT written to
  * the survey unless the author actually changes them (omit-when-default).
  */
 export const BRAND_DEFAULTS = {
-  brandColor: "#0d9488",
-  questionColor: "#222b27", // ink
+  brandColor: BRAND.colors.brand,
+  questionColor: BRAND.colors.ink,
   backgroundColor: "#ffffff", // the card surface (white)
-  buttonColor: "#0d9488",
+  buttonColor: BRAND.colors.brand,
   buttonTextColor: "#ffffff",
-  pageBackground: "#faf8f7", // surface (page behind the card)
+  pageBackground: BRAND.colors.surface, // surface (page behind the card)
 } as const;
 
 /** Root text color of the in-progress survey (question text). */

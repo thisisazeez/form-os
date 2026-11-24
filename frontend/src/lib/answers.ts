@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — answer completeness helpers (runtime gating).
+// onForm — answer completeness helpers (runtime gating).
 //
 // The logic engine decides NAVIGATION; these helpers decide whether the current
 // question's answer is COMPLETE enough to advance (required-gating + per-type

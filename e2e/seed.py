@@ -1,9 +1,9 @@
 """
 e2e/seed.py — idempotent seed for the Playwright parity E2E harness.
 
-Run against the DEDICATED ``parity_e2e`` database (NEVER the live ``opensurvey_demo``):
+Run against the DEDICATED ``parity_e2e`` database (NEVER the live ``onform_demo``):
 
-    DATABASE_URL=postgres://opensurvey:opensurvey@localhost:5432/parity_e2e \
+    DATABASE_URL=postgres://onform:onform@localhost:5432/parity_e2e \
     DJANGO_SETTINGS_MODULE=config.settings.dev \
     .venv/bin/python manage.py shell -c "import e2e.seed as s; s.run()"
 
@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django_tenants.utils import schema_context
@@ -120,7 +121,7 @@ def run() -> dict:
             status=SurveyStatus.PUBLISHED,
             questions=QUESTIONS,
             languages=LANGUAGES,
-            styling={"brandColor": "#0d9488"},
+            styling={"brandColor": settings.BRAND["colors"]["brand"]},
             welcome_card=None,  # no welcome card → runtime jumps straight to the first question
             endings=ENDINGS,
             created_by_user_id=owner.id,

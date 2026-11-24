@@ -12,7 +12,7 @@
 //      storageState — so every spec starts already logged-in.
 //
 // Everything talks to the DEDICATED instance only (DATABASE_URL=parity_e2e); it
-// never touches the user's live :8011 / opensurvey_demo data.
+// never touches the user's live :8011 / onform_demo data.
 // ============================================================================
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";

@@ -395,7 +395,7 @@ def public_runtime_host(request, survey_id):
     org_slug = getattr(tenant, "slug", None)
 
     # White-label / remove-branding (enterprise) lives on the Workspace (apps.workspaces). When
-    # True, the public runtime hides the "Powered by OpenSurvey" footer. We thread it via the
+    # True, the public runtime hides the "Powered by onForm" footer. We thread it via the
     # runtime host config (data-remove-branding + runtime_config) — NOT via PublicSurvey — so the
     # public survey JSON stays a pure survey definition. Defaults to False (branding shown).
     remove_branding = bool(survey.environment.workspace.remove_branding)

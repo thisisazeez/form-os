@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — consent question (single acknowledgement checkbox).
+// onForm — consent question (single acknowledgement checkbox).
 // Answer shape: boolean (true = accepted).
 // ============================================================================
 import { resolveI18n } from "../i18n";

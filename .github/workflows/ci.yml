@@ -1,6 +1,6 @@
 name: CI
 
-# OpenSurvey CI — Wave-1 pipeline (owned by the ci/cicd-engineer agent).
+# onForm CI — Wave-1 pipeline (owned by the ci/cicd-engineer agent).
 #
 # Two parallel tracks plus an explicit cross-language parity gate:
 #   * python  — ruff lint, the shared logic-fixture suite (Python side), and the
@@ -52,14 +52,14 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: opensurvey
-          POSTGRES_PASSWORD: opensurvey
-          POSTGRES_DB: opensurvey
+          POSTGRES_USER: onform
+          POSTGRES_PASSWORD: onform
+          POSTGRES_DB: onform
         ports:
           - 5432:5432
         # Wait until Postgres is healthy before the job's steps run.
         options: >-
-          --health-cmd "pg_isready -U opensurvey"
+          --health-cmd "pg_isready -U onform"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -68,18 +68,21 @@ jobs:
       # Django settings + DB URL the scaffold is expected to honor (models.md /
       # decisions.md ADR-005). DATABASE_URL is the conventional override; if the
       # scaffold uses discrete vars it should read these too.
-      DATABASE_URL: postgres://opensurvey:opensurvey@localhost:5432/opensurvey
+      DATABASE_URL: postgres://onform:onform@localhost:5432/onform
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
-      POSTGRES_USER: opensurvey
-      POSTGRES_PASSWORD: opensurvey
-      POSTGRES_DB: opensurvey
+      POSTGRES_USER: onform
+      POSTGRES_PASSWORD: onform
+      POSTGRES_DB: onform
       DJANGO_SETTINGS_MODULE: config.settings.ci
       SECRET_KEY: ci-not-a-real-secret
       PYTHONUNBUFFERED: "1"
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Brand lint
+        run: python3 scripts/brand_lint.py
 
       - name: Set up Python
         uses: actions/setup-python@v5

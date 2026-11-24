@@ -1,5 +1,5 @@
 /**
- * Reference TypeScript implementation of the OpenSurvey logic evaluator.
+ * Reference TypeScript implementation of the onForm logic evaluator.
  *
  * ============================================================================
  *   REFERENCE / STAND-IN IMPLEMENTATION — NOT the production evaluator.
@@ -11,7 +11,7 @@
  * `#/$defs/action` `$comment`.
  *
  * Wave 3 replaces this with the real runtime/builder evaluator (e.g.
- * `@opensurvey/runtime/logic`) exporting the SAME three functions with the SAME
+ * `@onform/runtime/logic`) exporting the SAME three functions with the SAME
  * behavior; the runner then imports that module instead (see README §6,
  * "Injecting the real evaluator"). The fixtures do not change.
  *

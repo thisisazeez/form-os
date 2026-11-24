@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey — matrix question (rows × columns grid of choices).
+// onForm — matrix question (rows × columns grid of choices).
 //
 // Answer shape (survey-schema.json #/$defs/answerShapes):
 //   selection: "single"   -> { rowId: columnId }

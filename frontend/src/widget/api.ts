@@ -1,5 +1,5 @@
 // ============================================================================
-// OpenSurvey widget — public widget API client.
+// onForm widget — public widget API client.
 //
 // Wraps the THREE public widget endpoints (apps/actions/public_*). All paths are
 // tenant-prefixed `<apiHost>/api/v1/<orgSlug>/public/...` because TenantSlugMiddleware
@@ -55,7 +55,7 @@ export class WidgetApi {
       headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
     });
     if (!res.ok) {
-      throw new Error(`OpenSurvey widget API ${res.status} for ${input}`);
+      throw new Error(`onForm widget API ${res.status} for ${input}`);
     }
     if (res.status === 204) return undefined as T;
     return (await res.json()) as T;

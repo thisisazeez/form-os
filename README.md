@@ -1,30 +1,31 @@
-<h1 align="center">OpenSurvey</h1>
+<h1 align="center">onForm</h1>
 
 <p align="center">
-  <b>The open-source, self-hosted survey platform.</b><br>
+  <b>Forms you own. No seat limits, no paywalled logic.</b><br>
+  <i>An open-source, self-hosted alternative to Typeform and Formbricks.</i><br>
   A Typeform / Formbricks alternative you fully own — visual builder, conditional logic,
   analytics, contacts &amp; segments, teams &amp; RBAC. No seat limits, no paywalled features.
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-0d9488.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-5B4BE1.svg"></a>
   <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-3776ab.svg">
   <img alt="Django 5.1" src="https://img.shields.io/badge/Django-5.1-092e20.svg">
   <img alt="React 18" src="https://img.shields.io/badge/React-18-149eca.svg">
-  <a href="https://github.com/mohitbadwal/opensurvey/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/mohitbadwal/opensurvey?style=social"></a>
+  <a href="https://github.com/onform/onform/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/onform/onform?style=social"></a>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/builder-demo.gif" alt="Building a survey in OpenSurvey — add questions and see a live preview" width="820"><br>
+  <img src="docs/screenshots/builder-demo.gif" alt="Building a survey in onForm — add questions and see a live preview" width="820"><br>
   <sub><b>Build</b> — add questions from the palette and watch the live preview.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/runtime-demo.gif" alt="Answering a survey in OpenSurvey — type, rate, and submit" width="640"><br>
+  <img src="docs/screenshots/runtime-demo.gif" alt="Answering a survey in onForm — type, rate, and submit" width="640"><br>
   <sub><b>Answer</b> — what respondents see when they take your survey.</sub>
 </p>
 
-**OpenSurvey** is a self-hosted, multi-tenant survey & experience-management platform built with
+**onForm** is a self-hosted, multi-tenant survey & experience-management platform built with
 Django and React. Create surveys with a visual builder, share them as links (or embed them on your
 site/app), branch with conditional logic, collect and analyze responses, and manage contacts,
 segments, teams, and roles — all from a single, fully-owned, open-source codebase.
@@ -32,7 +33,11 @@ segments, teams, and roles — all from a single, fully-owned, open-source codeb
 It’s a self-hosted alternative to proprietary survey SaaS: features that are usually paywalled
 (Teams & RBAC, Contacts/Segments, webhooks, API keys, white-label) are first-class here.
 
-> 📊 See how it stacks up: [OpenSurvey vs Typeform vs Formbricks](docs/comparison.md).
+> 📊 See how it stacks up: [onForm vs Typeform vs Formbricks](docs/comparison.md).
+
+> 🙏 onForm is a rebrand and continuation of [OpenSurvey](https://github.com/mohitbadwal/opensurvey)
+> (MIT © Mohit Badwal). Upstream attribution is preserved in [`LICENSE`](LICENSE).
+> The repository links above are placeholders — point them at your fork before publishing.
 
 ## Screenshots
 
@@ -99,7 +104,7 @@ PostgreSQL + Redis, runs migrations, creates a `demo` organization, and serves t
 docker compose --profile app up --build
 ```
 
-When you see `Starting OpenSurvey`, open **http://127.0.0.1:8000**. Create an account at
+When you see `Starting onForm`, open **http://127.0.0.1:8000**. Create an account at
 **/auth/signup** — since dev uses the console email backend, the verification link is printed in
 the `web` container’s logs (`docker compose logs -f web`); open it to verify, then log in.
 
@@ -196,7 +201,7 @@ safe defaults even if a variable is unset.
 | `DEBUG` | `False` (dev settings default `True`) | Debug mode. Keep `False` in production. |
 | `ALLOWED_HOSTS` | empty (dev: `localhost,127.0.0.1,.localhost`) | Comma-separated allowed hosts. Required in production. |
 | `BASE_DOMAIN` | `localhost` | Base host that organizations are served under. |
-| `DATABASE_URL` | `postgres://opensurvey:opensurvey@localhost:5432/opensurvey` | PostgreSQL connection (required; no SQLite). |
+| `DATABASE_URL` | `postgres://onform:onform@localhost:5432/onform` | PostgreSQL connection (required; no SQLite). |
 | `CELERY_BROKER_URL` | `redis://localhost:6379/1` | Redis broker for Celery. |
 | `CELERY_RESULT_BACKEND` | `redis://localhost:6379/2` | Celery result backend. |
 | `CELERY_TASK_ALWAYS_EAGER` | `True` (dev) | Run tasks synchronously (no worker needed) — set `False` in production. |
@@ -206,7 +211,7 @@ safe defaults even if a variable is unset.
 
 ### Email (SMTP)
 
-Email is **provider-agnostic** and read from the environment. With no SMTP configured, OpenSurvey
+Email is **provider-agnostic** and read from the environment. With no SMTP configured, onForm
 uses Django’s **console backend** (emails print to stdout — perfect for local dev, zero setup).
 
 | Variable | Default | Description |
@@ -272,6 +277,10 @@ The defaults are tuned for local development. Before deploying:
 - Serve behind a real WSGI server (e.g. gunicorn) and a reverse proxy; serve `MEDIA_ROOT` via your
   web server or object storage rather than Django.
 - Run `python manage.py collectstatic` and `python manage.py check --deploy`.
+
+Ready-to-use configs are in [`deploy/`](deploy/README.md): Render hosts the Django API and
+its managed Postgres; Vercel hosts the built frontend assets. `/` serves the public landing
+page; the signed-in app entrypoint moved to `/app`.
 
 ## License
 
