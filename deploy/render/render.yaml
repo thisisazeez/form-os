@@ -11,7 +11,7 @@ services:
   - type: web
     name: onform-api
     runtime: python
-    plan: starter
+    plan: free  # no card required for manual Free services; Blueprint may require one
     buildCommand: ./deploy/render/api-build.sh
     startCommand: ./deploy/render/api-start.sh
     healthCheckPath: /healthz
