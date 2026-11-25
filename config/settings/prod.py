@@ -14,7 +14,9 @@ release step (see deploy/render/ and deploy/vercel/) — never on the request pa
 from .base import *  # noqa: F401,F403
 from .base import MIDDLEWARE, env
 
-DEBUG = False
+# TEMPORARY deployment diagnostic: DEBUG=true shows Django's detailed error page so a
+# production-only 500 can be diagnosed. Restore to `False` once the incident is resolved.
+DEBUG = env.bool("DEBUG", default=False)
 
 # Platform reverse proxies terminate TLS and pass the original scheme in this header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
