@@ -11,6 +11,7 @@ services:
   - type: web
     name: onform-api
     runtime: python
+    # Django 5.1 is not compatible with Python 3.14; repo-root .python-version pins 3.13.
     plan: free  # no card required for manual Free services; Blueprint may require one
     buildCommand: ./deploy/render/api-build.sh
     startCommand: ./deploy/render/api-start.sh
