@@ -69,6 +69,7 @@ long-cache headers for fonts and hashed bundles.
 
 | Variable | Notes |
 |---|---|
+| `PYTHON_VERSION` | `3.13` (or omit and let `.python-version` choose it). Django 5.1 does **not** support Python 3.14 — Render's default for services created after 2026-11-03 is 3.14, which breaks template rendering with `AttributeError: 'super' object has no attribute 'dicts'` |
 | `DATABASE_URL` | Copy from your Render `onform-db` dashboard (Postgres is required — django-tenants cannot use SQLite); the Blueprint injects it automatically if you use that optional path |
 | `SECRET_KEY` | Generate locally (`openssl rand -hex 32`) and paste into the service; the Blueprint can generate it instead |
 | `DEBUG` | `false` |
@@ -79,6 +80,10 @@ long-cache headers for fonts and hashed bundles.
 | `CELERY_TASK_ALWAYS_EAGER` | `true` only if no Celery worker is deployed |
 | `SECURE_SSL_REDIRECT` | `true` behind Render's TLS terminator |
 | `EMAIL_BACKEND` | console backend is fine for a demo; configure SMTP before real signups |
+
+The repo includes `.python-version` containing `3.13`, so Render rebuilds with Python 3.13
+even when the service default is newer. If you prefer, set `PYTHON_VERSION=3.13.11` (any fully
+qualified 3.13 patch version) in Render instead. Do **not** use Python 3.14 with Django 5.1.
 
 ## Pricing note
 
